@@ -111,6 +111,12 @@
     .mode-name{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;margin-bottom:2px}
     .mode-hint{font-size:.65rem;color:rgba(255,255,255,.28)}
     .submode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+    .format-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+    .format-card{border-radius:12px;padding:10px 8px;cursor:pointer;text-align:center;border:1.5px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);transition:all .16s;-webkit-tap-highlight-color:transparent}
+    .format-card.sel{border-color:var(--fc);background:color-mix(in srgb,var(--fc) 10%,transparent)}
+    .format-icon{font-size:1.4rem;margin-bottom:3px}
+    .format-name{font-family:'Orbitron',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.5px;margin-bottom:2px}
+    .format-hint{font-size:.6rem;color:rgba(255,255,255,.28)}
     .submode-card{border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;border:1.5px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);transition:all .16s;-webkit-tap-highlight-color:transparent}
     .submode-card.sel-comp{border-color:#00ffc8;background:rgba(0,255,200,.06)}
     .submode-card.sel-coop{border-color:#7c4dff;background:rgba(124,77,255,.07)}
@@ -292,6 +298,14 @@ const CATS={phrasal:{label:'Phrasal Verbs',color:'#00ffc8'},grammar:{label:'Gram
 const DIFF_LABELS=['','B2 Ľahká','B2→C1','C1 Ťažká'];
 const LT=['A','B','C','D'];
 const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
+const FORMATS={
+  mixed:     {label:'Zmiešaný',     icon:'⚡', color:'#00ffc8', hint:'Všetky typy otázok',         prompt:'Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary & idioms.'},
+  phrasal:   {label:'Phrasal Verbs',icon:'🔗', color:'#42a5f5', hint:'Len frázové slovesá',         prompt:'All 10 questions must be about phrasal verbs in various contexts. type="Phrasal Verbs" for all.'},
+  vocab:     {label:'Slovná zásoba',icon:'📖', color:'#b388ff', hint:'Slovíčka & idiomy',            prompt:'All 10 questions must be about advanced vocabulary, idioms, and expressions. type="Vocabulary & Idioms" for all.'},
+  collocations:{label:'Kolokácie',  icon:'🔀', color:'#ffb300', hint:'Typické anglické spojenia',   prompt:'All 10 questions must be about collocations — typical word combinations in English (verb+noun, adj+noun, adv+adj etc.). type="Vocabulary & Idioms" for all.'},
+  idioms:    {label:'Idiomy',       icon:'💬', color:'#ff6b35', hint:'Frazeologizmy & výrazy',       prompt:'All 10 questions must be about English idioms and fixed expressions. type="Vocabulary & Idioms" for all.'},
+  grammar:   {label:'Gramatika',    icon:'📐', color:'#66bb6a', hint:'Pokročilá gramatika',          prompt:'All 10 questions must be about advanced English grammar (conditionals, perfect tenses, passive, inversions, cleft sentences, etc.). type="Advanced Grammar" for all.'},
+};
 const XP_CORRECT=10, XP_WIN=50, XP_DRAW=20, XP_STREAK_BONUS=15, XP_PERFECT=100, XP_HINT_USED=-5;
 const XP_LEVELS=[0,100,250,500,800,1200,1700,2300,3000,4000,5500,7500,10000];
 function xpLevel(xp){let l=0;for(let i=0;i<XP_LEVELS.length;i++){if(xp>=XP_LEVELS[i])l=i;}return l;}
@@ -306,7 +320,7 @@ const S={
   ak:localStorage.getItem('ed_ak')||'',
   db:null, auth:null, user:null, uid:'',
   loadingMsg:'Inicializujem...',
-  name:'', mode:null, submode:'competitive', roomCode:'', role:'',
+  name:'', mode:null, submode:'competitive', format:'mixed', roomCode:'', role:'',
   questions:[], current:0, score:0, selected:null,
   myAnswers:[], myDone:false,
   oppName:'', oppScore:0, oppDone:false, oppAnswers:[], oppUid:'',
@@ -554,16 +568,13 @@ function attach(code){
     const opp=S.role==='p1'?(r.p2||{}):(r.p1||{});
     const prevOppScore=S.oppScore;
     S.oppName=opp.name||S.oppName;S.oppScore=opp.score??S.oppScore;
-    // Show reaction when opponent answers
-    if(S.screen==='quiz'&&S.oppScore!==prevOppScore&&S.selected!==null){
-      triggerOppReaction(S.oppScore>prevOppScore);
-    }
+
     S.oppDone=opp.finished||false;
     S.oppUid=S.role==='p1'?(r.p2uid||''):(r.p1uid||'');
     if(S.oppDone&&opp.answers)S.oppAnswers=opp.answers;
     if(S.screen==='lobby'){
-      if(S.role==='p1'&&r.p2&&r.status==='playing'){S.submode=r.submode||'competitive';S.screen='quiz';render();return;}
-      if(S.role==='p2'&&r.questions&&r.status==='playing'){S.questions=r.questions;S.submode=r.submode||'competitive';S.screen='quiz';render();return;}
+      if(S.role==='p1'&&r.p2&&r.status==='playing'){S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
+      if(S.role==='p2'&&r.questions&&r.status==='playing'){S.questions=r.questions;S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
     }
     if(S.screen==='waiting'&&S.oppDone){runAnalysis();return;}
     if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
@@ -682,7 +693,7 @@ function hPlacement(){
   <span class="badge ${bc(q.type)}" style="margin-left:6px">${q.type}</span>
   <div class="q-text" style="margin-top:10px">${q.question}</div>
   <div class="options">${opts}</div>
-  ${ans?`<div class="expl ${chosen!==q.correct?'bad':''}">${chosen===q.correct?'✅':'❌'} ${q.explanation}</div>
+  ${ans?`<div class="expl ${chosen!==q.correct?'bad':''}">${q.explanation}</div>
   ${q.example?`<div class="example-box"><div class="ex-label">Príklad použitia</div><div class="ex-text">"${q.example}"</div></div>`:''}
   <button class="next-btn" id="placementNextBtn">${S.placementCurrent+1>=tot?'ZOBRAZIŤ VÝSLEDOK →':'ĎALŠIA →'}</button>`:''}
 `;}
@@ -752,6 +763,12 @@ function hHome(){
     <span class="cat-pct" style="color:${c.color}">${p!==null?p+'%':'—'}</span>${weak?'<span style="font-size:.7rem">⚠️</span>':''}</div>`;
   }).join('');
 
+  const formatCards=Object.entries(FORMATS).map(([k,f])=>`
+    <div class="format-card ${S.format===k?'sel':''}" id="fmt_${k}" style="--fc:${f.color}">
+      <div class="format-icon">${f.icon}</div>
+      <div class="format-name" style="color:${S.format===k?f.color:''}">${f.label}</div>
+      <div class="format-hint">${f.hint}</div>
+    </div>`).join('');
   const submodeHTML=S.mode==='create'?`
     <div class="lbl" style="margin-bottom:9px">Typ duelu</div>
     <div class="submode-grid">
@@ -761,7 +778,10 @@ function hHome(){
       <div class="submode-card ${S.submode==='coop'?'sel-coop':''}" id="sCoop">
         <div class="submode-icon">🤝</div><div class="submode-name" style="color:${S.submode==='coop'?'#b388ff':''}">Kooperatívny</div><div class="submode-hint">Spoločne vs cieľ</div>
       </div>
-    </div>`:'';
+    </div>
+    <div class="lbl" style="margin-bottom:9px">Formát otázok</div>
+    <div class="format-grid">${formatCards}</div>
+    `:'';
 
   return`
   <div class="user-chip">
@@ -777,6 +797,19 @@ function hHome(){
     ${shieldHTML(prof)}
     <span class="diff-badge diff-${diff}">${DIFF_LABELS[diff]}</span>
   </div>
+  <div style="margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;font-size:.62rem;color:rgba(255,255,255,.3);margin-bottom:5px">
+      <span>${rank.n}</span><span>${nxt}</span>
+    </div>
+    <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
+  </div>
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:.62rem;color:rgba(255,255,255,.3);margin-bottom:5px">
+      <span class="xp-badge">⭐ Level ${xpLevel(prof?.xp||0)}</span>
+      <span>${prof?.xp||0} XP · +${xpToNext(prof?.xp||0)} do ďalšieho</span>
+    </div>
+    <div class="xp-bar"><div class="xp-bar-fill" style="width:${xpProgress(prof?.xp||0)}%"></div></div>
+  </div>
   <div class="profile-card">
     <div class="profile-top">
       ${rankBadge(elo)}
@@ -786,10 +819,7 @@ function hHome(){
       </div>
     </div>
     ${stats?`<div class="cat-bars">${catBars}</div>`:'<div style="font-size:.76rem;color:rgba(255,255,255,.25);text-align:center;padding:4px 0">Zahraj prvý duel aby si videl/a štatistiky</div>'}
-    <div class="rank-progress-wrap">
-      <div class="rank-progress-label"><span>${rank.n}</span><span>${nxt}</span></div>
-      <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
-    </div>
+
     <div class="xp-bar-wrap">
       <div class="xp-bar-label">
         <span><span class="xp-badge">⭐ Level ${xpLevel(prof?.xp||0)}</span></span>
@@ -819,6 +849,11 @@ function hLobby(){
     <div class="room-code-wrap"><div class="room-label">Kód duelu</div><div class="room-code">${S.roomCode}</div></div>
     ${isCoop?`<div style="text-align:center;margin-bottom:12px;font-size:.8rem;color:rgba(124,77,255,.8);background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.2);border-radius:10px;padding:9px">🤝 Cieľ: spoločne dosiahnuť <strong>${Math.ceil(S.questions.length*2*COOP_TARGET_PCT)}/${S.questions.length*2}</strong></div>`:''}
     <div class="pulse"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="text-align:center;margin-bottom:10px">
+      <span style="padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">
+        ${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}
+      </span>
+    </div>
     <div style="text-align:center;color:rgba(255,255,255,.28);font-size:.82rem;margin-bottom:16px">Čakám kým sa ${isCoop?'partner':'súper'} pripojí...</div>
     <button class="btn btn-ghost" id="cancelBtn">Zrušiť</button>`;
   return hLoad();
@@ -858,7 +893,7 @@ function hQuiz(){
   <div class="options">${opts}</div>
   ${!ans&&!S.hintUsed?`<button class="hint-btn" id="hintBtn">💡 Nápoveda <span class="hint-cost">(-5 ELO)</span></button>`:''}
   ${ans?`<div class="expl ${S.selected===-1||S.selected!==q.correct?'bad':''}">
-    ${S.selected===-1?'⏰ Čas vypršal! ':S.selected===q.correct?'✅ ':'❌ '}${q.explanation}
+    ${S.selected===-1?'Čas vypršal! ':''}${q.explanation}
   </div>
   ${q.example?`<div class="example-box"><div class="ex-label">Príklad použitia</div><div class="ex-text">"${q.example}"</div></div>`:''}
   <button class="next-btn" id="nextBtn">${S.current+1>=tot?'DOKONČIŤ →':'ĎALŠIA →'}</button>`:''}`;}
@@ -902,11 +937,19 @@ function hResults(){
   const mp=Math.round(S.score/tot*100),op=Math.round(S.oppScore/tot*100);
   const v=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
   const mc=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252',oc=v==='loss'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
-  return`<div class="logo" style="font-size:1.3rem;margin-bottom:4px">DUEL SKONČIL</div><div class="logo-sub" style="margin-bottom:18px">Výsledky</div>
+  const bannerColor=v==='win'?'rgba(0,255,200,.1)':v==='draw'?'rgba(255,179,0,.08)':'rgba(255,82,82,.08)';
+  const bannerBorder=v==='win'?'rgba(0,255,200,.3)':v==='draw'?'rgba(255,179,0,.3)':'rgba(255,82,82,.25)';
+  const bannerText=v==='win'?'Vyhral/a si! 👑':v==='draw'?'Remíza 🤝':'Prehral/a si 😤';
+  const bannerSub=v==='win'?`Porazil/a si ${S.oppName||'súpera'} ${S.score}–${S.oppScore}`:v==='draw'?`Oba tímy skórovali ${S.score}–${S.oppScore}`:`${S.oppName||'Súper'} vyhral/a ${S.oppScore}–${S.score}`;
+  return`
+  <div style="text-align:center;padding:18px 16px;background:${bannerColor};border:1.5px solid ${bannerBorder};border-radius:16px;margin-bottom:18px">
+    <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:${v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252'};margin-bottom:5px">${bannerText}</div>
+    <div style="font-size:.88rem;color:rgba(255,255,255,.45)">${bannerSub}</div>
+  </div>
   <div class="vs-row">
-    <div class="vs-card ${v==='win'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.name}</div><div class="vs-score" style="color:${mc}">${S.score}</div><div class="vs-lbl" style="color:${mc}">${v==='win'?'👑 VÍŤAZ':v==='draw'?'🤝 REMÍZA':'😤'}</div></div>
+    <div class="vs-card ${v==='win'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.name}</div><div class="vs-score" style="color:${mc}">${S.score}</div><div class="vs-lbl" style="color:${mc}">${mp}%</div></div>
     <div class="vs-sep">VS</div>
-    <div class="vs-card ${v==='loss'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.oppName||'Súper'}</div><div class="vs-score" style="color:${oc}">${S.oppScore}</div><div class="vs-lbl" style="color:${oc}">${v==='loss'?'👑 VÍŤAZ':v==='draw'?'🤝 REMÍZA':'😤'}</div></div>
+    <div class="vs-card ${v==='loss'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.oppName||'Súper'}</div><div class="vs-score" style="color:${oc}">${S.oppScore}</div><div class="vs-lbl" style="color:${oc}">${op}%</div></div>
   </div>
   <div style="margin-bottom:18px">
     <div class="stat-row"><span class="stat-lbl">Tvoje skóre</span><span class="stat-val" style="color:${mc}">${S.score}/${tot} (${mp}%)</span></div>
@@ -1004,6 +1047,9 @@ function bindAll(){
   g('mJn')?.addEventListener('click',()=>{S.mode='join';render();});
   g('sCmp')?.addEventListener('click',()=>{S.submode='competitive';render();});
   g('sCoop')?.addEventListener('click',()=>{S.submode='coop';render();});
+  Object.keys(FORMATS).forEach(k=>{
+    g('fmt_'+k)?.addEventListener('click',()=>{S.format=k;render();});
+  });
   g('codeInp')?.addEventListener('input',e=>{
     S.roomCode=e.target.value.replace(/\D/g,'');e.target.value=S.roomCode;
     if(g('goBtn'))g('goBtn').disabled=!S.name.trim()||S.roomCode.length!==4;
@@ -1056,9 +1102,11 @@ function bindAll(){
       clearTimer();
       const i=parseInt(btn.dataset.i);S.selected=i;
       const q=S.questions[S.current];const correct=i===q.correct;
-      if(correct){S.score++;showXpPopup('+'+XP_CORRECT+' XP');}
+      if(correct)S.score++;
       S.myAnswers.push({correct,type:q.type});
-      dbUp('rooms/'+S.roomCode+'/'+S.role,{score:S.score}).catch(()=>{});render();
+      dbUp('rooms/'+S.roomCode+'/'+S.role,{score:S.score}).catch(()=>{});
+      render();
+      if(correct)setTimeout(()=>showXpPopup('+'+XP_CORRECT+' XP'),50);
     });
   });
   // Start timer when quiz question is shown and unanswered
@@ -1080,7 +1128,7 @@ function bindAll(){
     try{
       const diff=calcDiff(S.myProfile);
       S.srQuestions=await loadDueSRQuestions();
-      const qs=await genQ(diff,S.myProfile?.stats,S.srQuestions);
+      const qs=await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
       const code=String(Math.floor(1000+Math.random()*9000));
       S.roomCode=code;S.role='p1';
       await dbSet('rooms/'+code,{status:'waiting',submode:prevSubmode,questions:qs,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name||'Hráč 1',score:0,finished:false},isRematch:true});
@@ -1178,10 +1226,10 @@ async function handleGo(){
     try{
       const diff=calcDiff(S.myProfile);
       S.srQuestions=await loadDueSRQuestions();
-      const qs=await genQ(diff,S.myProfile?.stats,S.srQuestions);
+      const qs=await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
       const code=String(Math.floor(1000+Math.random()*9000));
       S.roomCode=code;S.role='p1';
-      await dbSet('rooms/'+code,{status:'waiting',submode:S.submode,questions:qs,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false}});
+      await dbSet('rooms/'+code,{status:'waiting',submode:S.submode,format:S.format,questions:qs,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false}});
       S.questions=qs;attach(code);S.screen='lobby';render();
     }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
   }else{
@@ -1191,7 +1239,7 @@ async function handleGo(){
       const room=await dbGet('rooms/'+code);
       if(!room)throw new Error('Duel '+code+' neexistuje');
       if(room.status!=='waiting')throw new Error('Duel už beží alebo skončil');
-      S.questions=room.questions;S.submode=room.submode||'competitive';
+      S.questions=room.questions;S.submode=room.submode||'competitive';S.format=room.format||'mixed';
       S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
       attach(code);
       await dbUp('rooms/'+code,{status:'playing',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false}});
@@ -1214,7 +1262,7 @@ function resetGame(){
   clearTimer();
   S.hintUsed=false;
   S.xpGained=0;S.newXp=0;S.leveledUp=0;
-  S.screen='home';S.mode=null;S.submode='competitive';S.roomCode='';S.role='';
+  S.screen='home';S.mode=null;S.submode='competitive';S.format='mixed';S.roomCode='';S.role='';
   S.questions=[];S.current=0;S.score=0;S.selected=null;
   S.myAnswers=[];S.myDone=false;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
@@ -1224,7 +1272,7 @@ function resetGame(){
 // ═══════════════════════════════════════════════════
 // AI QUESTION GENERATION
 // ═══════════════════════════════════════════════════
-async function genQ(diff,stats,srQs=[]){
+async function genQ(diff,stats,srQs=[],fmt='mixed'){
   let weakHint='';
   if(stats){const wk=weakestCat(stats);const p=catPct(stats,wk);if(p!==null&&p<70)weakHint=`\nAlso include 1-2 extra questions on "${CATS[wk].label}" — player scores only ${p}% there.`;}
   // Inject due SR questions directly (replace up to 3 normal questions)
@@ -1237,7 +1285,7 @@ async function genQ(diff,stats,srQs=[]){
     headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:
       `Generate exactly 10 multiple-choice English questions. Difficulty: ${diffHint(diff)}${weakHint}
-Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary/idioms.${srHint}
+${FORMATS[fmt]?.prompt||FORMATS.mixed.prompt}${srHint}
 Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","question":"...","options":["A","B","C","D"],"correct":0,"explanation":"...","example":"She gave up smoking after 10 years."}]}
 Rules: type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms". correct is 0-based index. The "explanation" field MUST be in Slovak. The "example" field must be a short natural English sentence showing the correct answer in real context.`
     }]})
