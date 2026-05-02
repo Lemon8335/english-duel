@@ -834,7 +834,7 @@ async function genQ(diff,stats){
   if(stats){const wk=weakestCat(stats);const p=catPct(stats,wk);if(p!==null&&p<70)weakHint=`\nAlso include 1-2 extra questions on "${CATS[wk].label}" — player scores only ${p}% there.`;}
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak},
+    headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:
       `Generate exactly 10 multiple-choice English questions. Difficulty: ${diffHint(diff)}${weakHint}
 Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary/idioms.
