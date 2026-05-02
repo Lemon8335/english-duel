@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#00ffc8"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="English Duel"/>
+  <link rel="manifest" href="manifest.json"/>
+  <title>English Duel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:#080c14}
+    body{font-family:'DM Sans',sans-serif;color:#e8eaf6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);overflow-x:hidden;position:relative}
+    .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,200,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,200,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+    .bg-glow{position:fixed;width:500px;height:500px;border-radius:50%;filter:blur(120px);pointer-events:none;opacity:.1;z-index:0}
+    .bg-glow-1{background:#00ffc8;top:-200px;left:-200px}
+    .bg-glow-2{background:#7c4dff;bottom:-200px;right:-200px}
+    #app{width:100%;max-width:520px;position:relative;z-index:1}
+    .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:26px 22px;backdrop-filter:blur(10px);animation:fadeUp .3s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+    .logo{font-family:'Orbitron',sans-serif;font-size:clamp(1.4rem,5vw,1.9rem);font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,#00ffc8,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:4px}
+    .logo-sub{text-align:center;color:rgba(255,255,255,.3);font-size:.68rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:22px}
+    .lbl{font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.36);margin-bottom:7px}
+    .sec-title{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.32);margin:16px 0 9px;display:flex;align-items:center;gap:8px}
+    .sec-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+    input[type=text],input[type=password],textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.11);border-radius:10px;padding:12px 15px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:#fff;outline:none;margin-bottom:14px;transition:border-color .2s;-webkit-appearance:none;resize:vertical}
+    textarea{min-height:90px;font-size:.77rem;line-height:1.5}
+    input:focus,textarea:focus{border-color:#00ffc8}
+    input::placeholder,textarea::placeholder{color:rgba(255,255,255,.18)}
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.76rem;letter-spacing:2px;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;display:block}
+    .btn+.btn,.btn+.google-btn,.google-btn+.btn{margin-top:9px}
+    .btn-primary{background:linear-gradient(135deg,#00ffc8,#00b894);color:#080c14}
+    .btn-primary:active{transform:scale(.98)}
+    .btn-primary:disabled{opacity:.35;cursor:not-allowed}
+    .btn-coop{background:linear-gradient(135deg,#7c4dff,#5e35b1);color:#fff}
+    .btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.11);color:rgba(255,255,255,.42)}
+    .btn-danger{background:transparent;border:1.5px solid rgba(255,82,82,.25);color:#ff8a80}
+
+    /* Google sign-in button */
+    .google-btn{width:100%;padding:14px 20px;background:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;color:#1f1f1f;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:all .18s;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+    .google-btn:active{transform:scale(.98);background:#f5f5f5}
+    .google-btn:disabled{opacity:.4;cursor:not-allowed}
+    .google-icon{width:22px;height:22px;flex-shrink:0}
+
+    .info-box{background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.16);border-radius:11px;padding:12px 14px;font-size:.79rem;color:rgba(255,255,255,.48);line-height:1.55;margin-bottom:14px}
+    .info-box a{color:#00ffc8;text-decoration:none}
+    .info-box strong{color:rgba(255,255,255,.72)}
+    .err-box{background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);border-radius:11px;padding:11px 14px;color:#ff8a80;font-size:.81rem;margin-bottom:13px;text-align:center}
+    .warn-box{background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);border-radius:11px;padding:11px 14px;color:#ffb300;font-size:.8rem;margin-bottom:13px}
+
+    /* Auth screen */
+    .auth-hero{text-align:center;padding:10px 0 24px}
+    .auth-icon{font-size:3.5rem;margin-bottom:12px}
+    .auth-title{font-size:1rem;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:6px}
+    .auth-sub{font-size:.8rem;color:rgba(255,255,255,.35);line-height:1.4}
+    .auth-divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:rgba(255,255,255,.2);font-size:.75rem}
+    .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+    .user-chip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;margin-bottom:16px}
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00ffc8,#7c4dff);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#080c14;flex-shrink:0;overflow:hidden}
+    .user-avatar img{width:100%;height:100%;object-fit:cover}
+    .user-info{flex:1;min-width:0}
+    .user-name{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-email{font-size:.73rem;color:rgba(255,255,255,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Rank badge */
+    .rank-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;border:1.5px solid;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px}
+
+    /* Meta row */
+    .meta-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+    .streak-badge{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.25);border-radius:20px;font-size:.78rem;font-weight:600;color:#ff6b35}
+    .streak-num{font-family:'Orbitron',sans-serif;font-size:.88rem;font-weight:900}
+    .shield-active{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(0,255,200,.1);border:1px solid rgba(0,255,200,.3);border-radius:20px;font-size:.78rem;color:#00ffc8;font-weight:600;animation:shieldPulse 2s ease-in-out infinite}
+    @keyframes shieldPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,200,.3)}50%{box-shadow:0 0 0 6px rgba(0,255,200,0)}}
+    .shield-progress{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:20px;font-size:.75rem;color:rgba(255,255,255,.4)}
+    .shield-pip{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.15)}
+    .shield-pip.filled{background:#00ffc8}
+    .diff-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.67rem;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+    .diff-1{background:rgba(102,187,106,.1);color:#66bb6a;border:1px solid rgba(102,187,106,.2)}
+    .diff-2{background:rgba(255,179,0,.1);color:#ffb300;border:1px solid rgba(255,179,0,.2)}
+    .diff-3{background:rgba(255,82,82,.1);color:#ff5252;border:1px solid rgba(255,82,82,.2)}
+
+    /* Profile card */
+    .profile-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 15px;margin-bottom:16px}
+    .profile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+    .profile-elo{font-family:'Orbitron',sans-serif;font-size:1.35rem;font-weight:900;color:#fff}
+    .profile-elo span{font-size:.68rem;color:rgba(255,255,255,.28);margin-left:3px;font-family:'DM Sans',sans-serif}
+    .rank-progress-wrap{margin-top:10px}
+    .rank-progress-label{display:flex;justify-content:space-between;font-size:.63rem;color:rgba(255,255,255,.28);margin-bottom:4px}
+    .rank-progress-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+    .rank-progress-fill{height:100%;border-radius:2px;transition:width .6s ease}
+    .cat-bars{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+    .cat-row{display:flex;align-items:center;gap:7px}
+    .cat-name{font-size:.68rem;color:rgba(255,255,255,.42);width:92px;flex-shrink:0}
+    .cat-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+    .cat-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+    .cat-pct{font-size:.68rem;font-weight:600;width:30px;text-align:right;flex-shrink:0}
+
+    /* Mode cards */
+    .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .mode-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.09);border-radius:14px;padding:15px 10px;cursor:pointer;text-align:center;transition:all .18s;-webkit-tap-highlight-color:transparent}
+    .mode-card.sel-create{border-color:#00ffc8;background:rgba(0,255,200,.07)}
+    .mode-card.sel-join{border-color:#7c4dff;background:rgba(124,77,255,.08)}
+    .mode-icon{font-size:1.8rem;margin-bottom:5px}
+    .mode-name{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;margin-bottom:2px}
+    .mode-hint{font-size:.65rem;color:rgba(255,255,255,.28)}
+    .submode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+    .submode-card{border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;border:1.5px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);transition:all .16s;-webkit-tap-highlight-color:transparent}
+    .submode-card.sel-comp{border-color:#00ffc8;background:rgba(0,255,200,.06)}
+    .submode-card.sel-coop{border-color:#7c4dff;background:rgba(124,77,255,.07)}
+    .submode-icon{font-size:1.5rem;margin-bottom:4px}
+    .submode-name{font-family:'Orbitron',sans-serif;font-size:.67rem;font-weight:700;letter-spacing:.5px;margin-bottom:2px}
+    .submode-hint{font-size:.63rem;color:rgba(255,255,255,.28)}
+
+    /* Lobby */
+    .room-code-wrap{text-align:center;margin:16px 0}
+    .room-code{font-family:'Orbitron',sans-serif;font-size:3rem;font-weight:900;letter-spacing:12px;background:linear-gradient(135deg,#00ffc8,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .room-label{font-size:.65rem;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.26);margin-bottom:6px}
+    .pulse{display:flex;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,.32);font-size:.82rem;margin:12px 0}
+    .dot{width:7px;height:7px;border-radius:50%;background:#00ffc8;animation:pls 1.2s ease-in-out infinite}
+    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+    @keyframes pls{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+    /* Live bar */
+    .live-bar{display:flex;align-items:center;gap:8px;margin-bottom:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:9px 13px}
+    .live-player{flex:1;text-align:center}
+    .live-name{font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .live-score{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900}
+    .live-sep{color:rgba(255,255,255,.14);font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700}
+    .ls-my{color:#00ffc8}.ls-opp{color:#b388ff}
+
+    /* Coop bar */
+    .coop-bar-wrap{margin-bottom:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 14px}
+    .coop-bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .coop-combined{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:#7c4dff}
+    .coop-track{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;position:relative}
+    .coop-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#7c4dff,#00ffc8);transition:width .4s ease}
+    .coop-marker{position:absolute;top:0;height:100%;width:2px;background:#ffb300;opacity:.7}
+    .coop-players{display:flex;justify-content:space-between;margin-top:6px;font-size:.68rem;color:rgba(255,255,255,.35)}
+
+    /* Quiz */
+    .quiz-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .q-cnt{font-family:'Orbitron',sans-serif;font-size:.67rem;color:rgba(255,255,255,.26);white-space:nowrap}
+    .prog-bar{flex:1;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+    .prog-fill{height:100%;background:linear-gradient(90deg,#00ffc8,#7c4dff);border-radius:2px;transition:width .4s ease}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:11px}
+    .bp{background:rgba(0,255,200,.1);color:#00ffc8;border:1px solid rgba(0,255,200,.2)}
+    .bg2{background:rgba(255,179,0,.1);color:#ffb300;border:1px solid rgba(255,179,0,.2)}
+    .bv{background:rgba(124,77,255,.12);color:#b388ff;border:1px solid rgba(124,77,255,.25)}
+    .q-text{font-size:1rem;line-height:1.65;color:#e8eaf6;margin-bottom:16px;font-weight:500}
+    .options{display:flex;flex-direction:column;gap:7px}
+    .opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:11px;padding:12px 13px;color:#e8eaf6;font-family:'DM Sans',sans-serif;font-size:.88rem;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all .14s;-webkit-tap-highlight-color:transparent;width:100%}
+    .opt.correct{border-color:#00ffc8;background:rgba(0,255,200,.09);color:#00ffc8}
+    .opt.wrong{border-color:#ff5252;background:rgba(255,82,82,.07);color:#ff8a80}
+    .opt-l{width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;flex-shrink:0}
+    .opt.correct .opt-l{background:#00ffc8;color:#080c14}
+    .opt.wrong .opt-l{background:#ff5252;color:#fff}
+    .expl{margin-top:11px;padding:11px 13px;background:rgba(255,255,255,.03);border-left:3px solid #00ffc8;border-radius:0 9px 9px 0;font-size:.81rem;color:rgba(255,255,255,.56);line-height:1.5;animation:fadeUp .22s ease}
+    .expl.bad{border-left-color:#ff5252}
+    .next-btn{margin-top:12px;width:100%;padding:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:11px;color:#fff;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+    /* Waiting */
+    .wait-overlay{text-align:center;padding:12px 0}
+    .wait-icon{font-size:2.2rem;margin-bottom:8px}
+    .wait-title{font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:700;color:#ffb300;margin-bottom:5px}
+    .my-fin{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900;color:#00ffc8;margin:8px 0 2px}
+
+    /* Results */
+    .vs-row{display:flex;gap:10px;margin-bottom:16px}
+    .vs-card{flex:1;background:rgba(255,255,255,.04);border-radius:14px;padding:14px 10px;text-align:center;border:1.5px solid rgba(255,255,255,.07)}
+    .vs-card.winner{border-color:#00ffc8;background:rgba(0,255,200,.05)}
+    .vs-card.loser{border-color:rgba(255,82,82,.22)}
+    .vs-card.draw{border-color:#ffb300}
+    .vs-pname{font-size:.61rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.26);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .vs-score{font-family:'Orbitron',sans-serif;font-size:1.7rem;font-weight:900}
+    .vs-lbl{font-size:.65rem;margin-top:5px;font-weight:600}
+    .vs-sep{display:flex;align-items:center;font-family:'Orbitron',sans-serif;font-size:.75rem;color:rgba(255,255,255,.16);font-weight:700}
+
+    /* Analysis */
+    .elo-change-wrap{text-align:center;margin:4px 0 18px}
+    .elo-delta{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900}
+    .elo-delta.pos{color:#00ffc8}.elo-delta.neg{color:#ff5252}.elo-delta.zero{color:#ffb300}
+    .elo-path{font-size:.76rem;color:rgba(255,255,255,.32);margin-top:3px}
+    .shield-earned-box{background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.25);border-radius:11px;padding:11px 14px;text-align:center;margin-bottom:14px}
+    .analysis-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:13px;padding:13px;margin-bottom:12px}
+    .cat-compare-row{display:grid;grid-template-columns:88px 1fr 44px 1fr 44px;align-items:center;gap:5px;margin-bottom:9px}
+    .cat-compare-row:last-child{margin-bottom:0}
+    .cat-lbl-sm{font-size:.66rem;color:rgba(255,255,255,.38)}
+    .mini-bar-wrap{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+    .mini-bar-fill{height:100%;border-radius:3px}
+    .mini-pct{font-size:.68rem;font-weight:600;text-align:right}
+    .weak-box{background:rgba(255,82,82,.06);border:1px solid rgba(255,82,82,.17);border-radius:11px;padding:12px 14px;margin-bottom:12px}
+    .weak-title{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:#ff8a80;margin-bottom:5px;font-weight:600}
+    .weak-body{font-size:.84rem;color:rgba(255,255,255,.62);line-height:1.4}
+    .q-review{background:rgba(255,255,255,.03);border-radius:10px;padding:10px 12px;margin-bottom:7px}
+    .q-review-text{font-size:.81rem;color:rgba(255,255,255,.58);margin-bottom:5px;line-height:1.4}
+    .q-review-ans{font-size:.79rem;color:#00ffc8;font-weight:600}
+    .stat-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.81rem}
+    .stat-lbl{color:rgba(255,255,255,.33)}.stat-val{font-weight:600}
+    .coop-result-big{text-align:center;margin:6px 0 18px}
+    .coop-result-score{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900}
+
+    .spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.07);border-top-color:#00ffc8;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-wrap{text-align:center;padding:28px 0}
+    .loading-text{color:rgba(255,255,255,.36);font-size:.84rem}
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div id="app"></div>
+<script>
+// ═══════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════
+const RANKS=[
+  {n:'B2 Recruit', min:0,    color:'#78909c',emoji:'🎖️'},
+  {n:'B2 Soldier', min:850,  color:'#42a5f5',emoji:'⚔️'},
+  {n:'B2 Veteran', min:950,  color:'#66bb6a',emoji:'🛡️'},
+  {n:'C1 Initiate',min:1050, color:'#00ffc8',emoji:'✨'},
+  {n:'C1 Scholar', min:1150, color:'#b388ff',emoji:'📚'},
+  {n:'C1 Expert',  min:1250, color:'#ffb300',emoji:'🔥'},
+  {n:'C1 Master',  min:1350, color:'#ff6b35',emoji:'👑'},
+];
+const CATS={phrasal:{label:'Phrasal Verbs',color:'#00ffc8'},grammar:{label:'Gramatika',color:'#ffb300'},vocab:{label:'Slovná zásoba',color:'#b388ff'}};
+const DIFF_LABELS=['','B2 Ľahká','B2→C1','C1 Ťažká'];
+const LT=['A','B','C','D'];
+const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const S={
+  screen:'loading',
+  ak:localStorage.getItem('ed_ak')||'',
+  fb:localStorage.getItem('ed_fb')||'',
+  db:null, auth:null, user:null, uid:'',
+  loadingMsg:'Inicializujem...',
+  name:'', mode:null, submode:'competitive', roomCode:'', role:'',
+  questions:[], current:0, score:0, selected:null,
+  myAnswers:[], myDone:false,
+  oppName:'', oppScore:0, oppDone:false, oppAnswers:[], oppUid:'',
+  myProfile:null,
+  eloChange:0, newElo:0, analysisReady:false, shieldJustEarned:false,
+  error:null,
+};
+
+// ═══════════════════════════════════════════════════
+// RANK / ELO
+// ═══════════════════════════════════════════════════
+function getRank(elo){for(let i=RANKS.length-1;i>=0;i--)if(elo>=RANKS[i].min)return{...RANKS[i],idx:i};return{...RANKS[0],idx:0};}
+function rankProg(elo){const r=getRank(elo);const nx=RANKS[r.idx+1];if(!nx)return 100;return Math.min(100,Math.round(((elo-r.min)/(nx.min-r.min))*100));}
+function nextRankN(elo){const r=getRank(elo);return RANKS[r.idx+1]?.n||'MAX 🏆';}
+function calcEloDelta(me,opp,res){return Math.round(K*(res-1/(1+Math.pow(10,(opp-me)/400))));}
+function rankBadge(elo){const r=getRank(elo);return`<span class="rank-badge" style="border-color:${r.color}33;color:${r.color};background:${r.color}12">${r.emoji} ${r.n}</span>`;}
+
+// ═══════════════════════════════════════════════════
+// STREAK / SHIELD
+// ═══════════════════════════════════════════════════
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function updateStreak(prof){
+  const today=todayStr(),last=prof.lastPlayedDate||'';
+  if(last===today)return null;
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  let streak=last===yesterday?(prof.streak||0)+1:1;
+  let shieldActive=prof.shieldActive||false,shieldJustEarned=false;
+  if(streak%SHIELD_EVERY===0&&!shieldActive){shieldActive=true;shieldJustEarned=true;}
+  return{streak,lastPlayedDate:today,shieldActive,shieldJustEarned};
+}
+function shieldHTML(prof){
+  if(prof?.shieldActive)return`<div class="shield-active">🛡️ Shield aktívny</div>`;
+  const prog=(prof?.streak||0)%SHIELD_EVERY;
+  const pips=Array.from({length:SHIELD_EVERY},(_,i)=>`<div class="shield-pip ${i<prog?'filled':''}"></div>`).join('');
+  return`<div class="shield-progress">🛡️ ${pips} ${prog}/${SHIELD_EVERY}</div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// DIFFICULTY
+// ═══════════════════════════════════════════════════
+function calcDiff(prof){
+  if((prof?.gamesPlayed||0)<3)return 2;
+  const st=prof?.stats;if(!st)return 2;
+  let tot=0,ok=0;Object.values(st).forEach(s=>{tot+=s.played;ok+=s.correct;});
+  if(tot<10)return 2;const acc=ok/tot;
+  return acc>0.78?3:acc<0.52?1:2;
+}
+function diffHint(d){
+  if(d===1)return'Focus on solid B2 questions. Student is struggling, keep contexts clear, avoid very advanced C1.';
+  if(d===3)return'Focus on challenging C1 questions. Advanced idioms, complex grammar, nuanced vocabulary. Push the student.';
+  return'Mix B2 and C1 evenly at the B2→C1 transition level.';
+}
+
+// ═══════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════
+function catKey(t){if(!t)return'vocab';if(t.includes('Phrasal'))return'phrasal';if(t.includes('Grammar'))return'grammar';return'vocab';}
+function mergeStats(ex,answers,questions){
+  const st={phrasal:{played:0,correct:0,...(ex?.phrasal||{})},grammar:{played:0,correct:0,...(ex?.grammar||{})},vocab:{played:0,correct:0,...(ex?.vocab||{})}};
+  answers.forEach((a,i)=>{const k=catKey(questions[i]?.type);st[k].played++;if(a.correct)st[k].correct++;});
+  return st;
+}
+function catPct(stats,k){const s=stats?.[k];if(!s||!s.played)return null;return Math.round(s.correct/s.played*100);}
+function weakestCat(stats){let min=101,key='vocab';Object.keys(CATS).forEach(k=>{const p=catPct(stats,k);if(p!==null&&p<min){min=p;key=k;}});return key;}
+
+// ═══════════════════════════════════════════════════
+// FIREBASE INIT
+// ═══════════════════════════════════════════════════
+function initFB(cfgStr){
+  try{
+    const json=cfgStr.replace(/\/\/.*$/gm,'').match(/\{[\s\S]*\}/)[0];
+    const cfg=new Function('return('+json+')')();
+    if(!cfg.databaseURL)throw new Error('Chýba databaseURL');
+    if(firebase.apps.length)firebase.app().delete();
+    firebase.initializeApp(cfg);
+    S.db=firebase.database();
+    S.auth=firebase.auth();
+    return true;
+  }catch(e){S.error='Neplatný Firebase config: '+e.message;return false;}
+}
+function dbSet(p,d){return S.db.ref(p).set(d);}
+function dbUp(p,d){return S.db.ref(p).update(d);}
+function dbGet(p){return S.db.ref(p).get().then(s=>s.val());}
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+function startAuthListener(){
+  S.auth.onAuthStateChanged(async user=>{
+    if(user){
+      S.user=user;S.uid=user.uid;
+      if(!S.name)S.name=user.displayName||'';
+      S.loadingMsg='Načítavam profil...';render();
+      await loadProfile();
+      S.screen='home';render();
+    }else{
+      S.user=null;S.uid='';S.myProfile=null;
+      S.screen='auth';render();
+    }
+  });
+}
+
+async function signInGoogle(){
+  S.error=null;
+  const provider=new firebase.auth.GoogleAuthProvider();
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+  try{
+    if(isStandalone){
+      // Store that we initiated redirect
+      localStorage.setItem('ed_redirect','1');
+      await S.auth.signInWithRedirect(provider);
+    }else{
+      await S.auth.signInWithPopup(provider);
+    }
+  }catch(e){
+    S.error='Prihlásenie zlyhalo: '+e.message;
+    render();
+  }
+}
+
+async function signOut(){
+  detach();
+  await S.auth.signOut();
+  resetGame();
+  // onAuthStateChanged will switch to auth screen
+}
+
+async function loadProfile(){
+  try{
+    const p=await dbGet('users/'+S.uid);
+    S.myProfile=p||{elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null};
+    if(!p)await dbSet('users/'+S.uid,{name:S.name,elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:''});
+  }catch(e){S.myProfile={elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null};}
+}
+
+// ═══════════════════════════════════════════════════
+// ROOM LISTENER
+// ═══════════════════════════════════════════════════
+let rRef=null,rCb=null;
+function attach(code){
+  detach();rRef=S.db.ref('rooms/'+code);
+  rCb=rRef.on('value',snap=>{
+    const r=snap.val();if(!r)return;
+    const opp=S.role==='p1'?(r.p2||{}):(r.p1||{});
+    S.oppName=opp.name||S.oppName;S.oppScore=opp.score??S.oppScore;
+    S.oppDone=opp.finished||false;
+    S.oppUid=S.role==='p1'?(r.p2uid||''):(r.p1uid||'');
+    if(S.oppDone&&opp.answers)S.oppAnswers=opp.answers;
+    if(S.screen==='lobby'){
+      if(S.role==='p1'&&r.p2&&r.status==='playing'){S.submode=r.submode||'competitive';S.screen='quiz';render();return;}
+      if(S.role==='p2'&&r.questions&&r.status==='playing'){S.questions=r.questions;S.submode=r.submode||'competitive';S.screen='quiz';render();return;}
+    }
+    if(S.screen==='waiting'&&S.oppDone){runAnalysis();return;}
+    if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
+  });
+}
+function detach(){if(rRef&&rCb)rRef.off('value',rCb);rRef=null;rCb=null;}
+
+// ═══════════════════════════════════════════════════
+// ANALYSIS
+// ═══════════════════════════════════════════════════
+async function runAnalysis(){
+  S.screen='analysis';S.analysisReady=false;render();
+  try{
+    const myElo=S.myProfile?.elo||START_ELO;
+    let oppElo=START_ELO;
+    if(S.oppUid){const op=await dbGet('users/'+S.oppUid);if(op?.elo)oppElo=op.elo;}
+    const isCoop=S.submode==='coop';
+    const tot=S.questions.length;
+    let delta=0;
+    if(isCoop){
+      const combined=S.score+S.oppScore,target=Math.ceil(tot*2*COOP_TARGET_PCT);
+      delta=combined>=target?15:-8;
+    }else{
+      const res=S.score>S.oppScore?1:S.score===S.oppScore?.5:0;
+      delta=calcEloDelta(myElo,oppElo,res);
+      if(delta<0&&S.myProfile?.shieldActive){delta=0;await dbUp('users/'+S.uid,{shieldActive:false});}
+    }
+    S.eloChange=delta;S.newElo=Math.max(100,myElo+delta);
+    const streakUpd=updateStreak(S.myProfile||{});
+    S.shieldJustEarned=streakUpd?.shieldJustEarned||false;
+    const newStats=mergeStats(S.myProfile?.stats,S.myAnswers,S.questions);
+    const isWin=(!isCoop&&S.score>S.oppScore)||(isCoop&&(S.score+S.oppScore)>=Math.ceil(tot*2*COOP_TARGET_PCT));
+    const upd={name:S.name,elo:S.newElo,gamesPlayed:(S.myProfile?.gamesPlayed||0)+1,wins:(S.myProfile?.wins||0)+(isWin?1:0),stats:newStats,...(streakUpd||{})};
+    delete upd.shieldJustEarned;
+    await dbUp('users/'+S.uid,upd);
+    S.myProfile={...S.myProfile,...upd,stats:newStats};
+    S.analysisReady=true;render();
+  }catch(e){console.error(e);S.analysisReady=true;render();}
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function g(id){return document.getElementById(id);}
+function render(){
+  const app=document.getElementById('app');
+  const card=document.createElement('div');card.className='card';
+  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,analysis:hAnalysis};
+  card.innerHTML=(map[S.screen]||hLoad)();
+  app.innerHTML='';app.appendChild(card);bindAll();
+}
+function updateLiveBar(){
+  const isCoop=S.submode==='coop';
+  const cur=S.score+(S.selected!==null&&S.selected===S.questions[S.current]?.correct?1:0);
+  if(isCoop){
+    const combined=cur+S.oppScore,tot=S.questions.length*2,target=Math.ceil(tot*COOP_TARGET_PCT);
+    const w=Math.min(100,Math.round(combined/tot*100));
+    const cf=g('coop-fill'),cc=g('coop-combined'),p1s=g('p1-sub'),p2s=g('p2-sub');
+    if(cf)cf.style.width=w+'%';
+    if(cc)cc.textContent=combined+'/'+tot;
+    if(p1s)p1s.textContent=S.name+': '+cur;
+    if(p2s)p2s.textContent=(S.oppName||'Partner')+': '+S.oppScore;
+  }else{
+    const ml=g('my-ls'),ol=g('opp-ls'),on2=g('opp-nm');
+    if(ml)ml.textContent=cur;if(ol)ol.textContent=S.oppScore;
+    if(on2)on2.textContent=S.oppName||'Súper';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SCREEN HTML
+// ═══════════════════════════════════════════════════
+function hLoad(){return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${S.loadingMsg||'Načítavam...'}</div></div>`;}
+
+function hAuth(){return`
+  <div class="logo">ENGLISH DUEL</div>
+  <div class="logo-sub" style="margin-bottom:20px">B2 → C1 Challenge</div>
+  <div class="auth-hero">
+    <div class="auth-icon">🏆</div>
+    <div class="auth-title">Prihlásiť sa pre uloženie progresu</div>
+    <div class="auth-sub">Tvoje ELO, rank, štatistiky a streak sa uložia na všetkých zariadeniach. Stačí Google účet.</div>
+  </div>
+  ${S.error?`<div class="err-box">${S.error}</div>`:''}
+  <button class="google-btn" id="googleSignIn">
+    <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Prihlásiť sa cez Google
+  </button>
+  <div class="auth-divider">alebo</div>
+  <button class="btn btn-ghost" id="cfgBtn">⚙️ Zmeniť Firebase nastavenia</button>
+`;}
+
+function hSetup(){return`
+  <div class="logo">ENGLISH DUEL</div><div class="logo-sub">Prvotné nastavenie</div>
+  <div class="info-box"><strong>① Anthropic API kľúč</strong> — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → Register → API Keys → Create Key</div>
+  <div class="lbl">Anthropic API kľúč</div>
+  <input type="password" id="ak" placeholder="sk-ant-..." value="${S.ak}"/>
+  <div class="info-box">
+    <strong>② Firebase projekt</strong> — <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
+    <span style="font-size:.74rem">
+      1. Nový projekt → Realtime Database → Vytvoriť → <strong>Test mode</strong><br>
+      2. Authentication → Začať → Sign-in method → <strong>Google → Povoliť → Uložiť</strong><br>
+      3. Authentication → Settings → Authorized domains → <strong>Pridaj svoju GitHub Pages adresu</strong> (napr. meno.github.io)<br>
+      4. ⚙️ Nastavenia projektu → Tvoje aplikácie → Web → skopíruj <strong>firebaseConfig objekt</strong>
+    </span>
+  </div>
+  <div class="lbl">Firebase Config</div>
+  <textarea id="fb" placeholder='{\n  apiKey: "AIza...",\n  databaseURL: "https://...-rtdb.firebaseio.com",\n  authDomain: "projekt.firebaseapp.com",\n  ...\n}'>${S.fb}</textarea>
+  ${S.error?`<div class="err-box">${S.error}</div>`:''}
+  <button class="btn btn-primary" id="saveSetup">ULOŽIŤ A POKRAČOVAŤ</button>
+`;}
+
+function hHome(){
+  const prof=S.myProfile,elo=prof?.elo||START_ELO,stats=prof?.stats;
+  const diff=calcDiff(prof),streak=prof?.streak||0;
+  const prog=rankProg(elo),rank=getRank(elo),nxt=nextRankN(elo);
+  const canGo=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
+
+  const avatar=S.user?.photoURL
+    ?`<img src="${S.user.photoURL}" alt=""/>`
+    :`<span>${(S.name||'?')[0].toUpperCase()}</span>`;
+
+  const catBars=Object.entries(CATS).map(([k,c])=>{
+    const p=catPct(stats,k);const weak=stats&&p!==null&&p<60;
+    return`<div class="cat-row"><span class="cat-name">${c.label.split('&')[0].trim()}</span>
+    <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${p??0}%;background:${c.color}"></div></div>
+    <span class="cat-pct" style="color:${c.color}">${p!==null?p+'%':'—'}</span>${weak?'<span style="font-size:.7rem">⚠️</span>':''}</div>`;
+  }).join('');
+
+  const submodeHTML=S.mode==='create'?`
+    <div class="lbl" style="margin-bottom:9px">Typ duelu</div>
+    <div class="submode-grid">
+      <div class="submode-card ${S.submode==='competitive'?'sel-comp':''}" id="sCmp">
+        <div class="submode-icon">⚔️</div><div class="submode-name" style="color:${S.submode==='competitive'?'#00ffc8':''}">Súťažný</div><div class="submode-hint">ELO · 1 vs 1</div>
+      </div>
+      <div class="submode-card ${S.submode==='coop'?'sel-coop':''}" id="sCoop">
+        <div class="submode-icon">🤝</div><div class="submode-name" style="color:${S.submode==='coop'?'#b388ff':''}">Kooperatívny</div><div class="submode-hint">Spoločne vs cieľ</div>
+      </div>
+    </div>`:'';
+
+  return`
+  <div class="user-chip">
+    <div class="user-avatar">${avatar}</div>
+    <div class="user-info">
+      <div class="user-name">${S.user?.displayName||S.name||'Hráč'}</div>
+      <div class="user-email">${S.user?.email||''}</div>
+    </div>
+    <button class="btn btn-ghost" id="signOutBtn" style="width:auto;padding:7px 12px;font-size:.65rem;margin:0">Odhlásiť</button>
+  </div>
+  <div class="meta-row">
+    <div class="streak-badge">🔥 <span class="streak-num">${streak}</span> dní</div>
+    ${shieldHTML(prof)}
+    <span class="diff-badge diff-${diff}">${DIFF_LABELS[diff]}</span>
+  </div>
+  <div class="profile-card">
+    <div class="profile-top">
+      ${rankBadge(elo)}
+      <div style="text-align:right">
+        <div class="profile-elo">${elo}<span>ELO</span></div>
+        <div style="font-size:.66rem;color:rgba(255,255,255,.26)">${prof?.gamesPlayed||0} duelov · ${prof?.wins||0} výhier</div>
+      </div>
+    </div>
+    ${stats?`<div class="cat-bars">${catBars}</div>`:'<div style="font-size:.76rem;color:rgba(255,255,255,.25);text-align:center;padding:4px 0">Zahraj prvý duel aby si videl/a štatistiky</div>'}
+    <div class="rank-progress-wrap">
+      <div class="rank-progress-label"><span>${rank.n}</span><span>${nxt}</span></div>
+      <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
+    </div>
+  </div>
+  <div class="lbl">Prezývka v dueli</div>
+  <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name}"/>
+  <div class="lbl" style="margin-bottom:10px">Čo chceš urobiť?</div>
+  <div class="mode-grid">
+    <div class="mode-card ${S.mode==='create'?'sel-create':''}" id="mCr"><div class="mode-icon">⚔️</div><div class="mode-name" style="color:${S.mode==='create'?'#00ffc8':''}">Vytvoriť duel</div><div class="mode-hint">Dostanem kód</div></div>
+    <div class="mode-card ${S.mode==='join'?'sel-join':''}" id="mJn"><div class="mode-icon">🎯</div><div class="mode-name" style="color:${S.mode==='join'?'#b388ff':''}">Pripojiť sa</div><div class="mode-hint">Zadám kód</div></div>
+  </div>
+  ${submodeHTML}
+  ${S.mode==='join'?`<div class="lbl">Kód duelu</div><input type="text" id="codeInp" placeholder="4-ciferný kód" maxlength="4" inputmode="numeric" value="${S.roomCode}" style="font-family:'Orbitron',sans-serif;font-size:1.5rem;letter-spacing:10px;text-align:center"/>`:''}
+  ${S.error?`<div class="err-box">${S.error}</div>`:''}
+  <button class="btn ${S.submode==='coop'?'btn-coop':'btn-primary'}" id="goBtn" ${!canGo?'disabled':''}>${S.mode==='join'?'PRIPOJIŤ SA':'VYTVORIŤ DUEL'}</button>
+  <button class="btn btn-ghost" id="cfgBtn" style="margin-top:9px">⚙️ Zmeniť API / Firebase</button>
+`;}
+
+function hLobby(){
+  const isCoop=S.submode==='coop';
+  if(S.role==='p1')return`
+    <div class="logo" style="font-size:1.3rem;margin-bottom:4px">${isCoop?'🤝 COOP':'⚔️ DUEL'} VYTVORENÝ</div>
+    <div class="logo-sub" style="margin-bottom:14px">Pošli kód ${isCoop?'partnerovi':'súperovi'}</div>
+    <div class="room-code-wrap"><div class="room-label">Kód duelu</div><div class="room-code">${S.roomCode}</div></div>
+    ${isCoop?`<div style="text-align:center;margin-bottom:12px;font-size:.8rem;color:rgba(124,77,255,.8);background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.2);border-radius:10px;padding:9px">🤝 Cieľ: spoločne dosiahnuť <strong>${Math.ceil(S.questions.length*2*COOP_TARGET_PCT)}/${S.questions.length*2}</strong></div>`:''}
+    <div class="pulse"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="text-align:center;color:rgba(255,255,255,.28);font-size:.82rem;margin-bottom:16px">Čakám kým sa ${isCoop?'partner':'súper'} pripojí...</div>
+    <button class="btn btn-ghost" id="cancelBtn">Zrušiť</button>`;
+  return hLoad();
+}
+
+function hQuiz(){
+  const q=S.questions[S.current],tot=S.questions.length,ans=S.selected!==null;
+  const pw=Math.round(S.current/tot*100),isCoop=S.submode==='coop';
+  const ls=S.score+(ans&&S.selected===q.correct?1:0);
+  const combinedTot=tot*2,combined=ls+S.oppScore,target=Math.ceil(combinedTot*COOP_TARGET_PCT);
+  const cw=Math.min(100,Math.round(combined/combinedTot*100)),mrkL=Math.min(100,Math.round(target/combinedTot*100));
+  function bc(t){return t?.includes('Phrasal')?'bp':t?.includes('Grammar')?'bg2':'bv';}
+  const opts=q.options.map((o,i)=>{
+    let c='opt';if(ans){if(i===q.correct)c+=' correct';else if(i===S.selected)c+=' wrong';}
+    return`<button class="${c}" data-i="${i}" ${ans?'disabled':''}><span class="opt-l">${LT[i]}</span>${o}</button>`;
+  }).join('');
+  const liveSection=isCoop?`
+    <div class="coop-bar-wrap">
+      <div class="coop-bar-top"><span style="font-size:.66rem;color:rgba(255,255,255,.28);letter-spacing:1px;text-transform:uppercase">Spoločné skóre</span><span class="coop-combined" id="coop-combined">${combined}/${combinedTot}</span></div>
+      <div class="coop-track"><div class="coop-fill" id="coop-fill" style="width:${cw}%"></div><div class="coop-marker" style="left:${mrkL}%"></div></div>
+      <div class="coop-players"><span id="p1-sub">${S.name}: ${ls}</span><span style="color:#ffb300;font-size:.64rem">Cieľ: ${target}</span><span id="p2-sub">${S.oppName||'Partner'}: ${S.oppScore}</span></div>
+    </div>`:`
+    <div id="livebar" class="live-bar">
+      <div class="live-player"><div class="live-name">${S.name}</div><div class="live-score ls-my" id="my-ls">${ls}</div></div>
+      <div class="live-sep">VS</div>
+      <div class="live-player"><div class="live-name" id="opp-nm">${S.oppName||'Súper'}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
+    </div>`;
+  return`${liveSection}
+  <div class="quiz-head"><div class="prog-bar"><div class="prog-fill" style="width:${pw}%"></div></div><span class="q-cnt">${S.current+1}/${tot}</span></div>
+  <span class="badge ${bc(q.type)}">${q.type}</span>
+  <div class="q-text">${q.question}</div>
+  <div class="options">${opts}</div>
+  ${ans?`<div class="expl ${S.selected!==q.correct?'bad':''}">${S.selected===q.correct?'✅':'❌'} ${q.explanation}</div>
+  <button class="next-btn" id="nextBtn">${S.current+1>=tot?'DOKONČIŤ →':'ĎALŠIA →'}</button>`:'`}`;}
+
+function hWaiting(){
+  const tot=S.questions.length,p=Math.round(S.score/tot*100),isCoop=S.submode==='coop';
+  const combined=S.score+S.oppScore,combinedTot=tot*2,target=Math.ceil(combinedTot*COOP_TARGET_PCT);
+  const cw=Math.min(100,Math.round(combined/combinedTot*100)),mrkL=Math.min(100,Math.round(target/combinedTot*100));
+  const top=isCoop?`<div class="coop-bar-wrap" style="margin-bottom:14px">
+    <div class="coop-bar-top"><span style="font-size:.66rem;color:rgba(255,255,255,.28);letter-spacing:1px;text-transform:uppercase">Spoločné skóre</span><span class="coop-combined" id="coop-combined">${combined}/${combinedTot}</span></div>
+    <div class="coop-track"><div class="coop-fill" id="coop-fill" style="width:${cw}%"></div><div class="coop-marker" style="left:${mrkL}%"></div></div>
+    <div class="coop-players"><span id="p1-sub">${S.name}: ${S.score}</span><span style="color:#ffb300;font-size:.64rem">Cieľ: ${target}</span><span id="p2-sub">${S.oppName||'Partner'}: ${S.oppScore}</span></div>
+  </div>`:`<div id="livebar" class="live-bar">
+    <div class="live-player"><div class="live-name">${S.name}</div><div class="live-score ls-my" id="my-ls">${S.score}</div></div>
+    <div class="live-sep">VS</div>
+    <div class="live-player"><div class="live-name" id="opp-nm">${S.oppName||'Partner'}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
+  </div>`;
+  return`${top}<div class="wait-overlay">
+    <div class="wait-icon">⏳</div><div class="wait-title">Ty si skončil/a!</div>
+    <div class="my-fin">${S.score}/${tot}</div>
+    <div style="color:#00ffc8;font-family:'Orbitron',sans-serif;font-size:.74rem;margin-bottom:10px">${p}%</div>
+    <div style="color:rgba(255,255,255,.34);font-size:.82rem">Čakám kým ${isCoop?'partner':'súper'} dohrá...</div>
+    <div class="pulse" style="margin-top:12px"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>`;}
+
+function hResults(){
+  const isCoop=S.submode==='coop',tot=S.questions.length;
+  if(isCoop){
+    const combined=S.score+S.oppScore,combinedTot=tot*2,target=Math.ceil(combinedTot*COOP_TARGET_PCT),win=combined>=target;
+    return`<div class="logo" style="font-size:1.3rem;margin-bottom:4px">${win?'🎉 VÍŤAZSTVO!':'😤 PREHRA'}</div>
+    <div class="logo-sub" style="margin-bottom:20px">Kooperatívny duel</div>
+    <div class="coop-result-big"><div class="coop-result-score" style="color:${win?'#00ffc8':'#ff5252'}">${combined}/${combinedTot}</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.38);margin-top:4px">Cieľ bol ${target}/${combinedTot} (${Math.round(COOP_TARGET_PCT*100)}%)</div></div>
+    <div style="margin-bottom:18px">
+      <div class="stat-row"><span class="stat-lbl">${S.name}</span><span class="stat-val">${S.score}/${tot}</span></div>
+      <div class="stat-row" style="border:none"><span class="stat-lbl">${S.oppName||'Partner'}</span><span class="stat-val">${S.oppScore}/${tot}</span></div>
+    </div>
+    <button class="btn btn-coop" id="analysisBtn">📊 ROZBOR DUELU</button>
+    <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
+  const mp=Math.round(S.score/tot*100),op=Math.round(S.oppScore/tot*100);
+  const v=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
+  const mc=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252',oc=v==='loss'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
+  return`<div class="logo" style="font-size:1.3rem;margin-bottom:4px">DUEL SKONČIL</div><div class="logo-sub" style="margin-bottom:18px">Výsledky</div>
+  <div class="vs-row">
+    <div class="vs-card ${v==='win'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.name}</div><div class="vs-score" style="color:${mc}">${S.score}</div><div class="vs-lbl" style="color:${mc}">${v==='win'?'👑 VÍŤAZ':v==='draw'?'🤝 REMÍZA':'😤'}</div></div>
+    <div class="vs-sep">VS</div>
+    <div class="vs-card ${v==='loss'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.oppName||'Súper'}</div><div class="vs-score" style="color:${oc}">${S.oppScore}</div><div class="vs-lbl" style="color:${oc}">${v==='loss'?'👑 VÍŤAZ':v==='draw'?'🤝 REMÍZA':'😤'}</div></div>
+  </div>
+  <div style="margin-bottom:18px">
+    <div class="stat-row"><span class="stat-lbl">Tvoje skóre</span><span class="stat-val" style="color:${mc}">${S.score}/${tot} (${mp}%)</span></div>
+    <div class="stat-row" style="border:none"><span class="stat-lbl">Skóre súpera</span><span class="stat-val" style="color:${oc}">${S.oppScore}/${tot} (${op}%)</span></div>
+  </div>
+  <button class="btn btn-primary" id="analysisBtn">📊 ROZBOR DUELU</button>
+  <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
+
+function hAnalysis(){
+  if(!S.analysisReady)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Počítam ELO a štatistiky...</div></div>`;
+  const isCoop=S.submode==='coop',tot=S.questions.length;
+  const delta=S.eloChange,newElo=S.newElo||S.myProfile?.elo||START_ELO,oldElo=newElo-delta;
+  const rank=getRank(newElo),prog=rankProg(newElo),nxt=nextRankN(newElo),stats=S.myProfile?.stats;
+  const eloBlock=`<div class="elo-change-wrap">
+    <div class="elo-delta ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta} ELO</div>
+    <div class="elo-path">${oldElo} → ${newElo} · ${rankBadge(newElo)}</div>
+    ${delta===0&&!isCoop?'<div style="font-size:.72rem;color:rgba(0,255,200,.7);margin-top:5px">🛡️ Shield absorboval ELO stratu!</div>':''}
+    <div style="margin-top:10px">
+      <div class="rank-progress-label" style="font-size:.62rem;color:rgba(255,255,255,.25);display:flex;justify-content:space-between;margin-bottom:4px"><span>${rank.n}</span><span>${nxt}</span></div>
+      <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
+    </div>
+  </div>`;
+  const shieldBlock=S.shieldJustEarned?`<div class="shield-earned-box"><div style="font-family:'Orbitron',sans-serif;font-size:.8rem;color:#00ffc8;margin-bottom:3px">🛡️ Shield získaný!</div><div style="font-size:.78rem;color:rgba(255,255,255,.44)">Hrals/a ${S.myProfile?.streak} dní za sebou. Ďalšia ELO strata bude chránená.</div></div>`:'';
+  const catRows=Object.entries(CATS).map(([k,c])=>{
+    const myQs=S.questions.filter(q=>catKey(q.type)===k);if(!myQs.length)return'';
+    const myOk=myQs.filter(q=>{const i=S.questions.indexOf(q);return S.myAnswers[i]?.correct;}).length;
+    const oppOk=myQs.filter(q=>{const i=S.questions.indexOf(q);return S.oppAnswers[i]?.c===1;}).length;
+    const n=myQs.length,myP=Math.round(myOk/n*100),oppP=Math.round(oppOk/n*100);
+    return`<div class="cat-compare-row"><span class="cat-lbl-sm">${c.label.split('&')[0].trim()}</span>
+    <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${myP}%;background:${c.color}80"></div></div>
+    <span class="mini-pct" style="color:${c.color}">${myOk}/${n}</span>
+    <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${oppP}%;background:#ffffff25"></div></div>
+    <span class="mini-pct" style="color:rgba(255,255,255,.42)">${oppOk}/${n}</span></div>`;
+  }).join('');
+  const wk=stats?weakestCat(stats):null,wkP=wk?catPct(stats,wk):null,diff=calcDiff(S.myProfile);
+  const diffMsg=diff===1?'Obtiažnosť zostáva nízka — viac B2 tréning.':diff===3?'Obtiažnosť rastie — C1 výzvy ťa čakajú!':'Obtiažnosť kalibrovaná na B2→C1.';
+  const weakBlock=wk&&wkP!==null?`<div class="weak-box"><div class="weak-title">⚠️ Najslabšia oblasť</div>
+    <div class="weak-body"><strong style="color:${CATS[wk].color}">${CATS[wk].label}</strong> — ${wkP}% (${stats[wk].correct}/${stats[wk].played} historicky)</div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.32);margin-top:5px">AI zahrnie viac tejto oblasti v ďalšom dueli. ${diffMsg}</div></div>`:'';
+  const bothWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&S.oppAnswers[i]&&S.oppAnswers[i].c!==1).slice(0,2);
+  const wrongBlock=bothWrong.length?`<div class="sec-title">Obaja ste pokazili</div>${bothWrong.map(q=>`<div class="q-review"><div class="q-review-text">${q.question}</div><div class="q-review-ans">✅ ${q.options[q.correct]}</div></div>`).join('')}`:'';
+  return`<div class="logo" style="font-size:1.2rem;margin-bottom:4px">ROZBOR DUELU</div>
+  <div class="logo-sub" style="margin-bottom:16px">${isCoop?'Kooperatívna analýza':'Analýza výkonu'}</div>
+  ${eloBlock}${shieldBlock}
+  <div class="sec-title">Výkon po kategóriách</div>
+  <div class="analysis-box">
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:7px;font-size:.62rem;color:rgba(255,255,255,.26)"><span style="width:44px;text-align:right">TY</span><span style="width:44px;text-align:right">${isCoop?'PARTNER':'SÚPER'}</span></div>
+    ${catRows}
+  </div>
+  ${weakBlock}${wrongBlock}
+  <button class="btn btn-primary" id="newBtn" style="margin-top:4px">NOVÝ DUEL</button>`;}
+
+// ═══════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════
+function bindAll(){
+  // Auth screen
+  g('googleSignIn')?.addEventListener('click',()=>signInGoogle());
+  // Setup screen
+  g('saveSetup')?.addEventListener('click',()=>{
+    const ak=g('ak')?.value.trim(),fb=g('fb')?.value.trim();
+    if(!ak||!ak.startsWith('sk-')){S.error='Kľúč musí začínať "sk-"';render();return;}
+    if(!fb||!fb.includes('{')){S.error='Vlož Firebase config objekt';render();return;}
+    S.ak=ak;S.fb=fb;S.error=null;
+    localStorage.setItem('ed_ak',ak);localStorage.setItem('ed_fb',fb);
+    if(!initFB(fb)){render();return;}
+    startAuthListener();
+  });
+  // Home
+  g('signOutBtn')?.addEventListener('click',()=>signOut());
+  g('nameInp')?.addEventListener('input',e=>{
+    S.name=e.target.value;
+    const ok=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
+    if(g('goBtn'))g('goBtn').disabled=!ok;
+  });
+  g('mCr')?.addEventListener('click',()=>{S.mode='create';render();});
+  g('mJn')?.addEventListener('click',()=>{S.mode='join';render();});
+  g('sCmp')?.addEventListener('click',()=>{S.submode='competitive';render();});
+  g('sCoop')?.addEventListener('click',()=>{S.submode='coop';render();});
+  g('codeInp')?.addEventListener('input',e=>{
+    S.roomCode=e.target.value.replace(/\D/g,'');e.target.value=S.roomCode;
+    if(g('goBtn'))g('goBtn').disabled=!S.name.trim()||S.roomCode.length!==4;
+  });
+  g('goBtn')?.addEventListener('click',handleGo);
+  g('cfgBtn')?.addEventListener('click',()=>{S.screen='setup';S.error=null;render();});
+  g('cancelBtn')?.addEventListener('click',()=>{
+    detach();if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});resetGame();render();
+  });
+  document.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(S.selected!==null)return;
+      const i=parseInt(btn.dataset.i);S.selected=i;
+      const q=S.questions[S.current];const correct=i===q.correct;
+      if(correct)S.score++;S.myAnswers.push({correct,type:q.type});
+      dbUp('rooms/'+S.roomCode+'/'+S.role,{score:S.score}).catch(()=>{});render();
+    });
+  });
+  g('nextBtn')?.addEventListener('click',()=>{
+    if(S.current+1>=S.questions.length)finishQuiz();
+    else{S.current++;S.selected=null;render();}
+  });
+  g('analysisBtn')?.addEventListener('click',()=>runAnalysis());
+  g('newBtn')?.addEventListener('click',()=>{detach();resetGame();render();});
+}
+
+// ═══════════════════════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════════════════════
+async function handleGo(){
+  S.error=null;S.name=g('nameInp')?.value.trim()||S.name;
+  if(S.mode==='create'){
+    S.loadingMsg='Generujem otázky...';S.screen='loading';render();
+    try{
+      const diff=calcDiff(S.myProfile);
+      const qs=await genQ(diff,S.myProfile?.stats);
+      const code=String(Math.floor(1000+Math.random()*9000));
+      S.roomCode=code;S.role='p1';
+      await dbSet('rooms/'+code,{status:'waiting',submode:S.submode,questions:qs,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false}});
+      S.questions=qs;attach(code);S.screen='lobby';render();
+    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+  }else{
+    const code=g('codeInp')?.value.trim()||S.roomCode;
+    S.roomCode=code;S.role='p2';S.loadingMsg='Pripájam sa...';S.screen='loading';render();
+    try{
+      const room=await dbGet('rooms/'+code);
+      if(!room)throw new Error('Duel '+code+' neexistuje');
+      if(room.status!=='waiting')throw new Error('Duel už beží alebo skončil');
+      S.questions=room.questions;S.submode=room.submode||'competitive';
+      S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
+      attach(code);
+      await dbUp('rooms/'+code,{status:'playing',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false}});
+      S.screen='quiz';render();
+    }catch(e){detach();S.error='Chyba: '+e.message;S.screen='home';render();}
+  }
+}
+
+async function finishQuiz(){
+  S.myDone=true;
+  const compact=S.myAnswers.map(a=>({c:a.correct?1:0}));
+  await dbUp('rooms/'+S.roomCode+'/'+S.role,{finished:true,score:S.score,answers:compact}).catch(()=>{});
+  if(S.oppDone)runAnalysis();else{S.screen='waiting';render();}
+}
+
+function resetGame(){
+  S.screen='home';S.mode=null;S.submode='competitive';S.roomCode='';S.role='';
+  S.questions=[];S.current=0;S.score=0;S.selected=null;
+  S.myAnswers=[];S.myDone=false;
+  S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
+  S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.error=null;
+}
+
+// ═══════════════════════════════════════════════════
+// AI QUESTION GENERATION
+// ═══════════════════════════════════════════════════
+async function genQ(diff,stats){
+  let weakHint='';
+  if(stats){const wk=weakestCat(stats);const p=catPct(stats,wk);if(p!==null&&p<70)weakHint=`\nAlso include 1-2 extra questions on "${CATS[wk].label}" — player scores only ${p}% there.`;}
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:
+      `Generate exactly 10 multiple-choice English questions. Difficulty: ${diffHint(diff)}${weakHint}
+Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary/idioms.
+Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]}
+Rules: type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms". correct is 0-based index.`
+    }]})
+  });
+  if(!res.ok){const t=await res.text();throw new Error('API '+res.status+': '+t);}
+  const data=await res.json();
+  const text=data.content?.find(b=>b.type==='text')?.text||'';
+  const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('Neplatná odpoveď AI');
+  const p=JSON.parse(m[0]);if(!p.questions?.length)throw new Error('Prázdne otázky');
+  return p.questions;
+}
+
+// ═══════════════════════════════════════════════════
+// BOOT — handle redirect result first, then auth state
+// ═══════════════════════════════════════════════════
+if(S.ak&&S.fb){
+  if(initFB(S.fb)){
+    // Check for pending redirect result (standalone PWA mode)
+    if(localStorage.getItem('ed_redirect')){
+      localStorage.removeItem('ed_redirect');
+      S.loadingMsg='Dokončujem prihlásenie...';render();
+      S.auth.getRedirectResult()
+        .catch(()=>{})
+        .finally(()=>startAuthListener());
+    }else{
+      startAuthListener();
+    }
+  }else{
+    S.screen='setup';render();
+  }
+}else{
+  S.screen='setup';render();
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
