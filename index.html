@@ -113,7 +113,7 @@
     .submode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
     .format-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
     .format-card{border-radius:12px;padding:10px 8px;cursor:pointer;text-align:center;border:1.5px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);transition:all .16s;-webkit-tap-highlight-color:transparent}
-    .format-card.sel{border-color:var(--fc);background:color-mix(in srgb,var(--fc) 10%,transparent)}
+    .format-card.sel{border-color:var(--fc)}
     .format-icon{font-size:1.4rem;margin-bottom:3px}
     .format-name{font-family:'Orbitron',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.5px;margin-bottom:2px}
     .format-hint{font-size:.6rem;color:rgba(255,255,255,.28)}
@@ -325,7 +325,7 @@ const S={
   myAnswers:[], myDone:false,
   oppName:'', oppScore:0, oppDone:false, oppAnswers:[], oppUid:'',
   myProfile:null,
-  eloChange:0, newElo:0, analysisReady:false, shieldJustEarned:false,
+  eloChange:0, newElo:0, analysisReady:false, shieldJustEarned:false, analysisStarted:false,
   timerVal:25, timerInterval:null,
   srQuestions:[], // spaced repetition questions due today
   rematchCode:'', rematchRole:'',
@@ -503,7 +503,7 @@ function startAuthListener(){
   S.auth.onAuthStateChanged(async user=>{
     if(user){
       S.user=user;S.uid=user.uid;
-      if(!S.name)S.name=user.displayName||'';
+      S.name=user.displayName||S.name||'';
       S.loadingMsg='Načítavam profil...';render();
       await loadProfile();
       // New user → placement test
@@ -580,12 +580,14 @@ function attach(code){
     if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
   });
 }
-function detach(){if(rRef&&rCb)rRef.off('value',rCb);rRef=null;rCb=null;}
+function detach(){if(rRef&&rCb)rRef.off('value',rCb);rRef=null;rCb=null;clearTimer();}
 
 // ═══════════════════════════════════════════════════
 // ANALYSIS
 // ═══════════════════════════════════════════════════
 async function runAnalysis(){
+  if(S.analysisStarted)return;
+  S.analysisStarted=true;
   S.screen='analysis';S.analysisReady=false;render();
   try{
     const myElo=S.myProfile?.elo||START_ELO;
@@ -614,7 +616,7 @@ async function runAnalysis(){
     // XP calculation
     const correctCount=S.myAnswers.filter(a=>a.correct).length;
     const isPerfect=correctCount===tot;
-    const streak=streakUpd?.streak||S.myProfile?.streak||0;
+    const streak=(streakUpd?.streak!=null?streakUpd.streak:S.myProfile?.streak)||0;
     let xpGained=correctCount*XP_CORRECT;
     if(isWin)xpGained+=XP_WIN;
     else if(isDraw)xpGained+=XP_DRAW;
@@ -633,6 +635,8 @@ async function runAnalysis(){
     await dbUp('users/'+S.uid,upd);
     S.myProfile={...S.myProfile,...upd,stats:newStats};
     S.analysisReady=true;render();
+    // Cleanup room from Firebase
+    if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
   }catch(e){console.error(e);S.analysisReady=true;render();}
 }
 
@@ -764,7 +768,7 @@ function hHome(){
   }).join('');
 
   const formatCards=Object.entries(FORMATS).map(([k,f])=>`
-    <div class="format-card ${S.format===k?'sel':''}" id="fmt_${k}" style="--fc:${f.color}">
+    <div class="format-card ${S.format===k?'sel':''}" id="fmt_${k}" style="--fc:${f.color};${S.format===k?'background:'+f.color+'1a;':''}">
       <div class="format-icon">${f.icon}</div>
       <div class="format-name" style="color:${S.format===k?f.color:''}">${f.label}</div>
       <div class="format-hint">${f.hint}</div>
@@ -1266,7 +1270,7 @@ function resetGame(){
   S.questions=[];S.current=0;S.score=0;S.selected=null;
   S.myAnswers=[];S.myDone=false;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
-  S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.error=null;
+  S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;S.error=null;
 }
 
 // ═══════════════════════════════════════════════════
