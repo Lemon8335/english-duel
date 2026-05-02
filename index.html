@@ -313,17 +313,17 @@ function weakestCat(stats){let min=101,key='vocab';Object.keys(CATS).forEach(k=>
 // ═══════════════════════════════════════════════════
 // FIREBASE INIT
 // ═══════════════════════════════════════════════════
-function initFB(cfgStr){
+function initFB(cfg){
   try{
-    const json=cfgStr.replace(/\/\/.*$/gm,'').match(/\{[\s\S]*\}/)[0];
-    const cfg=new Function('return('+json+')')();
+    if(!cfg||!cfg.apiKey)throw new Error('Chýba apiKey');
+    if(!cfg.authDomain)throw new Error('Chýba authDomain');
     if(!cfg.databaseURL)throw new Error('Chýba databaseURL');
     if(firebase.apps.length)firebase.app().delete();
     firebase.initializeApp(cfg);
     S.db=firebase.database();
     S.auth=firebase.auth();
     return true;
-  }catch(e){S.error='Neplatný Firebase config: '+e.message;return false;}
+  }catch(e){S.error='Chyba Firebase: '+e.message;return false;}
 }
 function dbSet(p,d){return S.db.ref(p).set(d);}
 function dbUp(p,d){return S.db.ref(p).update(d);}
@@ -487,22 +487,25 @@ function hAuth(){return`
   <button class="btn btn-ghost" id="cfgBtn">⚙️ Zmeniť Firebase nastavenia</button>
 `;}
 
-function hSetup(){return`
+function hSetup(){
+  const fb=S.fbFields||{};
+  return`
   <div class="logo">ENGLISH DUEL</div><div class="logo-sub">Prvotné nastavenie</div>
-  <div class="info-box"><strong>① Anthropic API kľúč</strong> — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → Register → API Keys → Create Key</div>
+  <div class="info-box"><strong>① Anthropic API kľúč</strong> — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
   <div class="lbl">Anthropic API kľúč</div>
-  <input type="password" id="ak" placeholder="sk-ant-..." value="${S.ak}"/>
-  <div class="info-box">
-    <strong>② Firebase projekt</strong> — <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
-    <span style="font-size:.74rem">
-      1. Nový projekt → Realtime Database → Vytvoriť → <strong>Test mode</strong><br>
-      2. Authentication → Začať → Sign-in method → <strong>Google → Povoliť → Uložiť</strong><br>
-      3. Authentication → Settings → Authorized domains → <strong>Pridaj svoju GitHub Pages adresu</strong> (napr. meno.github.io)<br>
-      4. ⚙️ Nastavenia projektu → Tvoje aplikácie → Web → skopíruj <strong>firebaseConfig objekt</strong>
-    </span>
-  </div>
-  <div class="lbl">Firebase Config</div>
-  <textarea id="fb" placeholder='{\n  apiKey: "AIza...",\n  databaseURL: "https://...-rtdb.firebaseio.com",\n  authDomain: "projekt.firebaseapp.com",\n  ...\n}'>${S.fb}</textarea>
+  <input type="password" id="ak" placeholder="sk-ant-api03-..." value="${S.ak}" autocomplete="off"/>
+  <div class="info-box"><strong>② Firebase polia</strong> — <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
+  <span style="font-size:.73rem">Projekt → ⚙️ Nastavenia → Tvoje aplikácie → Web app → firebaseConfig</span></div>
+  <div class="lbl">apiKey</div>
+  <input type="text" id="fb_apiKey" placeholder="AIzaSy..." value="${fb.apiKey||''}" autocomplete="off"/>
+  <div class="lbl">authDomain</div>
+  <input type="text" id="fb_authDomain" placeholder="projekt.firebaseapp.com" value="${fb.authDomain||''}" autocomplete="off"/>
+  <div class="lbl">databaseURL</div>
+  <input type="text" id="fb_databaseURL" placeholder="https://projekt-rtdb.firebaseio.com" value="${fb.databaseURL||''}" autocomplete="off"/>
+  <div class="lbl">projectId</div>
+  <input type="text" id="fb_projectId" placeholder="moj-projekt" value="${fb.projectId||''}" autocomplete="off"/>
+  <div class="lbl">appId</div>
+  <input type="text" id="fb_appId" placeholder="1:123:web:abc" value="${fb.appId||''}" autocomplete="off"/>
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
   <button class="btn btn-primary" id="saveSetup">ULOŽIŤ A POKRAČOVAŤ</button>
 `;}
@@ -723,12 +726,21 @@ function bindAll(){
   g('googleSignIn')?.addEventListener('click',()=>signInGoogle());
   // Setup screen
   g('saveSetup')?.addEventListener('click',()=>{
-    const ak=g('ak')?.value.trim(),fb=g('fb')?.value.trim();
-    if(!ak||!ak.startsWith('sk-')){S.error='Kľúč musí začínať "sk-"';render();return;}
-    if(!fb||!fb.includes('{')){S.error='Vlož Firebase config objekt';render();return;}
-    S.ak=ak;S.fb=fb;S.error=null;
-    localStorage.setItem('ed_ak',ak);localStorage.setItem('ed_fb',fb);
-    if(!initFB(fb)){render();return;}
+    const ak=(g('ak')?.value||'').trim();
+    const fbApiKey=(g('fb_apiKey')?.value||'').trim();
+    const fbAuthDomain=(g('fb_authDomain')?.value||'').trim();
+    const fbDatabaseURL=(g('fb_databaseURL')?.value||'').trim();
+    const fbProjectId=(g('fb_projectId')?.value||'').trim();
+    const fbAppId=(g('fb_appId')?.value||'').trim();
+    if(!ak||!ak.startsWith('sk-')){S.error='API kľúč musí začínať "sk-"';render();return;}
+    if(!fbApiKey){S.error='Chýba Firebase apiKey';render();return;}
+    if(!fbAuthDomain){S.error='Chýba Firebase authDomain';render();return;}
+    if(!fbDatabaseURL||!fbDatabaseURL.startsWith('https://')){S.error='Chýba alebo zlý databaseURL';render();return;}
+    const cfg={apiKey:fbApiKey,authDomain:fbAuthDomain,databaseURL:fbDatabaseURL,projectId:fbProjectId,appId:fbAppId};
+    S.ak=ak;S.fbFields=cfg;S.error=null;
+    localStorage.setItem('ed_ak',ak);
+    localStorage.setItem('ed_fbf',JSON.stringify(cfg));
+    if(!initFB(cfg)){render();return;}
     startAuthListener();
   });
   // Home
@@ -841,9 +853,10 @@ Rules: type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary 
 // ═══════════════════════════════════════════════════
 // BOOT — handle redirect result first, then auth state
 // ═══════════════════════════════════════════════════
-if(S.ak&&S.fb){
-  if(initFB(S.fb)){
-    // Check for pending redirect result (standalone PWA mode)
+const _savedFbf=localStorage.getItem('ed_fbf');
+if(_savedFbf){try{S.fbFields=JSON.parse(_savedFbf);}catch(e){}}
+if(S.ak&&S.fbFields){
+  if(initFB(S.fbFields)){
     if(localStorage.getItem('ed_redirect')){
       localStorage.removeItem('ed_redirect');
       S.loadingMsg='Dokončujem prihlásenie...';render();
