@@ -253,7 +253,6 @@ const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
 const S={
   screen:'loading',
   ak:localStorage.getItem('ed_ak')||'',
-  fb:localStorage.getItem('ed_fb')||'',
   db:null, auth:null, user:null, uid:'',
   loadingMsg:'Inicializujem...',
   name:'', mode:null, submode:'competitive', roomCode:'', role:'',
@@ -841,6 +840,9 @@ Rules: type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary 
 // ═══════════════════════════════════════════════════
 // BOOT — handle redirect result first, then auth state
 // ═══════════════════════════════════════════════════
+// Vymaž staré Firebase dáta z predchádzajúcich verzií
+['ed_fb','ed_fbf'].forEach(k=>localStorage.removeItem(k));
+
 if(initFB(FB_CONFIG)){
   if(localStorage.getItem('ed_redirect')){
     localStorage.removeItem('ed_redirect');
