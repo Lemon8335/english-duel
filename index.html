@@ -802,7 +802,14 @@ function hHome(){
     <span class="diff-badge diff-${diff}">${DIFF_LABELS[diff]}</span>
   </div>
   <div style="margin-bottom:6px">
-    <div style="display:flex;justify-content:space-between;font-size:.62rem;color:rgba(255,255,255,.3);margin-bottom:5px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      ${rankBadge(elo)}
+      <div style="text-align:right">
+        <div class="profile-elo" style="font-size:1.1rem">${elo}<span>ELO</span></div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,.26)">${prof?.gamesPlayed||0} duelov · ${prof?.wins||0} výhier</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.6rem;color:rgba(255,255,255,.28);margin-bottom:4px">
       <span>${rank.n}</span><span>${nxt}</span>
     </div>
     <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
@@ -824,13 +831,6 @@ function hHome(){
     </div>
     ${stats?`<div class="cat-bars">${catBars}</div>`:'<div style="font-size:.76rem;color:rgba(255,255,255,.25);text-align:center;padding:4px 0">Zahraj prvý duel aby si videl/a štatistiky</div>'}
 
-    <div class="xp-bar-wrap">
-      <div class="xp-bar-label">
-        <span><span class="xp-badge">⭐ Level ${xpLevel(prof?.xp||0)}</span></span>
-        <span>${prof?.xp||0} XP · +${xpToNext(prof?.xp||0)} do ďalšieho</span>
-      </div>
-      <div class="xp-bar"><div class="xp-bar-fill" style="width:${xpProgress(prof?.xp||0)}%"></div></div>
-    </div>
   </div>
   <div class="lbl">Prezývka v dueli</div>
   <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name}"/>
