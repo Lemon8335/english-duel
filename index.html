@@ -219,6 +219,18 @@
 <div id="app"></div>
 <script>
 // ═══════════════════════════════════════════════════
+// HARDCODED CONFIG — nastav raz, funguje pre všetkých
+// ═══════════════════════════════════════════════════
+const ANTHROPIC_KEY = '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';
+const FB_CONFIG = {
+  apiKey: 'AIzaSyDHLK7BI3Un38zknqmvoJplAk5Tck-4f8w',
+  authDomain: 'english-duel-20bdc.firebaseapp.com',
+  databaseURL: 'https://english-duel-20bdc-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'english-duel-20bdc',
+  appId: '1:1027694040488:web:ed2747ca7bc7130ec5b99d'
+};
+
+// ═══════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════
 const RANKS=[
@@ -484,7 +496,6 @@ function hAuth(){return`
     Prihlásiť sa cez Google
   </button>
   <div class="auth-divider">alebo</div>
-  <button class="btn btn-ghost" id="cfgBtn">⚙️ Zmeniť Firebase nastavenia</button>
 `;}
 
 function hSetup(){
@@ -577,7 +588,6 @@ function hHome(){
   ${S.mode==='join'?`<div class="lbl">Kód duelu</div><input type="text" id="codeInp" placeholder="4-ciferný kód" maxlength="4" inputmode="numeric" value="${S.roomCode}" style="font-family:'Orbitron',sans-serif;font-size:1.5rem;letter-spacing:10px;text-align:center"/>`:''}
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
   <button class="btn ${S.submode==='coop'?'btn-coop':'btn-primary'}" id="goBtn" ${!canGo?'disabled':''}>${S.mode==='join'?'PRIPOJIŤ SA':'VYTVORIŤ DUEL'}</button>
-  <button class="btn btn-ghost" id="cfgBtn" style="margin-top:9px">⚙️ Zmeniť API / Firebase</button>
 `;}
 
 function hLobby(){
@@ -853,21 +863,15 @@ Rules: type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary 
 // ═══════════════════════════════════════════════════
 // BOOT — handle redirect result first, then auth state
 // ═══════════════════════════════════════════════════
-const _savedFbf=localStorage.getItem('ed_fbf');
-if(_savedFbf){try{S.fbFields=JSON.parse(_savedFbf);}catch(e){}}
-if(S.ak&&S.fbFields){
-  if(initFB(S.fbFields)){
-    if(localStorage.getItem('ed_redirect')){
-      localStorage.removeItem('ed_redirect');
-      S.loadingMsg='Dokončujem prihlásenie...';render();
-      S.auth.getRedirectResult()
-        .catch(()=>{})
-        .finally(()=>startAuthListener());
-    }else{
-      startAuthListener();
-    }
+if(initFB(FB_CONFIG)){
+  if(localStorage.getItem('ed_redirect')){
+    localStorage.removeItem('ed_redirect');
+    S.loadingMsg='Dokončujem prihlásenie...';render();
+    S.auth.getRedirectResult()
+      .catch(()=>{})
+      .finally(()=>startAuthListener());
   }else{
-    S.screen='setup';render();
+    startAuthListener();
   }
 }else{
   S.screen='setup';render();
