@@ -618,7 +618,7 @@ function hQuiz(){
   <div class="q-text">${q.question}</div>
   <div class="options">${opts}</div>
   ${ans?`<div class="expl ${S.selected!==q.correct?'bad':''}">${S.selected===q.correct?'✅':'❌'} ${q.explanation}</div>
-  <button class="next-btn" id="nextBtn">${S.current+1>=tot?'DOKONČIŤ →':'ĎALŠIA →'}</button>`:'`}`;}
+  <button class="next-btn" id="nextBtn">${S.current+1>=tot?'DOKONČIŤ →':'ĎALŠIA →'}</button>`:''}`;}
 
 function hWaiting(){
   const tot=S.questions.length,p=Math.round(S.score/tot*100),isCoop=S.submode==='coop';
