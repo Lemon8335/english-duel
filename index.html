@@ -989,6 +989,16 @@ function attach(code){
   detach();rRef=S.db.ref('rooms/'+code);
   rCb=rRef.on('value',snap=>{
     const r=snap.val();if(!r)return;
+
+    // If question generation failed on the host side, show the error to BOTH players.
+    if(r.status==='error'){
+      S._generatingQuestions=false;
+      S.error='Chyba generovania otázok: '+(r.error||'Neznáma chyba. Skontroluj API kľúč a konzolu prehliadača.');
+      if(S.screen!=='lobby')S.screen='lobby';
+      render();
+      return;
+    }
+
     const opp=S.role==='p1'?(r.p2||{}):(r.p1||{});
     const prevOppScore=S.oppScore;
     S.oppName=opp.name||S.oppName;S.oppScore=opp.score??S.oppScore;
@@ -1007,6 +1017,8 @@ function attach(code){
       S.oppJoined=S.role==='p1'?!!r.p2:!!r.p1;
       S.oppReady=!!(S.role==='p1'?r.p2ready:r.p1ready);
       S.myReady=!!(S.role==='p1'?r.p1ready:r.p2ready);
+      // Show a visible waiting/generating state also to the opponent while the host calls the API.
+      if(r.status==='generating')S._generatingQuestions=true;
       if(S.role==='p1'&&r.p2?.name)S.oppName=r.p2.name;
       if(S.role==='p1'&&r.p2uid&&r.p2uid!==S._lastH2HUid){
         S._lastH2HUid=r.p2uid;S.oppUid=r.p2uid;
@@ -1019,23 +1031,39 @@ function attach(code){
         if(p1uid&&!S._h2hLoaded){S._h2hLoaded=true;loadH2H(p1uid).then(h=>{S.h2h=h;render();});}
         if(r.p1?.name)S.oppName=r.p1.name;
       }
-      // ── P1: generate when both ready ─────────────────────────
-      if(S.role==='p1'&&r.p1ready&&r.p2ready&&!S._generatingQuestions&&!r.questions){
-        S._generatingQuestions=true;render();
+      // ── P1: generate when both players are ready ─────────────
+      // Only the host generates questions and writes them to Firebase.
+      // The opponent then receives the same questions via the room listener.
+      if(S.role==='p1'&&r.p1ready&&r.p2ready&&!S._generatingQuestions&&!(Array.isArray(r.questions)&&r.questions.length)){
+        S._generatingQuestions=true;
+        S.error=null;
+        dbUp('rooms/'+S.roomCode,{status:'generating',error:null}).catch(()=>{});
+        render();
         (async()=>{
           try{
+            if(!S.ak||!S.ak.startsWith('sk-')){
+              throw new Error('Hostiteľ miestnosti nemá uložený platný Anthropic API kľúč. Otvor Nastavenia a ulož API kľúč, ktorý začína na sk-.');
+            }
             const p2uid=r.p2uid||'';
             let oppElo=START_ELO;
             if(p2uid){const op=await dbGet('users/'+p2uid);if(op?.elo)oppElo=op.elo;}
             const diff=calcSharedDiff(S.myProfile,oppElo);
             S.srQuestions=await loadDueSRQuestions();
             const qs=S.format==='sr'?await genSROnlyQuestions(S.srQuestions):await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
-            await dbUp('rooms/'+S.roomCode,{questions:qs,status:'ready'});
-          }catch(e){S._generatingQuestions=false;S.error='Chyba generovania: '+e.message;render();}
+            if(!Array.isArray(qs)||!qs.length)throw new Error('AI nevrátila žiadne otázky.');
+            await dbUp('rooms/'+S.roomCode,{questions:qs,status:'ready',error:null});
+          }catch(e){
+            S._generatingQuestions=false;
+            const msg=e?.message||String(e);
+            await dbUp('rooms/'+S.roomCode,{status:'error',error:msg}).catch(()=>{});
+            S.error='Chyba generovania: '+msg;
+            render();
+          }
         })();
       }
       // ── Both sides: start when questions are ready ────────────
-      if(r.questions&&r.questions.length&&!S._countdownStarted){
+      if(Array.isArray(r.questions)&&r.questions.length&&!S._countdownStarted){
+        S._generatingQuestions=false;
         S._countdownStarted=true;
         S.questions=r.questions;
         startCountdown(()=>{
@@ -1526,7 +1554,8 @@ function hLobby(){
     ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky</div>`:''}
     ${S.h2h&&S.oppJoined?h2hHTML(S.h2h):''}
     ${readyCards}
-    ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:S._generatingQuestions?`<button class="btn-ready pressed" id="readyBtn" style="background:rgba(255,179,0,.15);color:#ffb300;border:2px solid #ffb300;animation:none">⏳ GENERUJEM OTÁZKY...</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
+    ${S.error?`<div class="err-box">${S.error}</div>`:''}
+    ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:S._generatingQuestions?`<button class="btn-ready pressed" id="readyBtn" style="background:rgba(255,179,0,.15);color:#ffb300;border:2px solid #ffb300;animation:none">⏳ PRIPRAVUJEM OTÁZKY...</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
     <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:11px;padding:11px 14px;margin-top:10px">
       <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,255,200,.5);margin-bottom:5px">💡 Tip kým čakáš</div>
       <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.5">${tip}</div>
@@ -2473,7 +2502,9 @@ async function handleGo(){
       S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
       if(room.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=room.bo3?.p2wins||0;S.bo3OppWins=room.bo3?.p1wins||0;S.bo3Game=room.bo3?.game||1;}
       attach(code);
-      await dbUp('rooms/'+code,{status:'joined',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false},p1ready:false,p2ready:false});
+      // Do NOT reset p1ready here. If the host clicked READY before P2 joined,
+      // resetting p1ready:false would prevent generation from starting.
+      await dbUp('rooms/'+code,{status:'joined',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false},p2ready:false,error:null});
       // Pre-load P1 profile for rank display
       if(S.oppUid)dbGet('users/'+S.oppUid).then(p=>{S.oppProfile=p;});
       S.screen='lobby';render();
@@ -2513,6 +2544,9 @@ function resetGame(){
 // AI QUESTION GENERATION
 // ═══════════════════════════════════════════════════
 async function genQ(diff,stats,srQs=[],fmt='mixed'){
+  if(!S.ak||!S.ak.startsWith('sk-')){
+    throw new Error('Chýba platný Anthropic API kľúč. Otvor Nastavenia a ulož API kľúč, ktorý začína na sk-.');
+  }
   let weakHint='';
   if(stats){const wk=weakestCat(stats);const p=catPct(stats,wk);if(p!==null&&p<70)weakHint=`\nAlso include 1-2 extra questions on "${CATS[wk].label}" — player scores only ${p}% there.`;}
   // Inject due SR questions directly (replace up to 3 normal questions)
@@ -2523,7 +2557,7 @@ async function genQ(diff,stats,srQs=[],fmt='mixed'){
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:
       `Generate exactly 10 multiple-choice English questions. Difficulty: ${diffHint(diff)}${weakHint}
 ${FORMATS[fmt]?.prompt||FORMATS.mixed.prompt}${srHint}
 Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","question":"...","options":["A","B","C","D"],"correct":0,"explanation":"...","example":"She gave up smoking after 10 years."}]}
@@ -2542,8 +2576,11 @@ Rules:
   if(!res.ok){const t=await res.text();throw new Error('API '+res.status+': '+t);}
   const data=await res.json();
   const text=data.content?.find(b=>b.type==='text')?.text||'';
-  const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('Neplatná odpoveď AI');
-  const p=JSON.parse(m[0]);if(!p.questions?.length)throw new Error('Prázdne otázky');
+  const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('Neplatná odpoveď AI – odpoveď neobsahovala JSON.');
+  let p;
+  try{p=JSON.parse(m[0]);}
+  catch(err){throw new Error('Neplatný JSON z AI. Skús znova alebo zvýš max_tokens. Detail: '+err.message);}
+  if(!Array.isArray(p.questions)||!p.questions.length)throw new Error('Prázdne otázky');
   return p.questions;
 }
 
