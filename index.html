@@ -293,6 +293,14 @@
     .cefr-weak{color:#ff8a80;font-weight:600}
     .cefr-tip{color:#ffb300;font-weight:600}
     .cefr-notify{background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);border-radius:11px;padding:11px 14px;text-align:center;margin-bottom:14px;font-size:.82rem;color:rgba(255,255,255,.5)}
+    /* Format pills */
+    .format-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .format-scroll::-webkit-scrollbar{display:none}
+    .format-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;white-space:nowrap;transition:all .16s;-webkit-tap-highlight-color:transparent;flex-shrink:0;touch-action:manipulation}
+    .format-pill.sel{border-color:var(--fc);background:var(--fc-bg)}
+    .format-pill.locked{opacity:.35;cursor:not-allowed}
+    .format-pill-icon{font-size:1rem}
+    .format-pill-name{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.5px}
     /* Redesigned home */
     .hero-card{background:rgba(18,24,36,.95);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px 16px;margin-bottom:10px;position:relative;overflow:hidden}
     .hero-card::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,200,.08),transparent 70%);top:-80px;right:-60px;pointer-events:none}
@@ -1200,6 +1208,7 @@ function hAuth(){return`
 `;}
 
 function hSetup(){
+  const isFromHome=S.uid&&S.myProfile;
   return`
   <div class="logo">ENGLISH DUEL</div><div class="logo-sub">Nastavenie</div>
   <div class="info-box"><strong>Anthropic API kľúč</strong> — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
@@ -1207,6 +1216,7 @@ function hSetup(){
   <input type="password" id="ak" placeholder="sk-ant-api03-..." value="${S.ak}" autocomplete="off"/>
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
   <button class="btn btn-primary" id="saveSetup">ULOŽIŤ A POKRAČOVAŤ</button>
+  ${isFromHome?`<button class="btn btn-ghost" id="backHomeBtn" style="margin-top:9px">← Späť</button>`:''}
 `;}
 
 function hHome(){
@@ -1849,6 +1859,8 @@ function bindAll(){
     if(!ak||!ak.startsWith('sk-')){S.error='API kľúč musí začínať "sk-"';render();return;}
     S.ak=ak;S.error=null;
     localStorage.setItem('ed_ak',ak);
+    // If already logged in, just go back to home — don't re-trigger auth/placement
+    if(S.uid&&S.myProfile){S.screen='home';render();return;}
     if(!initFB(FB_CONFIG)){render();return;}
     startAuthListener();
   });
