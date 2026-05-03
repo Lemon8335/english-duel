@@ -309,6 +309,10 @@ const CATS={phrasal:{label:'Phrasal Verbs',color:'#00ffc8'},grammar:{label:'Gram
 const DIFF_LABELS=['','B2','B2/C1','C1'];
 const LT=['A','B','C','D'];
 const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
+const NICK_ADJ=['Swift','Brave','Sharp','Clever','Bold','Quick','Wise','Epic','Dark','Calm','Wild','Cool','Iron','Gold','Neon'];
+const NICK_NOUN=['Falcon','Tiger','Phoenix','Dragon','Wolf','Hawk','Viper','Ninja','Storm','Blaze','Ghost','Rider','Arrow','Comet','Spark'];
+function randomNick(){return NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+NICK_NOUN[Math.floor(Math.random()*NICK_NOUN.length)];}
+
 const FORMATS={
   mixed:     {label:'Zmiešaný',     icon:'⚡', color:'#00ffc8', hint:'Všetky typy otázok',         prompt:'Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary & idioms.'},
   phrasal:   {label:'Phrasal Verbs',icon:'🔗', color:'#42a5f5', hint:'Len frázové slovesá',         prompt:'All 10 questions must be about phrasal verbs in various contexts. type="Phrasal Verbs" for all.'},
@@ -610,7 +614,10 @@ function startAuthListener(){
   S.auth.onAuthStateChanged(async user=>{
     if(user){
       S.user=user;S.uid=user.uid;
-      S.name=user.displayName||S.name||'';
+      // Load saved nick or generate random one (don't use Gmail name)
+      const savedNick=localStorage.getItem('ed_nick');
+      if(!S.name)S.name=savedNick||randomNick();
+      if(!savedNick)localStorage.setItem('ed_nick',S.name);
       S.loadingMsg='Načítavam profil...';render();
       await loadProfile();
       // New user → placement test
@@ -914,8 +921,8 @@ function hHome(){
     ${shieldHTML(prof)}
     <span class="diff-badge diff-${diff}">${DIFF_LABELS[diff]}</span>
   </div>
-  <div style="margin-bottom:6px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 15px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       ${rankBadge(elo)}
       <div style="text-align:right">
         <div class="profile-elo" style="font-size:1.1rem">${elo}<span>ELO</span></div>
@@ -925,12 +932,11 @@ function hHome(){
     <div style="display:flex;justify-content:space-between;font-size:.6rem;color:rgba(255,255,255,.28);margin-bottom:4px">
       <span>${rank.n}</span><span>${nxt}</span>
     </div>
-    <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
-  </div>
-  <div style="margin-bottom:14px">
-    <div style="display:flex;justify-content:space-between;font-size:.62rem;color:rgba(255,255,255,.3);margin-bottom:5px">
+    <div class="rank-progress-bar" style="margin-bottom:12px"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
+    <div style="height:1px;background:rgba(255,255,255,.06);margin-bottom:12px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
       <span class="xp-badge">⭐ Level ${xpLevel(prof?.xp||0)}</span>
-      <span>${prof?.xp||0} XP · +${xpToNext(prof?.xp||0)} do ďalšieho</span>
+      <span style="font-size:.62rem;color:rgba(255,255,255,.3)">${prof?.xp||0} XP · +${xpToNext(prof?.xp||0)} do ďalšieho</span>
     </div>
     <div class="xp-bar"><div class="xp-bar-fill" style="width:${xpProgress(prof?.xp||0)}%"></div></div>
   </div>
@@ -943,7 +949,26 @@ function hHome(){
       </div>
     </div>
     ${stats?`<div class="cat-bars">${catBars}</div>`:'<div style="font-size:.76rem;color:rgba(255,255,255,.25);text-align:center;padding:4px 0">Zahraj prvý duel aby si videl/a štatistiky</div>'}
-
+    <div style="margin-top:12px;display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:11px">
+      <div style="flex-shrink:0">
+        <svg width="52" height="52" viewBox="0 0 52 52" style="display:block">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="3.5"/>
+          ${prof?.cefrResult?`<circle cx="26" cy="26" r="21" fill="none" stroke="#00ffc8" stroke-width="3.5"
+            stroke-dasharray="132" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 26 26)"/>
+          <text x="26" y="30" text-anchor="middle" fill="#00ffc8"
+            style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:900">${prof.cefrResult.level}</text>`
+          :`<text x="26" y="30" text-anchor="middle" fill="rgba(255,255,255,.25)"
+            style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700">?</text>`}
+        </svg>
+      </div>
+      <div style="min-width:0;flex:1">
+        <div style="font-size:.67rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:3px">CEFR úroveň</div>
+        ${prof?.cefrResult?`
+          <div style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${prof.cefrResult.summary?.split('.')[0]}.</div>
+          <div style="font-size:.63rem;color:rgba(255,255,255,.25);margin-top:3px">Na základe ${prof.cefrResult.gamesAt} hier</div>
+        `:`<div style="font-size:.79rem;color:rgba(255,255,255,.3)">Odomkne sa po 10 hrách</div>`}
+      </div>
+    </div>
   </div>
   <div class="lbl">Prezývka v dueli</div>
   <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name}"/>
@@ -1164,6 +1189,7 @@ function bindAll(){
   g('signOutBtn')?.addEventListener('click',()=>signOut());
   g('nameInp')?.addEventListener('input',e=>{
     S.name=e.target.value;
+    if(S.name.trim())localStorage.setItem('ed_nick',S.name.trim());
     const ok=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
     if(g('goBtn'))g('goBtn').disabled=!ok;
   });
