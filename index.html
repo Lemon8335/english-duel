@@ -103,7 +103,7 @@
     .cat-pct{font-size:.68rem;font-weight:600;width:30px;text-align:right;flex-shrink:0}
 
     /* Mode cards */
-    .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
     .mode-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.09);border-radius:14px;padding:15px 10px;cursor:pointer;text-align:center;transition:all .18s;-webkit-tap-highlight-color:transparent}
     .mode-card.sel-create{border-color:#00ffc8;background:rgba(0,255,200,.07)}
     .mode-card.sel-join{border-color:#7c4dff;background:rgba(124,77,255,.08)}
@@ -224,6 +224,55 @@
     .xp-levelup{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);z-index:1001;animation:fadeIn .3s ease}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     .xp-levelup-card{background:linear-gradient(135deg,rgba(124,77,255,.3),rgba(0,255,200,.15));border:2px solid #7c4dff;border-radius:20px;padding:32px 28px;text-align:center;animation:xpPop .4s ease}
+    /* Sudden Death */
+    .sd-overlay{position:fixed;inset:0;background:rgba(8,12,20,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:600;gap:14px;text-align:center;padding:24px}
+    .sd-icon{font-size:5rem;animation:sdPulse 1s ease-in-out infinite alternate}
+    @keyframes sdPulse{0%{transform:scale(1);filter:drop-shadow(0 0 12px rgba(255,82,82,.6))}100%{transform:scale(1.1);filter:drop-shadow(0 0 24px rgba(255,82,82,.9))}}
+    .sd-title{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:#ff5252;letter-spacing:3px}
+    .sd-sub{font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.5;max-width:280px}
+    .sd-countdown{font-family:'Orbitron',sans-serif;font-size:4rem;font-weight:900;color:#ff5252}
+    .sd-timer-ring{position:relative;width:80px;height:80px}
+    .sd-timer-ring svg{transform:rotate(-90deg)}
+    /* History screen */
+    .hist-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+    .hist-result{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:900;flex-shrink:0}
+    .hist-result.win{background:rgba(0,255,200,.15);color:#00ffc8}
+    .hist-result.loss{background:rgba(255,82,82,.12);color:#ff5252}
+    .hist-result.draw{background:rgba(255,179,0,.12);color:#ffb300}
+    .hist-info{flex:1;min-width:0}
+    .hist-opp{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hist-meta{font-size:.7rem;color:rgba(255,255,255,.35);margin-top:2px}
+    .hist-right{text-align:right;flex-shrink:0}
+    .hist-score{font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700}
+    .hist-elo{font-size:.7rem;margin-top:2px}
+    /* CEFR chart */
+    .cefr-chart-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:14px;margin-bottom:14px;overflow:hidden}
+    /* Best of 3 */
+    .bo3-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:18px}
+    .bo3-dot{width:14px;height:14px;border-radius:50%;border:2px solid;transition:all .3s}
+    .bo3-dot.win{background:#00ffc8;border-color:#00ffc8;box-shadow:0 0 8px rgba(0,255,200,.5)}
+    .bo3-dot.loss{background:#ff5252;border-color:#ff5252}
+    .bo3-dot.empty{background:transparent;border-color:rgba(255,255,255,.2)}
+    .bo3-sep{font-family:'Orbitron',sans-serif;font-size:.7rem;color:rgba(255,255,255,.2);margin:0 6px}
+    .bo3-player{text-align:center;flex:1}
+    .bo3-player-name{font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+    .bo3-player-wins{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900}
+    /* Bo3 series end */
+    .bo3-trophy{font-size:4rem;text-align:center;margin:10px 0 6px;animation:countPop .5s ease}
+    /* Countdown */
+    .countdown-overlay{position:fixed;inset:0;background:rgba(8,12,20,.95);display:flex;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:10px}
+    .countdown-num{font-family:'Orbitron',sans-serif;font-size:8rem;font-weight:900;background:linear-gradient(135deg,#00ffc8,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:countPop .9s ease}
+    @keyframes countPop{0%{transform:scale(1.6);opacity:0}40%{transform:scale(1);opacity:1}80%{transform:scale(1);opacity:1}100%{transform:scale(.7);opacity:0}}
+    .countdown-sub{font-family:'Orbitron',sans-serif;font-size:.8rem;letter-spacing:3px;color:rgba(255,255,255,.3);text-transform:uppercase}
+    /* Ready button */
+    .btn-ready{background:linear-gradient(135deg,#00ffc8,#00b894);color:#080c14;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.9rem;letter-spacing:2px;border:none;border-radius:14px;padding:18px;width:100%;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;animation:readyPulse 2s ease-in-out infinite}
+    @keyframes readyPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,200,.4)}50%{box-shadow:0 0 0 12px rgba(0,255,200,0)}}
+    .btn-ready.pressed{background:rgba(0,255,200,.15);color:#00ffc8;border:2px solid #00ffc8;animation:none}
+    .player-ready-row{display:flex;gap:10px;margin-bottom:16px}
+    .player-ready-card{flex:1;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;text-align:center;transition:all .3s}
+    .player-ready-card.is-ready{border-color:#00ffc8;background:rgba(0,255,200,.08)}
+    .player-ready-name{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .player-ready-status{font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700}
     /* AI Insight */
     .insight-box{background:rgba(124,77,255,.07);border:1px solid rgba(124,77,255,.2);border-radius:13px;padding:14px;margin-top:14px}
     .insight-label{font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(124,77,255,.8);margin-bottom:7px;font-weight:600}
@@ -320,13 +369,17 @@ function randomNick(){return NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]
 
 const FORMATS={
   mixed:     {label:'Zmiešaný',     icon:'⚡', color:'#00ffc8', hint:'Všetky typy otázok',         prompt:'Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary & idioms.'},
-  phrasal:   {label:'Phrasal Verbs',icon:'🔗', color:'#42a5f5', hint:'Len frázové slovesá',         prompt:'All 10 questions must be about phrasal verbs in various contexts. type="Phrasal Verbs" for all.'},
+  phrasal:   {label:'Frázové slovesá',icon:'🔗', color:'#42a5f5', hint:'Len frázové slovesá',         prompt:'All 10 questions must be about phrasal verbs in various contexts. type="Phrasal Verbs" for all.'},
   vocab:     {label:'Slovná zásoba',icon:'📖', color:'#b388ff', hint:'Slovíčka & idiomy',            prompt:'All 10 questions must be about advanced vocabulary, idioms, and expressions. type="Vocabulary & Idioms" for all.'},
   collocations:{label:'Kolokácie',  icon:'🔀', color:'#ffb300', hint:'Typické anglické spojenia',   prompt:'All 10 questions must be about collocations — typical word combinations in English (verb+noun, adj+noun, adv+adj etc.). type="Vocabulary & Idioms" for all.'},
   idioms:    {label:'Idiomy',       icon:'💬', color:'#ff6b35', hint:'Frazeologizmy & výrazy',       prompt:'All 10 questions must be about English idioms and fixed expressions. type="Vocabulary & Idioms" for all.'},
   grammar:   {label:'Gramatika',    icon:'📐', color:'#66bb6a', hint:'Pokročilá gramatika',          prompt:'All 10 questions must be about advanced English grammar (conditionals, perfect tenses, passive, inversions, cleft sentences, etc.). type="Advanced Grammar" for all.'},
   sr:        {label:'Opakovanie',   icon:'🔁', color:'#ffb300', hint:'Tvoje vlastné SR otázky',       prompt:''},
+  military:  {label:'Military',      icon:'🎖️', color:'#78909c', hint:'Vojenská angličtina',           prompt:'All 10 questions must be about military English vocabulary at B2-C1 level. Focus on: tactical and operational vocabulary used in real military contexts, military verbs and phrases (deploy, neutralize, reconnoiter, suppress, establish a perimeter, conduct a sweep), situation reports and briefing language, words used in NATO operations and multinational exercises, advanced military adjectives and collocations (collateral damage, rules of engagement, close air support, area of operations). Avoid trivial questions like phonetic alphabet or basic rank names. Make questions that a soldier in a multinational NATO exercise would genuinely need. type="Vocabulary & Idioms" for all.'},
 };
+const BO3_WINS_NEEDED=2;
+const XP_BO3_WIN=150, XP_BO3_LOSS=30;
+
 const XP_CORRECT=10, XP_WIN=50, XP_DRAW=20, XP_STREAK_BONUS=15, XP_PERFECT=100, XP_HINT_USED=-5;
 const XP_LEVELS=[0,100,250,500,800,1200,1700,2300,3000,4000,5500,7500,10000];
 function xpLevel(xp){let l=0;for(let i=0;i<XP_LEVELS.length;i++){if(xp>=XP_LEVELS[i])l=i;}return l;}
@@ -341,7 +394,7 @@ const S={
   ak:localStorage.getItem('ed_ak')||'',
   db:null, auth:null, user:null, uid:'',
   loadingMsg:'Inicializujem...',
-  name:'', mode:null, submode:'competitive', format:'mixed', roomCode:'', role:'',
+  name:'', mode:null, submode:'competitive', format:'mixed', solo:false, roomCode:'', role:'',
   questions:[], current:0, score:0, selected:null,
   myAnswers:[], myDone:false,
   oppName:'', oppScore:0, oppDone:false, oppAnswers:[], oppUid:'',
@@ -357,6 +410,12 @@ const S={
   oppReaction:null, reactionTimer:null,
   // Placement test
   placementQs:[], placementCurrent:0, placementAnswers:[], placementResult:null,
+  // Best of 3
+  suddenDeath:false, suddenDone:false,
+  bo3Active:false, bo3MyWins:0, bo3OppWins:0, bo3Game:0, bo3MaxGames:3,
+  bo3OppName:'', bo3OppUid:'',
+  bo3History:[],
+  gameHistory:[], historyLoaded:false,
   error:null,
 };
 
@@ -418,6 +477,47 @@ function catPct(stats,k){const s=stats?.[k];if(!s||!s.played)return null;return 
 function weakestCat(stats){let min=101,key='vocab';Object.keys(CATS).forEach(k=>{const p=catPct(stats,k);if(p!==null&&p<min){min=p;key=k;}});return key;}
 
 // ═══════════════════════════════════════════════════
+// SUDDEN DEATH
+// ═══════════════════════════════════════════════════
+async function genSuddenDeathQuestion(){
+  showSuddenDeathIntro(async()=>{
+    S.suddenDeath=true;S.suddenDone=false;
+    S.loadingMsg='Generujem otázku rozstrelu...';S.screen='loading';render();
+    try{
+      const diff=calcDiff(S.myProfile);
+      const qs=await genQ(diff,S.myProfile?.stats,[],S.format);
+      // Take just 1 question
+      const sdQ=qs[0];
+      // Reset quiz state for SD
+      S.questions=[sdQ];S.current=0;S.selected=null;
+      if(S.role==='p1'){
+        // P1 uploads SD question to Firebase
+        await dbUp('rooms/'+S.roomCode,{
+          sdQuestion:sdQ,sdStatus:'ready',
+          sdP1done:false,sdP2done:false,sdP1time:null,sdP2time:null
+        });
+      }else{
+        // P2 waits for SD question
+        S.loadingMsg='Čakám na otázku rozstrelu...';render();
+        let tries=0;
+        const waitForSD=setInterval(async()=>{
+          tries++;
+          const r=await dbGet('rooms/'+S.roomCode);
+          if(r?.sdQuestion){
+            clearInterval(waitForSD);
+            S.questions=[r.sdQuestion];S.current=0;S.selected=null;
+            S.screen='sudden_death';render();
+          }
+          if(tries>20){clearInterval(waitForSD);S.screen='home';render();}
+        },500);
+        return;
+      }
+      S.screen='sudden_death';render();
+    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+  });
+}
+
+// ═══════════════════════════════════════════════════
 // AI GAME INSIGHT
 // ═══════════════════════════════════════════════════
 async function generateInsight(){
@@ -457,6 +557,50 @@ Write ONLY the insight text in Slovak, no labels, no intro. Max 2-3 sentences. B
     return data.content?.find(b=>b.type==='text')?.text?.trim()||null;
   }catch(e){return null;}
 }
+
+// ═══════════════════════════════════════════════════
+// GAME HISTORY
+// ═══════════════════════════════════════════════════
+async function saveGameToHistory(oppName,oppUid,myScore,oppScore,result,format,submode,eloChange,myElo,stats){
+  try{
+    const key='g'+Date.now();
+    const entry={
+      date:Date.now(), oppName, oppUid,
+      myScore, oppScore, result,
+      format:format||'mixed', submode:submode||'competitive',
+      eloBefore:myElo-eloChange, eloAfter:myElo,
+      eloChange,
+      phrasal:stats?.phrasal?Math.round((stats.phrasal.correct||0)/(stats.phrasal.played||1)*100):null,
+      grammar:stats?.grammar?Math.round((stats.grammar.correct||0)/(stats.grammar.played||1)*100):null,
+      vocab:stats?.vocab?Math.round((stats.vocab.correct||0)/(stats.vocab.played||1)*100):null,
+    };
+    await dbSet('history/'+S.uid+'/'+key, entry);
+  }catch(e){console.warn('History save failed',e);}
+}
+
+async function saveCefrSnapshot(level){
+  try{
+    await dbSet('cefrHistory/'+S.uid+'/'+Date.now(), level);
+  }catch(e){}
+}
+
+async function loadHistory(){
+  try{
+    const data=await dbGet('history/'+S.uid);
+    if(!data)return[];
+    return Object.values(data).sort((a,b)=>b.date-a.date).slice(0,30);
+  }catch(e){return[];}
+}
+
+async function loadCefrHistory(){
+  try{
+    const data=await dbGet('cefrHistory/'+S.uid);
+    if(!data)return[];
+    return Object.entries(data).sort((a,b)=>Number(a[0])-Number(b[0])).map(([ts,level])=>({ts:Number(ts),level}));
+  }catch(e){return[];}
+}
+
+const CEFR_SCORE={A2:1,B1:2,'B1+':2.5,B2:3,'B2+':3.5,C1:4,'C1+':4.5};
 
 // ═══════════════════════════════════════════════════
 // CEFR AI ASSESSMENT
@@ -514,6 +658,7 @@ Level must be one of: A2, B1, B1+, B2, B2+, C1, C1+`
     S.cefrResult=result;
     await dbUp('users/'+S.uid,{cefrResult:result});
     S.myProfile={...S.myProfile,cefrResult:result};
+    saveCefrSnapshot(result.level);
   }catch(e){console.warn('CEFR assessment failed',e);}
 }
 
@@ -734,11 +879,42 @@ function attach(code){
     S.oppDone=opp.finished||false;
     S.oppUid=S.role==='p1'?(r.p2uid||''):(r.p1uid||'');
     if(S.oppDone&&opp.answers)S.oppAnswers=opp.answers;
+    // Bo3 next round — P2 gets questions when P1 sets them up
+    if(S.bo3Active&&(r.status==='next_round')&&S.role==='p2'&&r.questions&&S.screen==='loading'){
+      S.questions=r.questions;
+      showRoundIntro(S.bo3Game,()=>{S.screen='quiz';render();});
+      return;
+    }
     if(S.screen==='lobby'){
-      if(S.role==='p1'&&r.p2&&r.status==='playing'){S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
-      if(S.role==='p2'&&r.status==='playing'&&(r.questions||S.format==='sr')&&S.questions.length){S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
+      // Track who joined and who is ready
+      S.oppJoined=S.role==='p1'?!!r.p2:!!r.p1;
+      const myReadyKey=S.role==='p1'?'p1ready':'p2ready';
+      const oppReadyKey=S.role==='p1'?'p2ready':'p1ready';
+      S.oppReady=!!r[oppReadyKey];
+      // Update opp name when they join
+      if(S.role==='p1'&&r.p2?.name)S.oppName=r.p2.name;
+      // Both ready → start countdown then quiz
+      if(r.status==='countdown'&&!S._countdownStarted){
+        S._countdownStarted=true;
+        startCountdown(()=>{
+          if(S.format==='sr'){
+            genSROnlyQuestions(S.srQuestions).then(qs=>{S.questions=qs;S.screen='quiz';render();});
+          }else if(S.role==='p2'&&r.questions){
+            S.questions=r.questions;S.screen='quiz';render();
+          }else{
+            S.screen='quiz';render();
+          }
+        });
+        return;
+      }
+      render();return;
     }
     if(S.screen==='waiting'&&S.oppDone){runAnalysis();return;}
+    // Sync Bo3 wins from Firebase
+    if(S.bo3Active&&r.bo3){
+      if(S.role==='p1'){S.bo3OppWins=r.bo3.p2wins||0;}
+      else{S.bo3OppWins=r.bo3.p1wins||0;}
+    }
     if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
   });
 }
@@ -747,6 +923,34 @@ function detach(){if(rRef&&rCb)rRef.off('value',rCb);rRef=null;rCb=null;clearTim
 // ═══════════════════════════════════════════════════
 // ANALYSIS
 // ═══════════════════════════════════════════════════
+async function runSoloAnalysis(){
+  S.screen='analysis';S.analysisReady=false;render();
+  try{
+    const tot=S.questions.length;
+    const correctCount=S.myAnswers.filter(a=>a.correct).length;
+    const isPerfect=correctCount===tot;
+    const streakUpd=updateStreak(S.myProfile||{});
+    S.shieldJustEarned=streakUpd?.shieldJustEarned||false;
+    // XP — tretinové oproti duelu
+    let xpGained=Math.floor(correctCount*XP_CORRECT/3);
+    if(isPerfect)xpGained+=Math.floor(XP_PERFECT/3);
+    if(S.hintUsed)xpGained+=XP_HINT_USED;
+    xpGained=Math.max(0,xpGained);
+    const oldXp=S.myProfile?.xp||0;
+    const newXp=oldXp+xpGained;
+    S.xpGained=xpGained;S.newXp=newXp;
+    S.eloChange=0;S.newElo=S.myProfile?.elo||START_ELO;
+    S.leveledUp=xpLevel(newXp)>xpLevel(oldXp)?xpLevel(newXp):0;
+    const newStats=mergeStats(S.myProfile?.stats,S.myAnswers,S.questions);
+    const upd={name:S.name,gamesPlayed:(S.myProfile?.gamesPlayed||0)+1,stats:newStats,xp:newXp,...(streakUpd||{})};
+    delete upd.shieldJustEarned;
+    await dbUp('users/'+S.uid,upd);
+    S.myProfile={...S.myProfile,...upd,stats:newStats};
+    // Solo does NOT trigger CEFR (needs multiplayer data)
+    S.analysisReady=true;render();
+  }catch(e){console.error(e);S.analysisReady=true;render();}
+}
+
 async function runAnalysis(){
   if(S.analysisStarted)return;
   S.analysisStarted=true;
@@ -796,8 +1000,30 @@ async function runAnalysis(){
     delete upd.shieldJustEarned;
     await dbUp('users/'+S.uid,upd);
     S.myProfile={...S.myProfile,...upd,stats:newStats};
-    S.analysisReady=true;render();
-    // Run CEFR assessment every 10 games (async, non-blocking)
+    S.analysisReady=true;
+    // Bo3 logic — update series wins
+    // Sudden death on draw (competitive + bo3, not coop, not solo)
+    if(isDraw&&!S.solo&&!S.suddenDeath){
+      // Trigger sudden death
+      await genSuddenDeathQuestion();
+      return;
+    }
+    if(S.submode==='bo3'){
+      const res=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
+      if(res==='win')S.bo3MyWins++;
+      else if(res==='loss')S.bo3OppWins++;
+      // Save game to history
+      S.bo3History.push({myScore:S.score,oppScore:S.oppScore,myAnswers:[...S.myAnswers],questions:[...S.questions],game:S.bo3Game});
+      S.screen='bo3_results';render();
+    }else{
+      render();
+    }
+    // Save to game history (multiplayer only)
+    if(!isCoop&&!S.solo){
+      saveGameToHistory(S.oppName,S.oppUid,S.score,S.oppScore,
+        S.score>S.oppScore?'win':S.score===S.oppScore?'draw':'loss',
+        S.format,S.submode,delta,S.newElo,newStats);
+    }
     runCefrAssessment();
     // Cleanup room from Firebase
     if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
@@ -811,7 +1037,7 @@ function g(id){return document.getElementById(id);}
 function render(){
   const app=document.getElementById('app');
   const card=document.createElement('div');card.className='card';
-  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,analysis:hAnalysis};
+  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,bo3_results:hBo3Results,bo3_summary:hBo3Summary,analysis:hAnalysis,history:hHistory,sudden_death:hSuddenDeath};
   card.innerHTML=(map[S.screen]||hLoad)();
   app.innerHTML='';app.appendChild(card);bindAll();
 }
@@ -918,7 +1144,7 @@ function hHome(){
   const prof=S.myProfile,elo=prof?.elo||START_ELO,stats=prof?.stats;
   const diff=calcDiff(prof),streak=prof?.streak||0;
   const prog=rankProg(elo),rank=getRank(elo),nxt=nextRankN(elo);
-  const canGo=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
+  const canGo=S.name.trim()&&S.mode&&(S.mode==='solo'||S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
 
   const avatar=S.user?.photoURL
     ?`<img src="${S.user.photoURL}" alt=""/>`
@@ -934,24 +1160,28 @@ function hHome(){
   const games=prof?.gamesPlayed||0;
   const formatCards=Object.entries(FORMATS).map(([k,f])=>{
     const locked=k==='sr'&&games<5;
-    return`<div class="format-card ${S.format===k?'sel':''} ${locked?'locked':''}" id="fmt_${k}" style="--fc:${f.color};${S.format===k?'background:'+f.color+'1a;':''}${locked?'opacity:.4;cursor:not-allowed;':''}">
-      <div class="format-icon">${f.icon}</div>
-      <div class="format-name" style="color:${S.format===k?f.color:''}">${f.label}</div>
-      <div class="format-hint">${locked?'Odomkne sa po 5 hrách':''+f.hint}</div>
+    const isSel=S.format===k;
+    return`<div class="format-pill ${isSel?'sel':''} ${locked?'locked':''}" id="fmt_${k}"
+      style="--fc:${f.color};--fc-bg:${f.color}18;${isSel?'color:'+f.color+';border-color:'+f.color:'color:rgba(255,255,255,.55)'}">
+      <span class="format-pill-icon">${f.icon}</span>
+      <span class="format-pill-name">${locked?f.label+'🔒':f.label}</span>
     </div>`;
   }).join('');
-  const submodeHTML=S.mode==='create'?`
+  const submodeHTML=(S.mode==='create')?`
     <div class="lbl" style="margin-bottom:9px">Typ duelu</div>
-    <div class="submode-grid">
+    <div class="submode-grid" style="grid-template-columns:1fr 1fr 1fr">
       <div class="submode-card ${S.submode==='competitive'?'sel-comp':''}" id="sCmp">
         <div class="submode-icon">⚔️</div><div class="submode-name" style="color:${S.submode==='competitive'?'#00ffc8':''}">Súťažný</div><div class="submode-hint">ELO · 1 vs 1</div>
+      </div>
+      <div class="submode-card ${S.submode==='bo3'?'sel-comp':''}" id="sBo3" style="${S.submode==='bo3'?'border-color:#ff6b35;background:rgba(255,107,53,.07)':''}">
+        <div class="submode-icon">🏆</div><div class="submode-name" style="color:${S.submode==='bo3'?'#ff6b35':''}">Best of 3</div><div class="submode-hint">Séria · 2 výhry</div>
       </div>
       <div class="submode-card ${S.submode==='coop'?'sel-coop':''}" id="sCoop">
         <div class="submode-icon">🤝</div><div class="submode-name" style="color:${S.submode==='coop'?'#b388ff':''}">Kooperatívny</div><div class="submode-hint">Spoločne vs cieľ</div>
       </div>
     </div>
-    <div class="lbl" style="margin-bottom:9px">Formát otázok</div>
-    <div class="format-grid">${formatCards}</div>
+    <div class="lbl" style="margin-bottom:8px">Formát otázok</div>
+    <div class="format-scroll">${formatCards}</div>
     `:'';
 
   return`
@@ -1013,6 +1243,11 @@ function hHome(){
   <div class="lbl">Prezývka v dueli</div>
   <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name}"/>
   <div class="lbl" style="margin-bottom:10px">Čo chceš urobiť?</div>
+  <div class="mode-card ${S.mode==='solo'?'sel-create':''}" id="mSolo" style="margin-bottom:8px;${S.mode==='solo'?'border-color:#ffb300;background:rgba(255,179,0,.07)':''}">
+    <div class="mode-icon">🧑</div>
+    <div class="mode-name" style="color:${S.mode==='solo'?'#ffb300':''}">Sólo tréning</div>
+    <div class="mode-hint">Hrám sám · +XP</div>
+  </div>
   <div class="mode-grid">
     <div class="mode-card ${S.mode==='create'?'sel-create':''}" id="mCr"><div class="mode-icon">⚔️</div><div class="mode-name" style="color:${S.mode==='create'?'#00ffc8':''}">Vytvoriť duel</div><div class="mode-hint">Dostanem kód</div></div>
     <div class="mode-card ${S.mode==='join'?'sel-join':''}" id="mJn"><div class="mode-icon">🎯</div><div class="mode-name" style="color:${S.mode==='join'?'#b388ff':''}">Pripojiť sa</div><div class="mode-hint">Zadám kód</div></div>
@@ -1020,27 +1255,59 @@ function hHome(){
   ${submodeHTML}
   ${S.mode==='join'?`<div class="lbl">Kód duelu</div><input type="text" id="codeInp" placeholder="4-ciferný kód" maxlength="4" inputmode="numeric" value="${S.roomCode}" style="font-family:'Orbitron',sans-serif;font-size:1.5rem;letter-spacing:10px;text-align:center"/>`:''}
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
-  <button class="btn ${S.submode==='coop'?'btn-coop':'btn-primary'}" id="goBtn" ${!canGo?'disabled':''}>${S.mode==='join'?'PRIPOJIŤ SA':'VYTVORIŤ DUEL'}</button>
+  <button class="btn ${S.mode==='solo'?'':''}${S.submode==='coop'&&S.mode!=='solo'?'btn-coop':S.mode==='solo'?'':'btn-primary'}" id="goBtn" ${!canGo?'disabled':''}
+    style="${S.mode==='solo'?'background:linear-gradient(135deg,#ffb300,#e65100);color:#080c14':''}"
+  >${S.mode==='join'?'PRIPOJIŤ SA':S.mode==='solo'?'ZAČAŤ TRÉNING':'VYTVORIŤ DUEL'}</button>
+  <button class="btn btn-ghost" id="histBtn" style="margin-top:9px">📜 História zápasov</button>
   <button class="btn btn-ghost" id="cfgBtn" style="margin-top:9px;font-size:.72rem">🔑 Zmeniť API kľúč</button>
 `;}
 
 function hLobby(){
   const isCoop=S.submode==='coop';
-  if(S.role==='p1')return`
-    <div class="logo" style="font-size:1.3rem;margin-bottom:4px">${isCoop?'🤝 COOP':'⚔️ DUEL'} VYTVORENÝ</div>
-    <div class="logo-sub" style="margin-bottom:14px">Pošli kód ${isCoop?'partnerovi':'súperovi'}</div>
-    <div class="room-code-wrap"><div class="room-label">Kód duelu</div><div class="room-code">${S.roomCode}</div></div>
-    ${isCoop?`<div style="text-align:center;margin-bottom:12px;font-size:.8rem;color:rgba(124,77,255,.8);background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.2);border-radius:10px;padding:9px">🤝 Cieľ: spoločne dosiahnuť <strong>${Math.ceil(S.questions.length*2*COOP_TARGET_PCT)}/${S.questions.length*2}</strong></div>`:''}
-    <div class="pulse"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-    <div style="text-align:center;margin-bottom:10px">
-      <span style="padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">
-        ${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}
-      </span>
+  const oppJoined=S.oppJoined;
+  const myR=S.myReady, oppR=S.oppReady;
+  const fmtBadge=`<span style="padding:4px 12px;border-radius:20px;font-size:.74rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</span>`;
+  const readyCards=`<div class="player-ready-row">
+    <div class="player-ready-card ${myR?'is-ready':''}">
+      <div class="player-ready-name">${S.name}</div>
+      <div class="player-ready-status" style="color:${myR?'#00ffc8':'rgba(255,255,255,.3)'}">${myR?'✓ READY':'čakám...'}</div>
     </div>
-    ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky na opakovanie</div>`:''}
-    <div style="text-align:center;color:rgba(255,255,255,.28);font-size:.82rem;margin-bottom:16px">Čakám kým sa ${isCoop?'partner':'súper'} pripojí...</div>
-    <button class="btn btn-ghost" id="cancelBtn">Zrušiť</button>`;
-  return hLoad();
+    <div class="player-ready-card ${oppR?'is-ready':''}">
+      <div class="player-ready-name">${S.oppName||'Súper'}</div>
+      <div class="player-ready-status" style="color:${oppR?'#00ffc8':oppJoined?'rgba(255,255,255,.3)':'rgba(255,255,255,.15)'}">
+        ${oppR?'✓ READY':oppJoined?'čakám...':'nepripojený'}
+      </div>
+    </div>
+  </div>`;
+  return`
+    <div class="logo" style="font-size:1.3rem;margin-bottom:4px">${isCoop?'🤝 COOP':'⚔️ DUEL'} LOBBY</div>
+    <div class="logo-sub" style="margin-bottom:14px">${S.roomCode}</div>
+    <div class="room-code-wrap" style="margin:12px 0"><div class="room-label">Kód duelu — pošli ${isCoop?'partnerovi':'súperovi'}</div><div class="room-code">${S.roomCode}</div></div>
+    <div style="text-align:center;margin-bottom:14px">${fmtBadge}</div>
+    ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:12px">🔁 Každý hráč dostane svoje vlastné otázky na opakovanie</div>`:''}
+    ${readyCards}
+    ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
+    <button class="btn btn-ghost" id="cancelBtn" style="margin-top:10px">Zrušiť</button>
+  `;}
+
+function bo3BarHTML(){
+  if(!S.bo3Active)return'';
+  const myDots=Array.from({length:BO3_WINS_NEEDED},(_,i)=>`<div class="bo3-dot ${i<S.bo3MyWins?'win':'empty'}"></div>`).join('');
+  const oppDots=Array.from({length:BO3_WINS_NEEDED},(_,i)=>`<div class="bo3-dot ${i<S.bo3OppWins?'loss':'empty'}"></div>`).join('');
+  return`<div style="background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);border-radius:12px;padding:10px 14px;margin-bottom:12px">
+    <div style="text-align:center;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,107,53,.7);margin-bottom:8px">🏆 Best of ${S.bo3MaxGames} · Hra ${S.bo3Game}/${S.bo3MaxGames}</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0">
+      <div class="bo3-player">
+        <div class="bo3-player-name">${S.name}</div>
+        <div style="display:flex;justify-content:center;gap:5px">${myDots}</div>
+      </div>
+      <div class="bo3-sep">VS</div>
+      <div class="bo3-player">
+        <div class="bo3-player-name">${S.oppName||'Súper'}</div>
+        <div style="display:flex;justify-content:center;gap:5px">${oppDots}</div>
+      </div>
+    </div>
+  </div>`;
 }
 
 function hQuiz(){
@@ -1058,7 +1325,11 @@ function hQuiz(){
     }
     return`<button class="${c}" data-i="${i}" ${ans?'disabled':''}><span class="opt-l">${LT[i]}</span>${o}</button>`;
   }).join('');
-  const liveSection=isCoop?`
+  const liveSection=S.solo?`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.18);border-radius:12px;padding:9px 13px">
+      <span style="font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,179,0,.7)">🧑 Sólo tréning</span>
+      <span style="font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:#ffb300">${ls}<span style="font-size:.65rem;color:rgba(255,255,255,.3);margin-left:4px">/ ${tot}</span></span>
+    </div>`:isCoop?`
     <div class="coop-bar-wrap">
       <div class="coop-bar-top"><span style="font-size:.66rem;color:rgba(255,255,255,.28);letter-spacing:1px;text-transform:uppercase">Spoločné skóre</span><span class="coop-combined" id="coop-combined">${combined}/${combinedTot}</span></div>
       <div class="coop-track"><div class="coop-fill" id="coop-fill" style="width:${cw}%"></div><div class="coop-marker" style="left:${mrkL}%"></div></div>
@@ -1069,7 +1340,7 @@ function hQuiz(){
       <div class="live-sep">VS</div>
       <div class="live-player"><div class="live-name" id="opp-nm">${S.oppName||'Súper'}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
     </div>`;
-  return`${liveSection}
+  return`${bo3BarHTML()}${liveSection}
   <div class="quiz-head">${!ans?timerHTML():''}<div class="prog-bar"><div class="prog-fill" style="width:${pw}%"></div></div><span class="q-cnt">${S.current+1}/${tot}</span></div>
 
   ${q.isSR?'<span class="sr-badge" style="margin-right:6px">🔁</span>':''}<span class="badge ${bc(q.type)}">${q.type}</span>
@@ -1095,7 +1366,7 @@ function hWaiting(){
     <div class="live-sep">VS</div>
     <div class="live-player"><div class="live-name" id="opp-nm">${S.oppName||'Partner'}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
   </div>`;
-  return`${top}<div class="wait-overlay">
+  return`${bo3BarHTML()}${top}<div class="wait-overlay">
     <div class="wait-icon">⏳</div><div class="wait-title">Ty si skončil/a!</div>
     <div class="my-fin">${S.score}/${tot}</div>
     <div style="color:#00ffc8;font-family:'Orbitron',sans-serif;font-size:.74rem;margin-bottom:10px">${p}%</div>
@@ -1160,26 +1431,258 @@ function hResults(){
   <button class="btn btn-rematch" id="rematchBtn" style="margin-top:9px">⚔️ REMATCH</button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
+function hHistory(){
+  const hist=S.gameHistory||[];
+  // Summary stats
+  const total=hist.length;
+  const wins=hist.filter(g=>g.result==='win').length;
+  const draws=hist.filter(g=>g.result==='draw').length;
+  const losses=hist.filter(g=>g.result==='loss').length;
+  const avgScore=total?Math.round(hist.reduce((s,g)=>s+(g.myScore||(g.eloChange>0?8:5)),0)/total*10)/10:0;
+  const winRate=total?Math.round(wins/total*100):0;
+  // Format distribution
+  const fmtCount={};
+  hist.forEach(g=>{const f=g.format||'mixed';fmtCount[f]=(fmtCount[f]||0)+1;});
+  const topFmt=Object.entries(fmtCount).sort((a,b)=>b[1]-a[1])[0];
+  // ELO sparkline via SVG
+  const eloPoints=hist.slice(0,20).reverse();
+  const elos=eloPoints.map(g=>g.eloAfter).filter(Boolean);
+  let sparkline='';
+  if(elos.length>1){
+    const minE=Math.min(...elos),maxE=Math.max(...elos),range=maxE-minE||1;
+    const W=280,H=40,pad=4;
+    const pts=elos.map((e,i)=>`${pad+i*(W-pad*2)/(elos.length-1)},${H-pad-(e-minE)/range*(H-pad*2)}`).join(' ');
+    sparkline=`<div class="cefr-chart-wrap" style="padding:10px 14px 8px">
+      <div class="lbl" style="margin-bottom:8px">ELO krivka (posledných ${elos.length} hier)</div>
+      <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">
+        <polyline points="${pts}" fill="none" stroke="#00ffc8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        ${elos.map((e,i)=>`<circle cx="${pad+i*(W-pad*2)/(elos.length-1)}" cy="${H-pad-(e-minE)/range*(H-pad*2)}" r="3" fill="#00ffc8"/>`).join('')}
+        <text x="0" y="${H}" font-size="9" fill="rgba(255,255,255,.3)">${minE}</text>
+        <text x="0" y="${pad+6}" font-size="9" fill="rgba(255,255,255,.3)">${maxE}</text>
+      </svg>
+    </div>`;
+  }
+  // CEFR history line (loaded async — we'll load inline)
+  const cefrLevels=['A2','B1','B1+','B2','B2+','C1','C1+'];
+  // History list
+  const histItems=hist.slice(0,25).map(g=>{
+    const v=g.result||'draw';
+    const date=new Date(g.date).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'});
+    const eloStr=g.eloChange!=null?(g.eloChange>0?`<span style="color:#00ffc8">+${g.eloChange}</span>`:`<span style="color:#ff5252">${g.eloChange}</span>`):'<span style="color:#ffb300">±0</span>';
+    const fmt=FORMATS[g.format]?.icon||'⚡';
+    const subStr=g.submode==='bo3'?'🏆':g.submode==='coop'?'🤝':'⚔️';
+    return`<div class="hist-item">
+      <div class="hist-result ${v}">${v==='win'?'W':v==='draw'?'D':'L'}</div>
+      <div class="hist-info">
+        <div class="hist-opp">${g.oppName||'Sólo'}</div>
+        <div class="hist-meta">${date} · ${fmt} ${FORMATS[g.format]?.label||'Zmiešaný'} · ${subStr}</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-score" style="color:${v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252'}">${g.myScore??'–'}–${g.oppScore??'–'}</div>
+        <div class="hist-elo">${eloStr} ELO</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return`
+  <div class="logo" style="font-size:1.3rem;margin-bottom:4px">HISTÓRIA</div>
+  <div class="logo-sub" style="margin-bottom:18px">${S.name}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#00ffc8">${winRate}%</div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Win rate</div>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#ffb300">${total}</div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Zápasov</div>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:#b388ff">${wins}W ${draws}D ${losses}L</div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Výhry / Remízy / Prehry</div>
+    </div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:#ff6b35">${topFmt?FORMATS[topFmt[0]]?.icon+' '+FORMATS[topFmt[0]]?.label:'–'}</div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Obľúbený formát</div>
+    </div>
+  </div>
+  ${sparkline}
+  <div id="cefr-hist-wrap"></div>
+  <div class="sec-title">Posledné zápasy</div>
+  ${histItems||'<div style="font-size:.82rem;color:rgba(255,255,255,.28);text-align:center;padding:16px">Zatiaľ žiadne zápasy</div>'}
+  <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:14px">← Späť</button>
+`;}
+
+function hBo3Summary(){
+  const hist=S.bo3History;
+  if(!hist.length)return`<div class="loading-wrap"><div class="spinner"></div></div>`;
+  const totalMy=hist.reduce((s,g)=>s+g.myScore,0);
+  const totalOpp=hist.reduce((s,g)=>s+g.oppScore,0);
+  const totalQ=hist.reduce((s,g)=>s+g.questions.length,0);
+  const myPct=Math.round(totalMy/totalQ*100);
+  const oppPct=Math.round(totalOpp/totalQ*100);
+  // Per-category across all games
+  const allMyAnswers=hist.flatMap(g=>g.myAnswers);
+  const allQs=hist.flatMap(g=>g.questions);
+  const catRows=Object.entries(CATS).map(([k,c])=>{
+    const qs=allQs.filter(q=>catKey(q.type)===k);
+    if(!qs.length)return'';
+    const myOk=qs.filter((q,i)=>allMyAnswers[allQs.indexOf(q)]?.correct).length;
+    const pct=Math.round(myOk/qs.length*100);
+    return`<div class="cat-row">
+      <span class="cat-name">${c.label.split('&')[0].trim()}</span>
+      <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      <span class="cat-pct" style="color:${c.color}">${pct}%</span>
+    </div>`;
+  }).join('');
+  const gameRows=hist.map(g=>{
+    const v=g.myScore>g.oppScore?'win':g.myScore<g.oppScore?'loss':'draw';
+    const c=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
+    return`<div class="stat-row">
+      <span class="stat-lbl">Kolo ${g.game}</span>
+      <span class="stat-val" style="color:${c}">${g.myScore}–${g.oppScore} (${v==='win'?'výhra':v==='draw'?'remíza':'prehra'})</span>
+    </div>`;
+  }).join('');
+  return`
+  <div class="logo" style="font-size:1.2rem;margin-bottom:4px">ROZBOR SÉRIE</div>
+  <div class="logo-sub" style="margin-bottom:18px">${S.name} vs ${S.oppName||'Súper'}</div>
+  <div style="background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);border-radius:14px;padding:14px;margin-bottom:14px">
+    <div style="text-align:center;font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,107,53,.7);margin-bottom:12px">Celkový výsledok série</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:20px">
+      <div style="text-align:center">
+        <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:#00ffc8">${S.bo3MyWins}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">${S.name}</div>
+      </div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:rgba(255,255,255,.2)">VS</div>
+      <div style="text-align:center">
+        <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:#ff5252">${S.bo3OppWins}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">${S.oppName||'Súper'}</div>
+      </div>
+    </div>
+  </div>
+  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:13px;margin-bottom:12px">
+    <div class="sec-title" style="margin-top:0">Výsledky kôl</div>
+    ${gameRows}
+    <div class="stat-row" style="border-top:1px solid rgba(255,255,255,.07);margin-top:4px;border-bottom:none">
+      <span class="stat-lbl">Celkovo správne</span>
+      <span class="stat-val" style="color:#00ffc8">${totalMy}/${totalQ} (${myPct}%)</span>
+    </div>
+  </div>
+  <div class="sec-title">Výkon podľa kategórií</div>
+  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:13px;margin-bottom:16px">
+    <div class="cat-bars">${catRows}</div>
+  </div>
+  <button class="btn btn-primary" id="newBtn">NOVÝ DUEL</button>
+`;}
+
+function hSuddenDeath(){
+  const q=S.questions[0];
+  if(!q)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Načítavam rozstrel...</div></div>`;
+  const ans=S.selected!==null;
+  function bc(t){return t?.includes('Phrasal')?'bp':t?.includes('Grammar')?'bg2':'bv';}
+  const opts=q.options.map((o,i)=>{
+    let c='opt';
+    if(ans){if(i===q.correct)c+=' correct';else if(i===S.selected&&S.selected!==-1)c+=' wrong';}
+    return`<button class="${c}" data-sd="${i}" ${ans?'disabled':''}><span class="opt-l">${['A','B','C','D'][i]}</span>${o}</button>`;
+  }).join('');
+  return`
+  <div style="text-align:center;margin-bottom:16px">
+    <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:#ff5252;letter-spacing:3px;margin-bottom:4px">⚡ ROZSTREL</div>
+    <div style="font-size:.78rem;color:rgba(255,255,255,.38)">Prvý správny víťaz · Čas sa počíta</div>
+  </div>
+  <div style="background:rgba(255,82,82,.07);border:1.5px solid rgba(255,82,82,.25);border-radius:14px;padding:14px;margin-bottom:14px">
+    ${!ans?timerHTML():''}
+    <span class="badge ${bc(q.type)}" style="margin-bottom:10px">${q.type}</span>
+    <div class="q-text">${q.question}</div>
+    <div class="options">${opts}</div>
+    ${ans?`<div class="expl ${S.selected!==q.correct?'bad':''}">${q.explanation}</div>`:''}
+  </div>
+  ${ans?`<div style="text-align:center;padding:10px;background:rgba(255,255,255,.04);border-radius:12px;font-size:.85rem;color:rgba(255,255,255,.45)">
+    ${S.selected===q.correct?'✅ Správne! Čakám na výsledok...':'❌ Nesprávne! Čakám na výsledok...'}
+  </div>`:''}
+`;}
+
+function hBo3Results(){
+  const myWon=S.bo3MyWins>=BO3_WINS_NEEDED;
+  const oppWon=S.bo3OppWins>=BO3_WINS_NEEDED;
+  const seriesOver=myWon||oppWon;
+  const myC=myWon?'#00ffc8':oppWon?'#ff5252':'#ffb300';
+  const oppC=oppWon?'#00ffc8':myWon?'#ff5252':'#ffb300';
+  const myDots=Array.from({length:BO3_WINS_NEEDED},(_,i)=>`<div class="bo3-dot ${i<S.bo3MyWins?'win':'empty'}"></div>`).join('');
+  const oppDots=Array.from({length:BO3_WINS_NEEDED},(_,i)=>`<div class="bo3-dot ${i<S.bo3OppWins?'loss':'empty'}"></div>`).join('');
+  const gameResult=S.score>S.oppScore?'Vyhral/a si hru':'Prehral/a si hru';
+  const gameColor=S.score>S.oppScore?'#00ffc8':'#ff5252';
+
+  if(seriesOver){
+    return`
+    <div class="bo3-trophy">${myWon?'🏆':'💀'}</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;text-align:center;color:${myWon?'#00ffc8':'#ff5252'};letter-spacing:2px;margin-bottom:4px">${myWon?'SÉRIA TVOJA!':'SÉRIA PREHRATÁ'}</div>
+    <div style="text-align:center;font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:22px">${S.name} vs ${S.oppName||'Súper'}</div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;margin-bottom:18px">
+      <div style="display:flex;align-items:center">
+        <div class="bo3-player" style="flex:1;text-align:center">
+          <div class="bo3-player-name">${S.name}</div>
+          <div class="bo3-player-wins" style="color:${myC}">${S.bo3MyWins}</div>
+          <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${myDots}</div>
+        </div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:rgba(255,255,255,.2)">VS</div>
+        <div class="bo3-player" style="flex:1;text-align:center">
+          <div class="bo3-player-name">${S.oppName||'Súper'}</div>
+          <div class="bo3-player-wins" style="color:${oppC}">${S.bo3OppWins}</div>
+          <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${oppDots}</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="bo3SummaryBtn">📊 ROZBOR CELEJ SÉRIE</button>
+    <button class="btn btn-ghost" id="analysisBtn" style="margin-top:9px;font-size:.72rem">Rozbor poslednej hry</button>
+    <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
+
+  // Series continues
+  return`
+  <div style="font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;text-align:center;color:${gameColor};letter-spacing:2px;margin-bottom:4px">${gameResult}</div>
+  <div style="text-align:center;font-size:.82rem;color:rgba(255,255,255,.38);margin-bottom:16px">${S.score}–${S.oppScore} · Hra ${S.bo3Game} z ${S.bo3MaxGames}</div>
+  <div style="background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);border-radius:14px;padding:14px;margin-bottom:18px">
+    <div style="text-align:center;font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,107,53,.7);margin-bottom:10px">Stav série</div>
+    <div style="display:flex;align-items:center">
+      <div class="bo3-player" style="flex:1;text-align:center">
+        <div class="bo3-player-name">${S.name}</div>
+        <div class="bo3-player-wins" style="color:#00ffc8">${S.bo3MyWins}</div>
+        <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${myDots}</div>
+      </div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:rgba(255,255,255,.2)">VS</div>
+      <div class="bo3-player" style="flex:1;text-align:center">
+        <div class="bo3-player-name">${S.oppName||'Súper'}</div>
+        <div class="bo3-player-wins" style="color:#ff5252">${S.bo3OppWins}</div>
+        <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${oppDots}</div>
+      </div>
+    </div>
+  </div>
+  <div class="insight-box" style="margin-bottom:16px">
+    <div class="insight-label">🤖 AI hodnotenie hry</div>
+    ${S.aiInsight?`<div class="insight-text">${S.aiInsight}</div>`:`<div class="insight-loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>`}
+  </div>
+  <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:2px">⚔️ ĎALŠIA HRA SÉRIE</button>
+  <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">Vzdať sériu</button>`;}
+
 function hAnalysis(){
   if(!S.analysisReady)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${(S.myProfile?.gamesPlayed||0)%10===0&&(S.myProfile?.gamesPlayed||0)>0?'Hodnotím tvoju úroveň angličtiny...':'Počítam ELO a štatistiky...'}</div></div>`;
   const isCoop=S.submode==='coop',tot=S.questions.length;
   const delta=S.eloChange,newElo=S.newElo||S.myProfile?.elo||START_ELO,oldElo=newElo-delta;
   const rank=getRank(newElo),prog=rankProg(newElo),nxt=nextRankN(newElo),stats=S.myProfile?.stats;
   const xpG=S.xpGained||0,nXp=S.newXp||0;
+  const isSolo=S.solo;
   const xpLvl=xpLevel(nXp),xpProg=xpProgress(nXp),xpNxt=xpToNext(nXp);
   const eloBlock=`<div class="elo-change-wrap">
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:4px">
       <div>
-        <div class="elo-delta ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta} ELO</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">ELO</div>
+        ${!isSolo?`<div class="elo-delta ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta} ELO</div><div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">ELO</div>`:''}
       </div>
-      <div style="width:1px;height:40px;background:rgba(255,255,255,.08)"></div>
+      ${!isSolo?`<div style="width:1px;height:40px;background:rgba(255,255,255,.08)"></div>`:''}
       <div>
         <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#b388ff;text-align:center">+${xpG}</div>
         <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">XP</div>
       </div>
     </div>
-    <div class="elo-path">${oldElo} → ${newElo} · ${rankBadge(newElo)}</div>
+    ${isSolo?`<div style="text-align:center;font-size:.78rem;color:rgba(255,179,0,.7);margin-top:4px">🧑 Sólo tréning · ELO sa nemení</div>`:`<div class="elo-path">${oldElo} → ${newElo} · ${rankBadge(newElo)}</div>`}
     ${delta===0&&!isCoop?'<div style="font-size:.72rem;color:rgba(0,255,200,.7);margin-top:5px">🛡️ Shield absorboval ELO stratu!</div>':''}
     <div style="margin-top:10px">
       <div class="rank-progress-label" style="font-size:.62rem;color:rgba(255,255,255,.25);display:flex;justify-content:space-between;margin-bottom:4px"><span>${rank.n}</span><span>${nxt}</span></div>
@@ -1245,9 +1748,11 @@ function bindAll(){
     const ok=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
     if(g('goBtn'))g('goBtn').disabled=!ok;
   });
-  g('mCr')?.addEventListener('click',()=>{S.mode='create';render();});
-  g('mJn')?.addEventListener('click',()=>{S.mode='join';render();});
+  g('mSolo')?.addEventListener('click',()=>{S.mode='solo';S.solo=true;render();});
+  g('mCr')?.addEventListener('click',()=>{S.mode='create';S.solo=false;render();});
+  g('mJn')?.addEventListener('click',()=>{S.mode='join';S.solo=false;render();});
   g('sCmp')?.addEventListener('click',()=>{S.submode='competitive';render();});
+  g('sBo3')?.addEventListener('click',()=>{S.submode='bo3';render();});
   g('sCoop')?.addEventListener('click',()=>{S.submode='coop';render();});
   Object.keys(FORMATS).forEach(k=>{
     g('fmt_'+k)?.addEventListener('click',()=>{
@@ -1261,6 +1766,26 @@ function bindAll(){
   });
   g('goBtn')?.addEventListener('click',handleGo);
   g('cfgBtn')?.addEventListener('click',()=>{S.screen='setup';S.error=null;render();});
+  g('histBtn')?.addEventListener('click',async()=>{
+    S.screen='loading';S.loadingMsg='Načítavam históriu...';render();
+    S.gameHistory=await loadHistory();
+    S.historyLoaded=true;
+    S.screen='history';render();
+  });
+  g('readyBtn')?.addEventListener('click',async()=>{
+    if(S.myReady)return;
+    S.myReady=true;render();
+    const myReadyKey=S.role==='p1'?'p1ready':'p2ready';
+    await dbUp('rooms/'+S.roomCode,{[myReadyKey]:true}).catch(()=>{});
+    // Check if both ready
+    const room=await dbGet('rooms/'+S.roomCode);
+    if(room?.p1ready&&room?.p2ready){
+      // Both ready — set countdown status (p1 triggers it)
+      if(S.role==='p1'){
+        await dbUp('rooms/'+S.roomCode,{status:'countdown'});
+      }
+    }
+  });
   g('cancelBtn')?.addEventListener('click',()=>{
     detach();if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});resetGame();render();
   });
@@ -1301,6 +1826,50 @@ function bindAll(){
     g('hintBtn').disabled=true;
     g('hintBtn').textContent='💡 Nápoveda použitá';
   });
+  // Sudden death answer
+  document.querySelectorAll('[data-sd]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      if(S.selected!==null)return;
+      clearTimer();
+      const i=parseInt(btn.dataset.sd);
+      const answerTime=Date.now();
+      S.selected=i;
+      const correct=i===S.questions[0].correct;
+      const myKey=S.role==='p1'?'sdP1done':'sdP2done';
+      const myTimeKey=S.role==='p1'?'sdP1time':'sdP2time';
+      await dbUp('rooms/'+S.roomCode,{[myKey]:true,[myTimeKey]:answerTime,sdAnswerCorrect:correct?S.role:null});
+      render();
+      // Wait for result
+      let tries=0;
+      const waitResult=setInterval(async()=>{
+        tries++;
+        const r=await dbGet('rooms/'+S.roomCode);
+        const bothDone=r?.sdP1done&&r?.sdP2done;
+        const oneCorrect=r?.sdAnswerCorrect;
+        if(bothDone||oneCorrect){
+          clearInterval(waitResult);
+          // Determine winner
+          let winner=null;
+          if(oneCorrect){
+            winner=oneCorrect; // 'p1' or 'p2'
+          }else{
+            // Both wrong or both correct — faster one wins
+            if(r.sdP1time&&r.sdP2time){
+              winner=r.sdP1time<r.sdP2time?'p1':'p2';
+            }
+          }
+          const iWon=winner===S.role;
+          S.suddenDone=true;
+          // Update scores for final results
+          if(iWon)S.score+=1;else S.oppScore+=1;
+          S.screen='results';render();
+        }
+        if(tries>30){clearInterval(waitResult);S.screen='results';render();}
+      },400);
+    });
+  });
+  // Start timer for sudden death
+  if(S.screen==='sudden_death'&&S.selected===null)startTimer();
   document.querySelectorAll('.opt').forEach(btn=>{
     btn.addEventListener('click',()=>{
       if(S.selected!==null)return;
@@ -1322,6 +1891,36 @@ function bindAll(){
     else{S.current++;S.selected=null;S.hintUsed=false;render();}
   });
   g('analysisBtn')?.addEventListener('click',()=>runAnalysis());
+  g('bo3SummaryBtn')?.addEventListener('click',()=>{S.screen='bo3_summary';render();});
+  g('backHomeBtn')?.addEventListener('click',()=>{S.screen='home';render();});
+  // Load CEFR history async on history screen
+  if(S.screen==='history'){
+    loadCefrHistory().then(cefrHist=>{
+      const wrap=document.getElementById('cefr-hist-wrap');
+      if(!wrap||cefrHist.length<2)return;
+      const levels=cefrHist.map(h=>h.level);
+      const W=280,H=50,pad=6;
+      const scores=levels.map(l=>CEFR_SCORE[l]||3);
+      const minS=Math.min(...scores),maxS=Math.max(...scores),range=maxS-minS||0.5;
+      const pts=scores.map((s,i)=>`${pad+i*(W-pad*2)/(scores.length-1)},${H-pad-(s-minS)/range*(H-pad*2)}`).join(' ');
+      const latest=levels[levels.length-1];
+      wrap.innerHTML=`<div class="cefr-chart-wrap" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="lbl" style="margin-bottom:0">CEFR krivka (${cefrHist.length} hodnotení)</span>
+          <span style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;color:#00ffc8">${latest}</span>
+        </div>
+        <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">
+          <polyline points="${pts}" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${scores.map((s,i)=>`<circle cx="${pad+i*(W-pad*2)/(scores.length-1)}" cy="${H-pad-(s-minS)/range*(H-pad*2)}" r="3.5" fill="#7c4dff"/>`).join('')}
+          ${['A2','B1','B1+','B2','B2+','C1','C1+'].filter(l=>{const s=CEFR_SCORE[l];return s>=minS&&s<=maxS;}).map(l=>{
+            const y=H-pad-(CEFR_SCORE[l]-minS)/range*(H-pad*2);
+            return`<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+            <text x="${W-pad+4}" y="${y+4}" font-size="8" fill="rgba(255,255,255,.3)">${l}</text>`;
+          }).join('')}
+        </svg>
+      </div>`;
+    });
+  }
   // Generate AI insight when results screen appears (async, non-blocking)
   if(S.screen==='results'&&!S.aiInsight&&!S.aiInsightLoading){
     S.aiInsightLoading=true;
@@ -1335,6 +1934,36 @@ function bindAll(){
     });
   }
   g('newBtn')?.addEventListener('click',()=>{detach();resetGame();render();});
+  g('bo3NextBtn')?.addEventListener('click',async()=>{
+    S.bo3Game++;
+    // Reset game state, keep series state
+    S.questions=[];S.current=0;S.score=0;S.selected=null;
+    S.myAnswers=[];S.myDone=false;S.oppScore=0;S.oppDone=false;S.oppAnswers=[];
+    S.analysisStarted=false;S.eloChange=0;S.newElo=0;S.analysisReady=false;
+    S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
+    // Show round intro animation then generate
+    showRoundIntro(S.bo3Game, async()=>{
+      S.loadingMsg='Generujem kolo '+S.bo3Game+'...';S.screen='loading';render();
+      try{
+        if(S.role==='p1'){
+          S.srQuestions=await loadDueSRQuestions();
+          const qs=await genQ(calcDiff(S.myProfile),S.myProfile?.stats,S.srQuestions,S.format);
+          S.questions=qs;
+          await dbUp('rooms/'+S.roomCode,{
+            questions:qs,status:'next_round',
+            p1:{name:S.name,score:0,finished:false},
+            p2:{name:S.oppName,score:0,finished:false},
+            'bo3/game':S.bo3Game,'bo3/p1wins':S.bo3MyWins,'bo3/p2wins':S.bo3OppWins
+          });
+          S.screen='quiz';render();
+        }else{
+          // P2: signal ready for next round, wait for questions
+          await dbUp('rooms/'+S.roomCode,{'bo3/game':S.bo3Game,status:'next_round_p2ready'});
+          S.loadingMsg='Čakám na otázky...';S.screen='loading';render();
+        }
+      }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+    });
+  });
   g('rematchBtn')?.addEventListener('click',async()=>{
     clearTimer();detach();
     // Create new room with same submode, opponent gets notified via Firebase
@@ -1363,6 +1992,75 @@ function showXpPopup(text){
   el.textContent=text;
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),950);
+}
+
+// ═══════════════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════════════
+function startCountdown(onDone){
+  const overlay=document.createElement('div');
+  overlay.className='countdown-overlay';
+  overlay.innerHTML=`<div class="countdown-num" id="cd-num">3</div><div class="countdown-sub">Priprav sa!</div>`;
+  document.body.appendChild(overlay);
+  let n=3;
+  const tick=()=>{
+    n--;
+    const el=document.getElementById('cd-num');
+    if(el){
+      if(n>0){
+        el.textContent=n;
+        el.style.animation='none';
+        void el.offsetWidth;
+        el.style.animation='countPop .9s ease';
+        setTimeout(tick,900);
+      }else{
+        el.textContent='GO!';
+        el.style.animation='none';
+        void el.offsetWidth;
+        el.style.animation='countPop .9s ease';
+        setTimeout(()=>{overlay.remove();onDone();},700);
+      }
+    }
+  };
+  setTimeout(tick,900);
+}
+
+function showSuddenDeathIntro(onDone){
+  const overlay=document.createElement('div');
+  overlay.className='sd-overlay';
+  let secs=4;
+  overlay.innerHTML=`
+    <div class="sd-icon">⚡</div>
+    <div class="sd-title">ROZSTREL</div>
+    <div class="sd-sub">Remíza! Jedna otázka rozhodne všetko.<br>Kto odpovie rýchlejšie a správne, vyhrá.</div>
+    <div class="sd-countdown" id="sd-num">${secs}</div>`;
+  document.body.appendChild(overlay);
+  const tick=setInterval(()=>{
+    secs--;
+    const el=document.getElementById('sd-num');
+    if(el){
+      if(secs>0){el.textContent=secs;}
+      else{
+        clearInterval(tick);
+        overlay.innerHTML=`<div class="sd-icon">🔫</div><div class="sd-title" style="color:#ffb300;font-size:1.5rem;letter-spacing:2px">PRVÝ SPRÁVNY BERIE!</div>`;
+        setTimeout(()=>{overlay.remove();onDone();},900);
+      }
+    }
+  },1000);
+}
+
+function showRoundIntro(roundNum, onDone){
+  const overlay=document.createElement('div');
+  overlay.className='countdown-overlay';
+  overlay.innerHTML=`
+    <div style="font-family:'Orbitron',sans-serif;font-size:.8rem;letter-spacing:4px;color:rgba(255,107,53,.7);text-transform:uppercase;margin-bottom:8px">Best of 3</div>
+    <div class="countdown-num" style="font-size:5rem">Kolo ${roundNum}</div>
+    <div class="countdown-sub" style="color:rgba(255,107,53,.6)">z ${S.bo3MaxGames}</div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      ${Array.from({length:S.bo3MaxGames},(_,i)=>`<div style="width:10px;height:10px;border-radius:50%;background:${i<roundNum?'#ff6b35':'rgba(255,255,255,.15)'};transition:all .3s"></div>`).join('')}
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>{overlay.remove();onDone();},1800);
 }
 
 // ═══════════════════════════════════════════════════
@@ -1420,6 +2118,18 @@ function timerHTML(){
 // ═══════════════════════════════════════════════════
 async function handleGo(){
   S.error=null;S.name=g('nameInp')?.value.trim()||S.name;
+  if(S.mode==='solo'){
+    S.solo=true;S.roomCode='solo';S.role='p1';
+    S.oppName='';S.oppScore=0;S.oppDone=false;
+    S.loadingMsg='Generujem otázky...';S.screen='loading';render();
+    try{
+      const diff=calcDiff(S.myProfile);
+      S.srQuestions=await loadDueSRQuestions();
+      const qs=S.format==='sr'?await genSROnlyQuestions(S.srQuestions):await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
+      S.questions=qs;S.screen='quiz';render();
+    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+    return;
+  }
   if(S.mode==='create'){
     S.loadingMsg='Generujem otázky...';S.screen='loading';render();
     try{
@@ -1435,7 +2145,8 @@ async function handleGo(){
       const code=String(Math.floor(1000+Math.random()*9000));
       S.roomCode=code;S.role='p1';
       // In SR mode don't store questions in Firebase (each player has own)
-      const roomData={status:'waiting',submode:S.submode,format:S.format,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false}};
+      if(S.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=0;S.bo3OppWins=0;S.bo3Game=1;S.bo3OppUid='';S.bo3OppName='';}
+      const roomData={status:'waiting',submode:S.submode,format:S.format,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false},bo3:{game:1,p1wins:0,p2wins:0}}; 
       if(S.format!=='sr')roomData.questions=qs;
       await dbSet('rooms/'+code,roomData);
       S.questions=qs;attach(code);S.screen='lobby';render();
@@ -1457,28 +2168,34 @@ async function handleGo(){
       }else{
         S.questions=room.questions;
       }
+      S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
+      if(room.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=room.bo3?.p2wins||0;S.bo3OppWins=room.bo3?.p1wins||0;S.bo3Game=room.bo3?.game||1;}
       attach(code);
-      await dbUp('rooms/'+code,{status:'playing',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false}});
-      S.screen='quiz';render();
+      await dbUp('rooms/'+code,{status:'joined',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false},p1ready:false,p2ready:false});
+      S.screen='lobby';render();
     }catch(e){detach();S.error='Chyba: '+e.message;S.screen='home';render();}
   }
 }
 
 async function finishQuiz(){
   S.myDone=true;
-  const compact=S.myAnswers.map(a=>({c:a.correct?1:0}));
-  await dbUp('rooms/'+S.roomCode+'/'+S.role,{finished:true,score:S.score,answers:compact}).catch(()=>{});
-  // Save wrong answers to spaced repetition
   const wrongQs=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&!S.questions[i].isSR);
   if(wrongQs.length)saveSRQuestions(wrongQs);
-  if(S.oppDone)runAnalysis();else{S.screen='waiting';render();}
+  if(S.solo){
+    // Solo mode — skip Firebase, go straight to analysis
+    runSoloAnalysis();
+  }else{
+    const compact=S.myAnswers.map(a=>({c:a.correct?1:0}));
+    await dbUp('rooms/'+S.roomCode+'/'+S.role,{finished:true,score:S.score,answers:compact}).catch(()=>{});
+    if(S.oppDone)runAnalysis();else{S.screen='waiting';render();}
+  }
 }
 
 function resetGame(){
   clearTimer();
   S.hintUsed=false;
   S.xpGained=0;S.newXp=0;S.leveledUp=0;
-  S.screen='home';S.mode=null;S.submode='competitive';S.format='mixed';S.roomCode='';S.role='';
+  S.screen='home';S.mode=null;S.submode='competitive';S.format='mixed';S.solo=false;S.roomCode='';S.role='';
   S.questions=[];S.current=0;S.score=0;S.selected=null;
   S.myAnswers=[];S.myDone=false;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
