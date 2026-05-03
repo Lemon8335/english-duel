@@ -1283,10 +1283,24 @@ function hAuth(){return`
 
 function hSetup(){
   const isFromHome=S.uid&&S.myProfile;
+  const avatar=S.user?.photoURL
+    ?`<img src="${S.user.photoURL}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`
+    :`<span style="font-size:1.1rem;font-weight:700;color:#080c14">${(S.name||'?')[0].toUpperCase()}</span>`;
   return`
-  <div class="logo">ENGLISH DUEL</div><div class="logo-sub">Nastavenie</div>
-  <div class="info-box"><strong>Anthropic API kľúč</strong> — <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
-  <div class="lbl">Anthropic API kľúč</div>
+  <div class="logo" style="font-size:1.3rem;margin-bottom:4px">Nastavenia</div>
+  ${isFromHome?`
+  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 15px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="user-avatar" style="width:44px;height:44px;font-size:1.1rem;flex-shrink:0">${avatar}</div>
+      <div style="min-width:0;flex:1">
+        <div style="font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${S.name||'Hráč'}</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${S.user?.email||''}</div>
+      </div>
+    </div>
+    <button class="btn btn-danger" id="signOutBtn">Odhlásiť sa</button>
+  </div>`:''}
+  <div class="lbl" style="margin-top:4px">Anthropic API kľúč</div>
+  <div class="info-box"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
   <input type="password" id="ak" placeholder="sk-ant-api03-..." value="${S.ak}" autocomplete="off"/>
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
   <button class="btn btn-primary" id="saveSetup">ULOŽIŤ A POKRAČOVAŤ</button>
@@ -1429,17 +1443,7 @@ function hHome(){
   ${submodeHTML}
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
 
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">
-    <div style="display:flex;align-items:center;gap:8px;min-width:0">
-      <div class="user-avatar" style="width:28px;height:28px;font-size:.75rem;flex-shrink:0">${S.user?.photoURL?`<img src="${S.user.photoURL}" alt=""/>`:S.name?S.name[0].toUpperCase():'?'}</div>
-      <div style="min-width:0">
-        <div style="font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${S.name||'Hráč'}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${S.user?.email||''}</div>
-      </div>
-    </div>
-    <button class="btn btn-ghost" id="signOutBtn" style="width:auto;padding:6px 12px;font-size:.65rem;margin:0;flex-shrink:0">Odhlásiť</button>
-  </div>
-  <div class="bottom-nav" style="border-top:none;padding-top:4px">
+  <div class="bottom-nav">
     <div class="nav-item nav-active">
       <div class="nav-icon">🏠</div>
       <div class="nav-label">Domov</div>
