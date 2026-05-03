@@ -223,7 +223,7 @@
     .xp-bar-label{display:flex;justify-content:space-between;font-size:.62rem;color:rgba(255,255,255,.28);margin-bottom:4px}
     .xp-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
     .xp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#7c4dff,#b388ff);transition:width .6s ease}
-    .xp-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(124,77,255,.12);border:1px solid rgba(124,77,255,.25);border-radius:20px;font-size:.7rem;color:#b388ff;font-weight:600}
+    .xp-badge{display:inline-flex;align-items:center;padding:3px 10px;background:rgba(124,77,255,.12);border:1px solid rgba(124,77,255,.25);border-radius:20px;font-size:.65rem;color:#b388ff;font-weight:700;letter-spacing:1.5px}
     /* XP popup animation */
     .xp-popup{position:fixed;bottom:40%;left:50%;transform:translateX(-50%);background:rgba(124,77,255,.9);color:#fff;font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700;padding:8px 18px;border-radius:20px;pointer-events:none;z-index:1000;animation:xpPop .9s ease forwards;white-space:nowrap}
     @keyframes xpPop{0%{opacity:0;transform:translateX(-50%) translateY(10px)}20%{opacity:1;transform:translateX(-50%) translateY(0)}70%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-20px)}}
@@ -293,6 +293,12 @@
     .cefr-weak{color:#ff8a80;font-weight:600}
     .cefr-tip{color:#ffb300;font-weight:600}
     .cefr-notify{background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);border-radius:11px;padding:11px 14px;text-align:center;margin-bottom:14px;font-size:.82rem;color:rgba(255,255,255,.5)}
+    /* Head-to-head */
+    .h2h-bar{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+    .h2h-score{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;flex-shrink:0}
+    .h2h-track{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;position:relative}
+    .h2h-fill{height:100%;border-radius:3px;background:#00ffc8;transition:width .5s ease}
+    .h2h-label{font-size:10px;color:rgba(255,255,255,.28);letter-spacing:1px;text-transform:uppercase}
     /* Difficulty inline */
     .diff-inline{display:flex;align-items:center;gap:10px;background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.18);border-radius:10px;padding:8px 12px;margin-bottom:12px}
     .diff-inline-segs{display:flex;gap:3px;flex-shrink:0}
@@ -494,7 +500,7 @@ function getRank(elo){for(let i=RANKS.length-1;i>=0;i--)if(elo>=RANKS[i].min)ret
 function rankProg(elo){const r=getRank(elo);const nx=RANKS[r.idx+1];if(!nx)return 100;return Math.min(100,Math.round(((elo-r.min)/(nx.min-r.min))*100));}
 function nextRankN(elo){const r=getRank(elo);return RANKS[r.idx+1]?.n||'MAX 🏆';}
 function calcEloDelta(me,opp,res){return Math.round(K*(res-1/(1+Math.pow(10,(opp-me)/400))));}
-function rankBadge(elo){const r=getRank(elo);return`<span class="rank-badge" style="border-color:${r.color}33;color:${r.color};background:${r.color}12">${r.emoji} ${r.n}</span>`;}
+function rankBadge(elo){const r=getRank(elo);return`<span class="rank-badge" style="border-color:${r.color}33;color:${r.color};background:${r.color}12">${r.n.toUpperCase()}</span>`;}
 
 // ═══════════════════════════════════════════════════
 // STREAK / SHIELD
@@ -674,6 +680,42 @@ async function loadCefrHistory(){
 }
 
 const CEFR_SCORE={A2:1,B1:2,'B1+':2.5,B2:3,'B2+':3.5,C1:4,'C1+':4.5};
+
+// ═══════════════════════════════════════════════════
+// HEAD-TO-HEAD
+// ═══════════════════════════════════════════════════
+async function loadH2H(oppUid){
+  if(!oppUid||!S.uid)return null;
+  try{
+    const hist=await dbGet('history/'+S.uid);
+    if(!hist)return null;
+    const games=Object.values(hist).filter(g=>g.oppUid===oppUid);
+    if(!games.length)return null;
+    const wins=games.filter(g=>g.result==='win').length;
+    const losses=games.filter(g=>g.result==='loss').length;
+    const draws=games.filter(g=>g.result==='draw').length;
+    const lastGame=games.sort((a,b)=>b.date-a.date)[0];
+    return{wins,losses,draws,total:games.length,lastGame};
+  }catch(e){return null;}
+}
+function h2hHTML(h2h){
+  if(!h2h)return'';
+  const pct=h2h.total?Math.round(h2h.wins/h2h.total*100):50;
+  const myColor=h2h.wins>h2h.losses?'#00ffc8':h2h.wins<h2h.losses?'#ff5252':'#ffb300';
+  const dateStr=new Date(h2h.lastGame?.date||0).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'});
+  const totalLabel=h2h.total===1?'zápas':h2h.total<5?'zápasy':'zápasov';
+  return`<div class="h2h-bar">
+    <div style="min-width:0;flex:1">
+      <div class="h2h-label" style="margin-bottom:6px">Vzájomné zápasy</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+        <span class="h2h-score" style="color:${myColor}">${h2h.wins}</span>
+        <div class="h2h-track"><div class="h2h-fill" style="width:${pct}%"></div></div>
+        <span class="h2h-score" style="color:rgba(255,82,82,.7)">${h2h.losses}</span>
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,.28)">${h2h.total} ${totalLabel}${h2h.draws?' · '+h2h.draws+' remíz':''} · posledný: ${dateStr}</div>
+    </div>
+  </div>`;
+}
 
 // ═══════════════════════════════════════════════════
 // CEFR AI ASSESSMENT
@@ -966,6 +1008,14 @@ function attach(code){
       S.oppReady=!!r[oppReadyKey];
       // Update opp name when they join
       if(S.role==='p1'&&r.p2?.name)S.oppName=r.p2.name;
+      if(S.role==='p1'&&r.p2uid&&r.p2uid!==S._lastH2HUid){
+        S._lastH2HUid=r.p2uid;S.oppUid=r.p2uid;
+        loadH2H(r.p2uid).then(h=>{S.h2h=h;render();});
+      }
+      if(S.role==='p2'&&S.oppUid&&!S._h2hLoaded){
+        S._h2hLoaded=true;
+        loadH2H(S.oppUid).then(h=>{S.h2h=h;render();});
+      }
       // Both ready → start countdown then quiz
       if(r.status==='countdown'&&!S._countdownStarted){
         S._countdownStarted=true;
@@ -1296,8 +1346,7 @@ function hHome(){
       <div class="hero-rank-block">
         <div class="hero-rank-label">Tvoj rank</div>
         <div class="hero-rank-row">
-          <span class="hero-rank-emoji">${rank.emoji}</span>
-          <span class="hero-rank-name" style="color:${rank.color}">${rank.n}</span>
+          <span class="hero-rank-name" style="color:${rank.color}">${rank.n.toUpperCase()}</span>
         </div>
       </div>
       <div class="hero-elo-block">
@@ -1307,8 +1356,8 @@ function hHome(){
     </div>
     <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.28);margin-bottom:4px"><span>${rank.n}</span><span>${nxt}</span></div>
     <div class="rank-progress-bar" style="margin-bottom:10px"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
-    <div style="margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
-      <span class="xp-badge">⭐ Level ${xpLevel(prof?.xp||0)}</span>
+    <div style="margin-top:10px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+      <span class="xp-badge" style="font-size:.65rem;letter-spacing:1.5px">LEVEL ${xpLevel(prof?.xp||0)}</span>
       <span style="font-size:10px;color:rgba(255,255,255,.28)">${prof?.xp||0} XP</span>
     </div>
     <div class="xp-bar" style="margin-bottom:12px"><div class="xp-bar-fill" style="width:${xpProgress(prof?.xp||0)}%"></div></div>
@@ -1436,6 +1485,7 @@ function hLobby(){
       </div>
     </div>
     ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky</div>`:''}
+    ${S.h2h&&S.oppJoined?h2hHTML(S.h2h):''}
     ${readyCards}
     ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
     <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:11px;padding:11px 14px;margin-top:10px">
