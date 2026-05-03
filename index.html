@@ -402,6 +402,63 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .loading-wrap{text-align:center;padding:28px 0}
     .loading-text{color:rgba(255,255,255,.36);font-size:.84rem}
+
+    /* Redesigned result analysis v4 */
+    .result-shell{display:flex;flex-direction:column;gap:14px}
+    .result-hero-v4{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:18px 16px 16px;box-shadow:0 18px 60px rgba(0,0,0,.22)}
+    .result-hero-v4::before{content:'';position:absolute;inset:-90px -70px auto auto;width:220px;height:220px;border-radius:50%;filter:blur(22px);opacity:.18;pointer-events:none}
+    .result-hero-v4.win::before{background:#00ffc8}.result-hero-v4.loss::before{background:#ff5252}.result-hero-v4.draw::before{background:#ffb300}.result-hero-v4.coop::before{background:#7c4dff}.result-hero-v4.solo::before{background:#ffb300}
+    .result-kicker{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:700;margin-bottom:8px}
+    .result-head-v4{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+    .result-status-v4{font-family:'Orbitron',sans-serif;font-size:clamp(1.35rem,6vw,2.05rem);font-weight:900;letter-spacing:1px;line-height:1.05}
+    .result-status-v4.win{color:#00ffc8}.result-status-v4.loss{color:#ff5252}.result-status-v4.draw{color:#ffb300}.result-status-v4.coop{color:#b388ff}.result-status-v4.solo{color:#ffb300}
+    .result-caption-v4{font-size:12px;color:rgba(255,255,255,.48);margin-top:6px;line-height:1.35}
+    .result-score-pill{flex-shrink:0;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 12px;text-align:center;min-width:104px}
+    .result-score-main{font-family:'Orbitron',sans-serif;font-size:1.45rem;font-weight:900;color:#fff;line-height:1}
+    .result-score-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.32);margin-top:5px}
+    .result-metrics-v4{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1}
+    .result-metric-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.075);border-radius:15px;padding:13px 12px;min-width:0}
+    .result-metric-value{font-family:'Orbitron',sans-serif;font-size:clamp(1.35rem,6vw,1.9rem);font-weight:900;line-height:1;white-space:nowrap}
+    .result-metric-value.pos{color:#00ffc8}.result-metric-value.neg{color:#ff5252}.result-metric-value.zero{color:#ffb300}.result-metric-value.xp{color:#b388ff}
+    .result-metric-label{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:6px}
+    .result-metric-sub{font-size:12px;color:rgba(255,255,255,.52);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .result-progress-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.075);border-radius:16px;padding:13px 14px}
+    .result-progress-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:rgba(255,255,255,.42);margin-bottom:6px}
+    .result-progress-track{height:5px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:10px}
+    .result-progress-track:last-child{margin-bottom:0}
+    .result-progress-fill{height:100%;border-radius:999px;transition:width .55s ease}
+    .result-xp-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:rgba(124,77,255,.13);border:1px solid rgba(124,77,255,.25);border-radius:999px;font-size:11px;color:#b388ff;font-weight:800}
+    .result-section-title{display:flex;align-items:center;gap:9px;margin:2px 2px 0;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.4);font-weight:800}
+    .result-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+    .result-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .result-stat-card{background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.075);border-radius:15px;padding:13px 12px;min-height:74px}
+    .result-stat-value{font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:900;color:#fff;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .result-stat-card.accent .result-stat-value{color:#00ffc8}.result-stat-card.warn .result-stat-value{color:#ffb300}.result-stat-card.danger .result-stat-value{color:#ff8a80}.result-stat-card.purple .result-stat-value{color:#b388ff}
+    .result-stat-label{font-size:11px;color:rgba(255,255,255,.42);margin-top:7px;line-height:1.25}
+    .result-category-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.075);border-radius:16px;padding:13px 13px 12px}
+    .result-cat-row{display:grid;grid-template-columns:92px 1fr 42px 1fr 42px;align-items:center;gap:7px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.045)}
+    .result-cat-row.solo{grid-template-columns:112px 1fr 46px}
+    .result-cat-row:last-child{border-bottom:none}
+    .result-cat-name{font-size:12px;color:rgba(255,255,255,.58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .result-cat-bar{height:7px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .result-cat-fill{height:100%;border-radius:999px;transition:width .55s ease}
+    .result-cat-score{font-size:12px;font-weight:800;text-align:right;white-space:nowrap}
+    .result-coach-card{background:linear-gradient(180deg,rgba(255,179,0,.08),rgba(255,82,82,.055));border:1px solid rgba(255,179,0,.18);border-radius:16px;padding:13px 14px}
+    .result-coach-title{font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#ffb300;font-weight:900;margin-bottom:7px}
+    .result-coach-body{font-size:13px;color:rgba(255,255,255,.66);line-height:1.45}
+    .result-coach-body strong{font-weight:800}
+    .result-review-details{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.075);border-radius:16px;overflow:hidden}
+    .result-review-details summary{list-style:none;cursor:pointer;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;-webkit-tap-highlight-color:transparent}
+    .result-review-details summary::-webkit-details-marker{display:none}
+    .result-review-title{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.52);font-weight:900}
+    .result-review-count{font-size:11px;color:rgba(255,255,255,.36)}
+    .result-review-content{padding:0 14px 14px}
+    .result-review-item{background:rgba(255,255,255,.035);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+    .result-review-q{font-size:13px;color:rgba(255,255,255,.62);line-height:1.42;margin-bottom:7px}
+    .result-review-a{font-size:13px;color:#00ffc8;font-weight:800;line-height:1.35}
+    .result-actions-v4{display:flex;flex-direction:column;gap:9px;margin-top:2px}
+    .result-actions-v4 .btn{margin-top:0!important}
+    @media(max-width:380px){.result-cat-row{grid-template-columns:82px 1fr 36px 1fr 36px;gap:5px}.result-cat-name{font-size:11px}.result-metrics-v4{gap:8px}.result-metric-card{padding:12px 10px}}
   </style>
 </head>
 <body>
@@ -441,6 +498,34 @@ const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
 const NICK_ADJ=['Swift','Brave','Sharp','Clever','Bold','Quick','Wise','Epic','Dark','Calm','Wild','Cool','Iron','Gold','Neon'];
 const NICK_NOUN=['Falcon','Tiger','Phoenix','Dragon','Wolf','Hawk','Viper','Ninja','Storm','Blaze','Ghost','Rider','Arrow','Comet','Spark'];
 function randomNick(){return NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+NICK_NOUN[Math.floor(Math.random()*NICK_NOUN.length)];}
+
+
+// Randomize answer positions so AI cannot keep the correct answer mostly at A/B.
+function normalizeGeneratedQuestions(questions){
+  if(!Array.isArray(questions))return[];
+  return questions.map((q,idx)=>{
+    const options=Array.isArray(q.options)?q.options.slice(0,4):[];
+    let correct=Number.isInteger(q.correct)?q.correct:Number(q.correct);
+    if(!Number.isInteger(correct)){
+      const letter=String(q.correct??'').trim().toUpperCase();
+      correct=LT.indexOf(letter);
+    }
+    if(correct<0||correct>=options.length)correct=0;
+
+    const pairs=options.map((text,i)=>({text,ok:i===correct}));
+    for(let i=pairs.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [pairs[i],pairs[j]]=[pairs[j],pairs[i]];
+    }
+    const newCorrect=pairs.findIndex(p=>p.ok);
+    return{
+      ...q,
+      id:q.id??idx+1,
+      options:pairs.map(p=>p.text),
+      correct:newCorrect>=0?newCorrect:0
+    };
+  });
+}
 
 const FORMATS={
   mixed:     {label:'Zmiešaný',     icon:'⚡', color:'#00ffc8', hint:'Všetky typy otázok',         prompt:'Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary & idioms.'},
@@ -797,7 +882,7 @@ Rules: level must be "B2", "B2-C1", or "C1". type must be "Phrasal Verbs","Advan
   const text=data.content?.find(b=>b.type==='text')?.text||'';
   const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('Neplatná odpoveď');
   const p=JSON.parse(m[0]);if(!p.questions?.length)throw new Error('Prázdne');
-  return p.questions;
+  return normalizeGeneratedQuestions(p.questions);
 }
 
 function calcPlacementElo(answers,questions){
@@ -1938,78 +2023,89 @@ function hBo3Results(){
 
 function hAnalysis(){
   if(!S.analysisReady)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${(S.myProfile?.gamesPlayed||0)%10===0&&(S.myProfile?.gamesPlayed||0)>0?'Hodnotím tvoju úroveň angličtiny...':'Počítam ELO a štatistiky...'}</div></div>`;
-  const isCoop=S.submode==='coop',tot=S.questions.length;
+  const safe=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  const isCoop=S.submode==='coop',isSolo=S.solo,tot=S.questions.length||1;
   const delta=S.eloChange,newElo=S.newElo||S.myProfile?.elo||START_ELO,oldElo=newElo-delta;
   const rank=getRank(newElo),prog=rankProg(newElo),nxt=nextRankN(newElo),stats=S.myProfile?.stats;
-  const xpG=S.xpGained||0,nXp=S.newXp||0;
-  const isSolo=S.solo;
-  const xpLvl=xpLevel(nXp),xpProg=xpProgress(nXp),xpNxt=xpToNext(nXp);
-  const eloBlock=`<div class="elo-change-wrap">
-    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:4px">
-      <div>
-        ${!isSolo?`<div class="elo-delta ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta} ELO</div><div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">ELO</div>`:''}
-      </div>
-      ${!isSolo?`<div style="width:1px;height:40px;background:rgba(255,255,255,.08)"></div>`:''}
-      <div>
-        <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#b388ff;text-align:center" id="xp-counter">+${xpG}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">XP</div>
-      </div>
-    </div>
-    ${isSolo?`<div style="text-align:center;font-size:.78rem;color:rgba(255,179,0,.7);margin-top:4px">🧑 Sólo tréning · ELO sa nemení</div>`:`<div class="elo-path">${oldElo} → ${newElo} · ${rankBadge(newElo)}</div>`}
-    ${delta===0&&!isCoop?'<div style="font-size:.72rem;color:rgba(0,255,200,.7);margin-top:5px">🛡️ Shield absorboval ELO stratu!</div>':''}
-    <div style="margin-top:10px">
-      <div class="rank-progress-label" style="font-size:.62rem;color:rgba(255,255,255,.25);display:flex;justify-content:space-between;margin-bottom:4px"><span>${rank.n}</span><span>${nxt}</span></div>
-      <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
-    </div>
-    <div class="xp-bar-wrap" style="margin-top:8px">
-      <div class="xp-bar-label"><span><span class="xp-badge">⭐ Level ${xpLvl}</span></span><span>${nXp} XP · +${xpNxt} do ďalšieho</span></div>
-      <div class="xp-bar"><div class="xp-bar-fill" style="width:${xpProg}%"></div></div>
-    </div>
-    ${S.leveledUp?`<div style="text-align:center;margin-top:10px;padding:10px;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.35);border-radius:12px"><div style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:#b388ff;font-weight:700">🎉 LEVEL UP! → Level ${S.leveledUp}</div></div>`:''}
-  </div>`;
-  const shieldBlock=S.shieldJustEarned?`<div class="shield-earned-box"><div style="font-family:'Orbitron',sans-serif;font-size:.8rem;color:#00ffc8;margin-bottom:3px">🛡️ Shield získaný!</div><div style="font-size:.78rem;color:rgba(255,255,255,.44)">Hrals/a ${S.myProfile?.streak} dní za sebou. Ďalšia ELO strata bude chránená.</div></div>`:'';
+  const xpG=S.xpGained||0,nXp=S.newXp||0,xpLvl=xpLevel(nXp),xpProg=xpProgress(nXp),xpNxt=xpToNext(nXp);
+  const validTimes=S.answerTimes.filter(t=>Number.isFinite(t)&&t>0);
+  const avgTime=validTimes.length?(validTimes.reduce((a,b)=>a+b,0)/validTimes.length):0;
+  const fastest=validTimes.length?Math.min(...validTimes):0;
+  const slowest=validTimes.length?Math.max(...validTimes):0;
+  const accuracy=Math.round((S.score/tot)*100);
+  const gameResult=isCoop?'coop':isSolo?'solo':S.score>S.oppScore?'win':S.score===S.oppScore?'draw':'loss';
+  const resultLabel={win:'Víťazstvo',loss:'Prehra',draw:'Remíza',coop:'Co-op hotovo',solo:'Tréning hotový'}[gameResult];
+  const resultCaption=isCoop?'Spoločný výkon s partnerom':isSolo?'Sólo tréning bez zmeny ELO':'Duel proti súperovi';
+  const scoreLine=isCoop?`${S.score+(S.oppScore||0)} / ${tot*2}`:isSolo?`${S.score} / ${tot}`:`${S.score} : ${S.oppScore}`;
+  const scoreLabel=isCoop?'spolu':isSolo?'správne':'ty vs súper';
+  const wk=stats?weakestCat(stats):null,wkP=wk?catPct(stats,wk):null,diff=calcDiff(S.myProfile);
+  const diffMsg=diff===1?'Obtiažnosť zostáva skôr B2, aby si upevnil základ.':diff===3?'Aplikácia ťa môže posúvať viac do C1 otázok.':'Si približne na prechode B2 → C1.';
+  const weakestLabel=wk&&wkP!==null?CATS[wk].label:'Zatiaľ bez dát';
+  const weakestShort=wk&&wkP!==null?CATS[wk].label.replace('Slovná zásoba','Vocab').replace('Phrasal Verbs','Phrasal').replace('Gramatika','Grammar'):'—';
   const catRows=Object.entries(CATS).map(([k,c])=>{
     const myQs=S.questions.filter(q=>catKey(q.type)===k);if(!myQs.length)return'';
     const myOk=myQs.filter(q=>{const i=S.questions.indexOf(q);return S.myAnswers[i]?.correct;}).length;
+    const n=myQs.length,myP=Math.round(myOk/n*100);
+    if(isSolo){
+      return`<div class="result-cat-row solo"><div class="result-cat-name">${safe(c.label.split('&')[0].trim())}</div><div class="result-cat-bar"><div class="result-cat-fill" style="width:${myP}%;background:${c.color}"></div></div><div class="result-cat-score" style="color:${c.color}">${myOk}/${n}</div></div>`;
+    }
     const oppOk=myQs.filter(q=>{const i=S.questions.indexOf(q);return S.oppAnswers[i]?.c===1;}).length;
-    const n=myQs.length,myP=Math.round(myOk/n*100),oppP=Math.round(oppOk/n*100);
-    return`<div class="cat-compare-row"><span class="cat-lbl-sm">${c.label.split('&')[0].trim()}</span>
-    <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${myP}%;background:${c.color}80"></div></div>
-    <span class="mini-pct" style="color:${c.color}">${myOk}/${n}</span>
-    <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${oppP}%;background:#ffffff25"></div></div>
-    <span class="mini-pct" style="color:rgba(255,255,255,.42)">${oppOk}/${n}</span></div>`;
+    const oppP=Math.round(oppOk/n*100);
+    return`<div class="result-cat-row"><div class="result-cat-name">${safe(c.label.split('&')[0].trim())}</div><div class="result-cat-bar"><div class="result-cat-fill" style="width:${myP}%;background:${c.color}"></div></div><div class="result-cat-score" style="color:${c.color}">${myOk}/${n}</div><div class="result-cat-bar"><div class="result-cat-fill" style="width:${oppP}%;background:rgba(255,255,255,.28)"></div></div><div class="result-cat-score" style="color:rgba(255,255,255,.48)">${oppOk}/${n}</div></div>`;
   }).join('');
-  const wk=stats?weakestCat(stats):null,wkP=wk?catPct(stats,wk):null,diff=calcDiff(S.myProfile);
-  const diffMsg=diff===1?'Obtiažnosť zostáva nízka — viac B2 tréning.':diff===3?'Obtiažnosť rastie — C1 výzvy ťa čakajú!':'Obtiažnosť kalibrovaná na B2→C1.';
-  const weakBlock=wk&&wkP!==null?`<div class="weak-box"><div class="weak-title">⚠️ Najslabšia oblasť</div>
-    <div class="weak-body"><strong style="color:${CATS[wk].color}">${CATS[wk].label}</strong> — ${wkP}% (${stats[wk].correct}/${stats[wk].played} historicky)</div>
-    <div style="font-size:.72rem;color:rgba(255,255,255,.32);margin-top:5px">AI zahrnie viac tejto oblasti v ďalšom dueli. ${diffMsg}</div></div>`:'';
-  const bothWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&S.oppAnswers[i]&&S.oppAnswers[i].c!==1).slice(0,2);
-  const wrongBlock=bothWrong.length?`<div class="sec-title">Obaja ste pokazili</div>${bothWrong.map(q=>`<div class="q-review"><div class="q-review-text">${q.question}</div><div class="q-review-ans">✅ ${q.options[q.correct]}</div></div>`).join('')}`:'';
-  return`<div class="logo" style="font-size:1.2rem;margin-bottom:4px">ROZBOR DUELU</div>
-  <div class="logo-sub" style="margin-bottom:16px">${isCoop?'Kooperatívna analýza':'Analýza výkonu'}</div>
-  ${eloBlock}${shieldBlock}
-  <div class="sec-title">Výkon po kategóriách</div>
-  <div class="analysis-box">
-    <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:7px;font-size:.62rem;color:rgba(255,255,255,.26)"><span style="width:44px;text-align:right">TY</span><span style="width:44px;text-align:right">${isCoop?'PARTNER':'SÚPER'}</span></div>
-    ${catRows}
-  </div>
-  ${weakBlock}${wrongBlock}
-  ${S.answerTimes.length>1?`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:12px">
-    <div class="sec-title" style="margin-top:0">Čas odpovedí</div>
-    <div style="display:flex;gap:0">
-      ${[
-        {l:'Najrýchlejší',v:Math.min(...S.answerTimes.filter(t=>t>0))+'s',c:'#00ffc8'},
-        {l:'Priemer',v:(S.answerTimes.reduce((a,b)=>a+b,0)/S.answerTimes.length).toFixed(1)+'s',c:'#ffb300'},
-        {l:'Najpomalší',v:Math.max(...S.answerTimes)+'s',c:'rgba(255,255,255,.4)'}
-      ].map(s=>`<div style="flex:1;text-align:center">
-        <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:${s.c}">${s.v}</div>
-        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:2px">${s.l}</div>
-      </div>`).join('<div style="width:1px;background:rgba(255,255,255,.07)"></div>')}
+  const bothWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&S.oppAnswers[i]&&S.oppAnswers[i].c!==1);
+  const myWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct);
+  const reviewList=(bothWrong.length?bothWrong:myWrong).slice(0,4);
+  const reviewTitle=bothWrong.length?'Otázky, ktoré ste pokazili obaja':'Tvoje chybné odpovede';
+  const shieldBlock=S.shieldJustEarned?`<div class="shield-earned-box" style="margin-bottom:0"><div style="font-family:'Orbitron',sans-serif;font-size:.8rem;color:#00ffc8;margin-bottom:3px">🛡️ Shield získaný!</div><div style="font-size:.78rem;color:rgba(255,255,255,.5)">Hrals/a ${S.myProfile?.streak} dní za sebou. Ďalšia ELO strata bude chránená.</div></div>`:'';
+  return`<div class="result-shell">
+    <div class="result-hero-v4 ${gameResult}">
+      <div class="result-kicker">Rozbor duelu</div>
+      <div class="result-head-v4">
+        <div>
+          <div class="result-status-v4 ${gameResult}">${resultLabel}</div>
+          <div class="result-caption-v4">${resultCaption}</div>
+        </div>
+        <div class="result-score-pill">
+          <div class="result-score-main">${scoreLine}</div>
+          <div class="result-score-label">${scoreLabel}</div>
+        </div>
+      </div>
+      <div class="result-metrics-v4">
+        <div class="result-metric-card">
+          ${isSolo?`<div class="result-metric-value zero">ELO</div><div class="result-metric-label">bez zmeny</div><div class="result-metric-sub">sólo režim</div>`:`<div class="result-metric-value ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta}</div><div class="result-metric-label">ELO</div><div class="result-metric-sub">${oldElo} → <span id="elo-counter">${newElo}</span></div>`}
+        </div>
+        <div class="result-metric-card">
+          <div class="result-metric-value xp">+${xpG}</div>
+          <div class="result-metric-label">XP</div>
+          <div class="result-metric-sub"><span id="xp-counter">${nXp}</span> XP celkovo</div>
+        </div>
+      </div>
     </div>
-  </div>`:''}
-  <button class="btn btn-rematch" id="rematchBtn" style="margin-top:4px">⚔️ REMATCH</button>
-  <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
+    <div class="result-progress-card">
+      ${!isSolo?`<div class="result-progress-row"><span>${rank.n}</span><span>${nxt}</span></div><div class="result-progress-track"><div class="result-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>`:''}
+      <div class="result-progress-row"><span><span class="result-xp-badge">⭐ Level ${xpLvl}</span></span><span>${xpNxt?`+${xpNxt} XP do ďalšieho`:'Max level'}</span></div>
+      <div class="result-progress-track"><div class="result-progress-fill" style="width:${xpProg}%;background:linear-gradient(90deg,#7c4dff,#b388ff)"></div></div>
+      ${S.leveledUp?`<div style="text-align:center;margin-top:10px;padding:10px;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.35);border-radius:12px"><div style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:#b388ff;font-weight:700">🎉 LEVEL UP! → Level ${S.leveledUp}</div></div>`:''}
+    </div>
+    ${shieldBlock}
+    <div class="result-section-title">Rýchly prehľad</div>
+    <div class="result-stats-grid">
+      <div class="result-stat-card accent"><div class="result-stat-value">${accuracy}%</div><div class="result-stat-label">Presnosť odpovedí</div></div>
+      <div class="result-stat-card warn"><div class="result-stat-value">${avgTime?avgTime.toFixed(1)+'s':'—'}</div><div class="result-stat-label">Priemerný čas</div></div>
+      <div class="result-stat-card purple"><div class="result-stat-value">${fastest?fastest+'s':'—'}</div><div class="result-stat-label">Najrýchlejšia odpoveď</div></div>
+      <div class="result-stat-card danger"><div class="result-stat-value">${safe(weakestShort)}</div><div class="result-stat-label">Najslabšia oblasť</div></div>
+    </div>
+    <div class="result-section-title">Kategórie</div>
+    <div class="result-category-card">
+      ${!isSolo?`<div style="display:grid;grid-template-columns:92px 1fr 42px 1fr 42px;gap:7px;margin-bottom:2px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.32)"><div></div><div></div><div style="text-align:right">Ty</div><div></div><div style="text-align:right">${isCoop?'Partner':'Súper'}</div></div>`:''}
+      ${catRows||`<div style="font-size:13px;color:rgba(255,255,255,.45);padding:8px">Žiadne kategórie na zobrazenie.</div>`}
+    </div>
+    ${wk&&wkP!==null?`<div class="result-coach-card"><div class="result-coach-title">🎯 Focus next</div><div class="result-coach-body"><strong style="color:${CATS[wk].color}">${safe(weakestLabel)}</strong> máš historicky na úrovni <strong>${wkP}%</strong> (${stats[wk].correct}/${stats[wk].played}). V ďalšom tréningu odporúčam viac otázok z tejto oblasti. ${diffMsg}</div></div>`:''}
+    ${reviewList.length?`<details class="result-review-details"><summary><span class="result-review-title">${reviewTitle}</span><span class="result-review-count">${reviewList.length} položky ▾</span></summary><div class="result-review-content">${reviewList.map(q=>`<div class="result-review-item"><div class="result-review-q">${safe(q.question)}</div><div class="result-review-a">✅ ${safe(q.options[q.correct])}</div></div>`).join('')}</div></details>`:''}
+    ${validTimes.length>1?`<div class="result-section-title">Čas odpovedí</div><div class="result-stats-grid"><div class="result-stat-card accent"><div class="result-stat-value">${fastest}s</div><div class="result-stat-label">Najrýchlejší čas</div></div><div class="result-stat-card warn"><div class="result-stat-value">${avgTime.toFixed(1)}s</div><div class="result-stat-label">Priemer</div></div><div class="result-stat-card"><div class="result-stat-value" style="color:rgba(255,255,255,.72)">${slowest}s</div><div class="result-stat-label">Najpomalší čas</div></div><div class="result-stat-card purple"><div class="result-stat-value">${validTimes.length}</div><div class="result-stat-label">Merané odpovede</div></div></div>`:''}
+    <div class="result-actions-v4"><button class="btn btn-rematch" id="rematchBtn">⚔️ REMATCH</button><button class="btn btn-ghost" id="newBtn">NOVÝ DUEL</button></div>
+  </div>`;}
 
 // ═══════════════════════════════════════════════════
 // EVENTS
@@ -2564,6 +2660,7 @@ Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","
 Rules:
 - type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms"
 - correct is 0-based index
+- Do NOT always put the correct answer first. Distribute correct answers across A, B, C and D.
 - explanation MUST be in Slovak
 - example is a short natural English sentence showing the correct answer in real context
 - CRITICAL — answer quality rules:
@@ -2581,7 +2678,7 @@ Rules:
   try{p=JSON.parse(m[0]);}
   catch(err){throw new Error('Neplatný JSON z AI. Skús znova alebo zvýš max_tokens. Detail: '+err.message);}
   if(!Array.isArray(p.questions)||!p.questions.length)throw new Error('Prázdne otázky');
-  return p.questions;
+  return normalizeGeneratedQuestions(p.questions);
 }
 
 // ═══════════════════════════════════════════════════
