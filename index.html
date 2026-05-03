@@ -224,6 +224,11 @@
     .xp-levelup{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);z-index:1001;animation:fadeIn .3s ease}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     .xp-levelup-card{background:linear-gradient(135deg,rgba(124,77,255,.3),rgba(0,255,200,.15));border:2px solid #7c4dff;border-radius:20px;padding:32px 28px;text-align:center;animation:xpPop .4s ease}
+    /* AI Insight */
+    .insight-box{background:rgba(124,77,255,.07);border:1px solid rgba(124,77,255,.2);border-radius:13px;padding:14px;margin-top:14px}
+    .insight-label{font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(124,77,255,.8);margin-bottom:7px;font-weight:600}
+    .insight-text{font-size:.86rem;color:rgba(255,255,255,.7);line-height:1.6}
+    .insight-loading{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.4);font-size:.84rem}
     /* CEFR assessment */
     .cefr-level{font-family:'Orbitron',sans-serif;font-size:2.6rem;font-weight:900;text-align:center;margin:14px 0 4px;background:linear-gradient(135deg,#00ffc8,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .cefr-label{text-align:center;font-size:.75rem;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
@@ -348,6 +353,7 @@ const S={
   hintUsed:false,
   xpGained:0, newXp:0, leveledUp:0,
   cefrResult:null,
+  aiInsight:null, aiInsightLoading:false,
   oppReaction:null, reactionTimer:null,
   // Placement test
   placementQs:[], placementCurrent:0, placementAnswers:[], placementResult:null,
@@ -410,6 +416,47 @@ function mergeStats(ex,answers,questions){
 }
 function catPct(stats,k){const s=stats?.[k];if(!s||!s.played)return null;return Math.round(s.correct/s.played*100);}
 function weakestCat(stats){let min=101,key='vocab';Object.keys(CATS).forEach(k=>{const p=catPct(stats,k);if(p!==null&&p<min){min=p;key=k;}});return key;}
+
+// ═══════════════════════════════════════════════════
+// AI GAME INSIGHT
+// ═══════════════════════════════════════════════════
+async function generateInsight(){
+  const tot=S.questions.length;
+  const correct=S.myAnswers.filter(a=>a.correct).length;
+  const wrong=S.myAnswers.map((a,i)=>({...a,q:S.questions[i]})).filter(a=>!a.correct);
+  const isCoop=S.submode==='coop';
+  const result=S.score>S.oppScore?'win':S.score===S.oppScore?'draw':'loss';
+
+  // Build wrong questions summary
+  const wrongSummary=wrong.slice(0,4).map(a=>`"${a.q?.question?.substring(0,60)}..." (správne: ${a.q?.options[a.q?.correct]})`).join('; ');
+  const catBreakdown=Object.entries(CATS).map(([k,c])=>{
+    const qs=S.myAnswers.filter((_,i)=>catKey(S.questions[i]?.type)===k);
+    const ok=qs.filter(a=>a.correct).length;
+    return`${c.label}: ${ok}/${qs.length}`;
+  }).join(', ');
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,messages:[{role:'user',content:
+        `You are a concise English coach. A student just finished an English quiz duel. Write a SHORT (2-3 sentences max) personal insight in Slovak about their performance. Be specific, encouraging but honest.
+
+Results: ${correct}/${tot} correct (${Math.round(correct/tot*100)}%)
+Game result: ${result}
+Category breakdown: ${catBreakdown}
+${wrong.length?`Wrong questions: ${wrongSummary}`:'All correct!'}
+Format played: ${FORMATS[S.format]?.label||'Mixed'}
+${isCoop?'Mode: Cooperative':'Mode: Competitive'}
+
+Write ONLY the insight text in Slovak, no labels, no intro. Max 2-3 sentences. Be specific about what to improve.`
+      }]})
+    });
+    if(!res.ok)return null;
+    const data=await res.json();
+    return data.content?.find(b=>b.type==='text')?.text?.trim()||null;
+  }catch(e){return null;}
+}
 
 // ═══════════════════════════════════════════════════
 // CEFR AI ASSESSMENT
@@ -1068,7 +1115,13 @@ function hResults(){
       <div class="stat-row"><span class="stat-lbl">${S.name}</span><span class="stat-val">${S.score}/${tot}</span></div>
       <div class="stat-row" style="border:none"><span class="stat-lbl">${S.oppName||'Partner'}</span><span class="stat-val">${S.oppScore}/${tot}</span></div>
     </div>
-    <button class="btn btn-coop" id="analysisBtn">📊 ROZBOR DUELU</button>
+    <div class="insight-box">
+      <div class="insight-label">🤖 AI hodnotenie hry</div>
+      ${S.aiInsight?`<div class="insight-text" id="ai-insight-content">${S.aiInsight}</div>`:`
+      <div class="insight-loading" id="ai-insight-spinner"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>
+      <div class="insight-text" id="ai-insight-content" style="display:none"></div>`}
+    </div>
+    <button class="btn btn-coop" id="analysisBtn" style="margin-top:14px">📊 ROZBOR DUELU</button>
     <button class="btn btn-rematch" id="rematchBtn" style="margin-top:9px">⚔️ REMATCH</button>
     <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
   const mp=Math.round(S.score/tot*100),op=Math.round(S.oppScore/tot*100);
@@ -1097,7 +1150,13 @@ function hResults(){
     <div style="font-size:.78rem;color:rgba(255,255,255,.3);margin-top:8px">z ${tot} otázok</div>
   </div>
 
-  <button class="btn btn-primary" id="analysisBtn">📊 ROZBOR DUELU</button>
+  <div class="insight-box">
+    <div class="insight-label">🤖 AI hodnotenie hry</div>
+    ${S.aiInsight?`<div class="insight-text" id="ai-insight-content">${S.aiInsight}</div>`:`
+    <div class="insight-loading" id="ai-insight-spinner"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>
+    <div class="insight-text" id="ai-insight-content" style="display:none"></div>`}
+  </div>
+  <button class="btn btn-primary" id="analysisBtn" style="margin-top:14px">📊 ROZBOR DUELU</button>
   <button class="btn btn-rematch" id="rematchBtn" style="margin-top:9px">⚔️ REMATCH</button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
@@ -1263,6 +1322,18 @@ function bindAll(){
     else{S.current++;S.selected=null;S.hintUsed=false;render();}
   });
   g('analysisBtn')?.addEventListener('click',()=>runAnalysis());
+  // Generate AI insight when results screen appears (async, non-blocking)
+  if(S.screen==='results'&&!S.aiInsight&&!S.aiInsightLoading){
+    S.aiInsightLoading=true;
+    generateInsight().then(text=>{
+      S.aiInsight=text;S.aiInsightLoading=false;
+      // Update insight box if still on results screen
+      const box=document.getElementById('ai-insight-content');
+      if(box&&text)box.innerHTML=text;
+      const spinner=document.getElementById('ai-insight-spinner');
+      if(spinner&&text){spinner.style.display='none';box.style.display='block';}
+    });
+  }
   g('newBtn')?.addEventListener('click',()=>{detach();resetGame();render();});
   g('rematchBtn')?.addEventListener('click',async()=>{
     clearTimer();detach();
@@ -1412,7 +1483,8 @@ function resetGame(){
   S.myAnswers=[];S.myDone=false;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
   S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;
-  S.cefrResult=S.myProfile?.cefrResult||null;S.error=null;
+  S.cefrResult=S.myProfile?.cefrResult||null;
+  S.aiInsight=null;S.aiInsightLoading=false;S.error=null;
 }
 
 // ═══════════════════════════════════════════════════
