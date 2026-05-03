@@ -1005,26 +1005,23 @@ function attach(code){
     // Handle countdown trigger for BOTH lobby and loading screens
     if((S.screen==='lobby'||S.screen==='loading')&&r.status==='countdown'&&!S._countdownStarted){
       S._countdownStarted=true;
+      // Store questions from snapshot immediately (available for both players)
+      if(r.questions&&r.questions.length)S.questions=r.questions;
       startCountdown(async()=>{
         if(S.format==='sr'){
           S.srQuestions=await loadDueSRQuestions();
           const qs=await genSROnlyQuestions(S.srQuestions);
-          S.questions=qs;S.screen='quiz';render();
-        }else if(S.role==='p2'){
-          // Fetch fresh questions from Firebase
-          let tries=0;
-          while(tries<20){
-            const fresh=await dbGet('rooms/'+S.roomCode);
-            if(fresh?.questions?.length){
-              S.questions=fresh.questions;S.screen='quiz';render();
-              return;
-            }
-            await new Promise(res=>setTimeout(res,300));
-            tries++;
-          }
-          S.error='Chyba: otázky sa nenačítali';S.screen='home';render();
-        }else{
+          S.questions=qs;
+        }else if(!S.questions||!S.questions.length){
+          // Questions not yet in S — fetch from Firebase
+          const fresh=await dbGet('rooms/'+S.roomCode);
+          if(fresh?.questions?.length)S.questions=fresh.questions;
+        }
+        if(S.questions&&S.questions.length){
+          S.current=0;S.selected=null;S.score=0;S.myAnswers=[];S.answerTimes=[];
           S.screen='quiz';render();
+        }else{
+          S.error='Chyba: otázky sa nenačítali. Skús znova.';S.screen='home';render();
         }
       });
       return;
