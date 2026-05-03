@@ -1002,46 +1002,58 @@ function attach(code){
       showRoundIntro(S.bo3Game,()=>{S.screen='quiz';render();});
       return;
     }
+    // Handle countdown trigger for BOTH lobby and loading screens
+    if((S.screen==='lobby'||S.screen==='loading')&&r.status==='countdown'&&!S._countdownStarted){
+      S._countdownStarted=true;
+      startCountdown(async()=>{
+        if(S.format==='sr'){
+          S.srQuestions=await loadDueSRQuestions();
+          const qs=await genSROnlyQuestions(S.srQuestions);
+          S.questions=qs;S.screen='quiz';render();
+        }else if(S.role==='p2'){
+          // Fetch fresh questions from Firebase
+          let tries=0;
+          while(tries<20){
+            const fresh=await dbGet('rooms/'+S.roomCode);
+            if(fresh?.questions?.length){
+              S.questions=fresh.questions;S.screen='quiz';render();
+              return;
+            }
+            await new Promise(res=>setTimeout(res,300));
+            tries++;
+          }
+          S.error='Chyba: otázky sa nenačítali';S.screen='home';render();
+        }else{
+          S.screen='quiz';render();
+        }
+      });
+      return;
+    }
     if(S.screen==='lobby'){
-      // Show loading overlay for P2 when P1 is generating
-      if(S.role==='p2'&&r.status==='generating'){
-        S.loadingMsg='Súper generuje otázky...';S.screen='loading';render();return;
-      }
       // Track who joined and who is ready
       S.oppJoined=S.role==='p1'?!!r.p2:!!r.p1;
       const myReadyKey=S.role==='p1'?'p1ready':'p2ready';
       const oppReadyKey=S.role==='p1'?'p2ready':'p1ready';
       S.oppReady=!!r[oppReadyKey];
-      // Sync myReady from Firebase (prevents stale local state)
       if(r[myReadyKey]!==undefined)S.myReady=!!r[myReadyKey];
-      // Update opp name when they join
       if(S.role==='p1'&&r.p2?.name)S.oppName=r.p2.name;
       if(S.role==='p1'&&r.p2uid&&r.p2uid!==S._lastH2HUid){
         S._lastH2HUid=r.p2uid;S.oppUid=r.p2uid;
-        // Load opp profile for rank display
         dbGet('users/'+r.p2uid).then(p=>{S.oppProfile=p;render();});
         loadH2H(r.p2uid).then(h=>{S.h2h=h;render();});
       }
       if(S.role==='p2'){
         const p1uid=r.p1uid||S.oppUid;
-        if(p1uid&&!S.oppProfile){
-          dbGet('users/'+p1uid).then(p=>{if(p){S.oppProfile=p;render();}});
-        }
-        if(p1uid&&!S._h2hLoaded){
-          S._h2hLoaded=true;
-          loadH2H(p1uid).then(h=>{S.h2h=h;render();});
-        }
-        // Update opp name from room data
+        if(p1uid&&!S.oppProfile)dbGet('users/'+p1uid).then(p=>{if(p){S.oppProfile=p;render();}});
+        if(p1uid&&!S._h2hLoaded){S._h2hLoaded=true;loadH2H(p1uid).then(h=>{S.h2h=h;render();});}
         if(r.p1?.name)S.oppName=r.p1.name;
       }
-      // P1: auto-trigger countdown when BOTH ready flags appear in Firebase
-      if(S.role==='p1'&&r.p1ready&&r.p2ready&&r.status!=='countdown'&&!S._countdownStarted&&!S._generatingQuestions){
+      // P1: auto-trigger when both ready
+      if(S.role==='p1'&&r.p1ready&&r.p2ready&&!S._generatingQuestions&&r.status!=='countdown'&&r.status!=='generating'){
         S._generatingQuestions=true;
         const p2uid=r.p2uid||'';
         (async()=>{
           try{
-            // Signal P2 that questions are being generated
-            await dbUp('rooms/'+S.roomCode,{status:'generating'}).catch(()=>{});
             let oppElo=START_ELO;
             if(p2uid){const op=await dbGet('users/'+p2uid);if(op?.elo)oppElo=op.elo;}
             const sharedDiff=calcSharedDiff(S.myProfile,oppElo);
@@ -1050,45 +1062,16 @@ function attach(code){
             if(S.format==='sr'){qs=await genSROnlyQuestions(S.srQuestions);}
             else{qs=await genQ(sharedDiff,S.myProfile?.stats,S.srQuestions,S.format);}
             S.questions=qs;
-            await dbUp('rooms/'+S.roomCode,{questions:qs,status:'countdown',sharedDiff,p1elo:S.myProfile?.elo||START_ELO,p2elo:oppElo});
+            await dbUp('rooms/'+S.roomCode,{questions:qs,status:'countdown',sharedDiff});
           }catch(e){
             S._generatingQuestions=false;
             await dbUp('rooms/'+S.roomCode,{status:'countdown'}).catch(()=>{});
           }
         })();
       }
-      // Both ready → start countdown then quiz
-      if(r.status==='countdown'&&!S._countdownStarted){
-        S._countdownStarted=true;
-        // Show loading state for P2 while waiting
-        if(S.role==='p2'){
-          S.loadingMsg='Generujem otázky...';
-        }
-        startCountdown(async()=>{
-          if(S.format==='sr'){
-            S.srQuestions=await loadDueSRQuestions();
-            const qs=await genSROnlyQuestions(S.srQuestions);
-            S.questions=qs;S.screen='quiz';render();
-          }else if(S.role==='p2'){
-            // Fetch fresh room data after countdown to get questions
-            let tries=0;
-            while(tries<15){
-              const fresh=await dbGet('rooms/'+S.roomCode);
-              if(fresh?.questions?.length){
-                S.questions=fresh.questions;S.screen='quiz';render();
-                return;
-              }
-              await new Promise(res=>setTimeout(res,400));
-              tries++;
-            }
-            // Fallback
-            S.error='Chyba: otázky sa nenačítali';S.screen='home';render();
-          }else{
-            // P1 already has questions in S.questions
-            S.screen='quiz';render();
-          }
-        });
-        return;
+      // Show generating status for P2
+      if(S.role==='p2'&&(r.status==='generating'||r.status==='joined'&&r.p1ready&&r.p2ready)){
+        S.loadingMsg='Generujem otázky...';S.screen='loading';render();return;
       }
       render();return;
     }
