@@ -24,6 +24,12 @@
     #app{width:100%;max-width:520px;position:relative;z-index:1;padding-top:4px}
     .card{background:rgba(18,24,36,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:22px 16px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:fadeUp .3s ease}
     @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes winExplode{0%{opacity:0;transform:scale(.85)}40%{transform:scale(1.03)}70%{transform:scale(.98)}100%{opacity:1;transform:scale(1)}}
+    @keyframes lossSlide{0%{opacity:0;transform:translateY(8px)}100%{opacity:.92;transform:translateY(0)}}
+    @keyframes drawPulse{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+    .anim-win{animation:winExplode .45s cubic-bezier(.34,1.56,.64,1)}
+    .anim-loss{animation:lossSlide .35s ease;opacity:.92}
+    .anim-draw{animation:drawPulse .3s ease}
 
     .logo{font-family:'Orbitron',sans-serif;font-size:clamp(1.4rem,5vw,1.9rem);font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,#00ffc8,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:4px}
     .logo-sub{text-align:center;color:rgba(255,255,255,.3);font-size:.68rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:22px}
@@ -161,7 +167,7 @@
     .bv{background:rgba(124,77,255,.12);color:#b388ff;border:1px solid rgba(124,77,255,.25)}
     .q-text{font-size:1rem;line-height:1.65;color:#e8eaf6;margin-bottom:16px;font-weight:500}
     .options{display:flex;flex-direction:column;gap:7px}
-    .opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:11px;padding:12px 13px;color:#e8eaf6;font-family:'Inter',sans-serif;font-size:.88rem;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all .14s;-webkit-tap-highlight-color:transparent;width:100%;touch-action:manipulation}
+    .opt{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:13px;padding:15px 14px;color:#e8eaf6;font-family:'Inter',sans-serif;font-size:.88rem;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all .14s;-webkit-tap-highlight-color:transparent;width:100%;touch-action:manipulation}
     .opt.correct{border-color:#00ffc8;background:rgba(0,255,200,.09);color:#00ffc8}
     .opt.wrong{border-color:#ff5252;background:rgba(255,82,82,.07);color:#ff8a80}
     .opt-l{width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;flex-shrink:0}
@@ -1095,6 +1101,13 @@ function render(){
   const card=document.createElement('div');card.className='card';
   const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,bo3_results:hBo3Results,bo3_summary:hBo3Summary,analysis:hAnalysis,history:hHistory,sudden_death:hSuddenDeath};
   card.innerHTML=(map[S.screen]||hLoad)();
+  // Apply result-specific animation
+  if(S.screen==='results'){
+    const v=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
+    card.classList.add(v==='win'?'anim-win':v==='loss'?'anim-loss':'anim-draw');
+    card.classList.remove('card'); // keep custom anim, remove default fadeUp
+    card.classList.add('card');
+  }
   app.innerHTML='';app.appendChild(card);bindAll();
 }
 function updateLiveBar(){
@@ -1343,6 +1356,16 @@ function hLobby(){
   const isCoop=S.submode==='coop';
   const oppJoined=S.oppJoined;
   const myR=S.myReady, oppR=S.oppReady;
+  // Random tip
+  const tips=["Phrasal verbs s 'up' sú najčastejšie na C1 — give up, take up, set up...", "Conditionals typu 'Were I to...' sú typické pre C1 formálny register.", "Kolokácia 'make a decision' je správna, nie 'do a decision'.", "Idiom 'hit the nail on the head' = povedať presne správnu vec.", "Present perfect vs past simple: 'I have lost my keys' vs 'I lost my keys yesterday'.", "Phrasal verb 'put off' má 2 významy: odložiť (delay) aj znechutiť (deter).", "Slovo 'actually' v angličtine ≠ 'aktuálne' — znamená 'vlastne / v skutočnosti'.", "Na C1 sa používa inversion: 'Not only did he...' namiesto 'He not only...'"];
+  const tip=tips[Math.floor(Math.random()*tips.length)];
+  // Player rank displays
+  const myRankR=getRank(S.myProfile?.elo||START_ELO);
+  const myRankHtml=`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+    <div style="font-size:22px">${myRankR.emoji}</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:${myRankR.color}">${myRankR.n}</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.myProfile?.elo||START_ELO} ELO</div>
+  </div>`;
   const fmtBadge=`<span style="padding:4px 12px;border-radius:20px;font-size:.74rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</span>`;
   const readyCards=`<div class="player-ready-row">
     <div class="player-ready-card ${myR?'is-ready':''}">
@@ -1358,12 +1381,24 @@ function hLobby(){
   </div>`;
   return`
     <div class="logo" style="font-size:1.3rem;margin-bottom:4px">${isCoop?'🤝 COOP':'⚔️ DUEL'} LOBBY</div>
-    <div class="logo-sub" style="margin-bottom:14px">${S.roomCode}</div>
-    <div class="room-code-wrap" style="margin:12px 0"><div class="room-label">Kód duelu — pošli ${isCoop?'partnerovi':'súperovi'}</div><div class="room-code">${S.roomCode}</div></div>
-    <div style="text-align:center;margin-bottom:14px">${fmtBadge}</div>
-    ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:12px">🔁 Každý hráč dostane svoje vlastné otázky na opakovanie</div>`:''}
+    <div class="room-code-wrap" style="margin:8px 0 14px"><div class="room-label">Kód duelu — pošli ${isCoop?'partnerovi':'súperovi'}</div><div class="room-code">${S.roomCode}</div></div>
+    <div style="display:flex;align-items:center;justify-content:space-around;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;margin-bottom:12px">
+      ${myRankHtml}
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-family:'Orbitron',sans-serif;font-size:11px;color:rgba(255,255,255,.2)">VS</div>
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.2)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+        ${oppJoined?`<div style="font-size:22px">❓</div><div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.4)">Súper</div><div style="font-size:10px;color:rgba(255,255,255,.25)">Pripojený</div>`:`<div style="font-size:22px;opacity:.3">👤</div><div style="font-size:10px;color:rgba(255,255,255,.2)">Čakám...</div>`}
+      </div>
+    </div>
+    ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky</div>`:''}
     ${readyCards}
     ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
+    <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:11px;padding:11px 14px;margin-top:10px">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,255,200,.5);margin-bottom:5px">💡 Tip kým čakáš</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.5">${tip}</div>
+    </div>
     <button class="btn btn-ghost" id="cancelBtn" style="margin-top:10px">Zrušiť</button>
   `;}
 
