@@ -402,63 +402,6 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .loading-wrap{text-align:center;padding:28px 0}
     .loading-text{color:rgba(255,255,255,.36);font-size:.84rem}
-
-    /* Redesigned result analysis v4 */
-    .result-shell{display:flex;flex-direction:column;gap:14px}
-    .result-hero-v4{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:18px 16px 16px;box-shadow:0 18px 60px rgba(0,0,0,.22)}
-    .result-hero-v4::before{content:'';position:absolute;inset:-90px -70px auto auto;width:220px;height:220px;border-radius:50%;filter:blur(22px);opacity:.18;pointer-events:none}
-    .result-hero-v4.win::before{background:#00ffc8}.result-hero-v4.loss::before{background:#ff5252}.result-hero-v4.draw::before{background:#ffb300}.result-hero-v4.coop::before{background:#7c4dff}.result-hero-v4.solo::before{background:#ffb300}
-    .result-kicker{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:700;margin-bottom:8px}
-    .result-head-v4{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
-    .result-status-v4{font-family:'Orbitron',sans-serif;font-size:clamp(1.35rem,6vw,2.05rem);font-weight:900;letter-spacing:1px;line-height:1.05}
-    .result-status-v4.win{color:#00ffc8}.result-status-v4.loss{color:#ff5252}.result-status-v4.draw{color:#ffb300}.result-status-v4.coop{color:#b388ff}.result-status-v4.solo{color:#ffb300}
-    .result-caption-v4{font-size:12px;color:rgba(255,255,255,.48);margin-top:6px;line-height:1.35}
-    .result-score-pill{flex-shrink:0;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 12px;text-align:center;min-width:104px}
-    .result-score-main{font-family:'Orbitron',sans-serif;font-size:1.45rem;font-weight:900;color:#fff;line-height:1}
-    .result-score-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.32);margin-top:5px}
-    .result-metrics-v4{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1}
-    .result-metric-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.075);border-radius:15px;padding:13px 12px;min-width:0}
-    .result-metric-value{font-family:'Orbitron',sans-serif;font-size:clamp(1.35rem,6vw,1.9rem);font-weight:900;line-height:1;white-space:nowrap}
-    .result-metric-value.pos{color:#00ffc8}.result-metric-value.neg{color:#ff5252}.result-metric-value.zero{color:#ffb300}.result-metric-value.xp{color:#b388ff}
-    .result-metric-label{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:6px}
-    .result-metric-sub{font-size:12px;color:rgba(255,255,255,.52);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .result-progress-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.075);border-radius:16px;padding:13px 14px}
-    .result-progress-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:rgba(255,255,255,.42);margin-bottom:6px}
-    .result-progress-track{height:5px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:10px}
-    .result-progress-track:last-child{margin-bottom:0}
-    .result-progress-fill{height:100%;border-radius:999px;transition:width .55s ease}
-    .result-xp-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:rgba(124,77,255,.13);border:1px solid rgba(124,77,255,.25);border-radius:999px;font-size:11px;color:#b388ff;font-weight:800}
-    .result-section-title{display:flex;align-items:center;gap:9px;margin:2px 2px 0;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.4);font-weight:800}
-    .result-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
-    .result-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-    .result-stat-card{background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.075);border-radius:15px;padding:13px 12px;min-height:74px}
-    .result-stat-value{font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:900;color:#fff;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .result-stat-card.accent .result-stat-value{color:#00ffc8}.result-stat-card.warn .result-stat-value{color:#ffb300}.result-stat-card.danger .result-stat-value{color:#ff8a80}.result-stat-card.purple .result-stat-value{color:#b388ff}
-    .result-stat-label{font-size:11px;color:rgba(255,255,255,.42);margin-top:7px;line-height:1.25}
-    .result-category-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.075);border-radius:16px;padding:13px 13px 12px}
-    .result-cat-row{display:grid;grid-template-columns:92px 1fr 42px 1fr 42px;align-items:center;gap:7px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.045)}
-    .result-cat-row.solo{grid-template-columns:112px 1fr 46px}
-    .result-cat-row:last-child{border-bottom:none}
-    .result-cat-name{font-size:12px;color:rgba(255,255,255,.58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .result-cat-bar{height:7px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
-    .result-cat-fill{height:100%;border-radius:999px;transition:width .55s ease}
-    .result-cat-score{font-size:12px;font-weight:800;text-align:right;white-space:nowrap}
-    .result-coach-card{background:linear-gradient(180deg,rgba(255,179,0,.08),rgba(255,82,82,.055));border:1px solid rgba(255,179,0,.18);border-radius:16px;padding:13px 14px}
-    .result-coach-title{font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#ffb300;font-weight:900;margin-bottom:7px}
-    .result-coach-body{font-size:13px;color:rgba(255,255,255,.66);line-height:1.45}
-    .result-coach-body strong{font-weight:800}
-    .result-review-details{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.075);border-radius:16px;overflow:hidden}
-    .result-review-details summary{list-style:none;cursor:pointer;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;-webkit-tap-highlight-color:transparent}
-    .result-review-details summary::-webkit-details-marker{display:none}
-    .result-review-title{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.52);font-weight:900}
-    .result-review-count{font-size:11px;color:rgba(255,255,255,.36)}
-    .result-review-content{padding:0 14px 14px}
-    .result-review-item{background:rgba(255,255,255,.035);border-radius:12px;padding:11px 12px;margin-bottom:8px}
-    .result-review-q{font-size:13px;color:rgba(255,255,255,.62);line-height:1.42;margin-bottom:7px}
-    .result-review-a{font-size:13px;color:#00ffc8;font-weight:800;line-height:1.35}
-    .result-actions-v4{display:flex;flex-direction:column;gap:9px;margin-top:2px}
-    .result-actions-v4 .btn{margin-top:0!important}
-    @media(max-width:380px){.result-cat-row{grid-template-columns:82px 1fr 36px 1fr 36px;gap:5px}.result-cat-name{font-size:11px}.result-metrics-v4{gap:8px}.result-metric-card{padding:12px 10px}}
   </style>
 </head>
 <body>
@@ -495,37 +438,10 @@ const CATS={phrasal:{label:'Phrasal Verbs',color:'#00ffc8'},grammar:{label:'Gram
 const DIFF_LABELS=['','B2','B2/C1','C1'];
 const LT=['A','B','C','D'];
 const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
+const QUESTION_TIME = 30;
 const NICK_ADJ=['Swift','Brave','Sharp','Clever','Bold','Quick','Wise','Epic','Dark','Calm','Wild','Cool','Iron','Gold','Neon'];
 const NICK_NOUN=['Falcon','Tiger','Phoenix','Dragon','Wolf','Hawk','Viper','Ninja','Storm','Blaze','Ghost','Rider','Arrow','Comet','Spark'];
 function randomNick(){return NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+NICK_NOUN[Math.floor(Math.random()*NICK_NOUN.length)];}
-
-
-// Randomize answer positions so AI cannot keep the correct answer mostly at A/B.
-function normalizeGeneratedQuestions(questions){
-  if(!Array.isArray(questions))return[];
-  return questions.map((q,idx)=>{
-    const options=Array.isArray(q.options)?q.options.slice(0,4):[];
-    let correct=Number.isInteger(q.correct)?q.correct:Number(q.correct);
-    if(!Number.isInteger(correct)){
-      const letter=String(q.correct??'').trim().toUpperCase();
-      correct=LT.indexOf(letter);
-    }
-    if(correct<0||correct>=options.length)correct=0;
-
-    const pairs=options.map((text,i)=>({text,ok:i===correct}));
-    for(let i=pairs.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [pairs[i],pairs[j]]=[pairs[j],pairs[i]];
-    }
-    const newCorrect=pairs.findIndex(p=>p.ok);
-    return{
-      ...q,
-      id:q.id??idx+1,
-      options:pairs.map(p=>p.text),
-      correct:newCorrect>=0?newCorrect:0
-    };
-  });
-}
 
 const FORMATS={
   mixed:     {label:'Zmiešaný',     icon:'⚡', color:'#00ffc8', hint:'Všetky typy otázok',         prompt:'Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary & idioms.'},
@@ -561,7 +477,7 @@ const S={
   oppName:'', oppScore:0, oppDone:false, oppAnswers:[], oppUid:'',
   myProfile:null,
   eloChange:0, newElo:0, analysisReady:false, shieldJustEarned:false, analysisStarted:false,
-  timerVal:25, timerInterval:null,
+  timerVal:QUESTION_TIME, timerInterval:null,
   srQuestions:[], // spaced repetition questions due today
   rematchCode:'', rematchRole:'',
   hintUsed:false,
@@ -730,10 +646,32 @@ Write ONLY the insight text in Slovak, no labels, no intro. Max 2-3 sentences. B
 async function saveGameToHistory(oppName,oppUid,myScore,oppScore,result,format,submode,eloChange,myElo,stats){
   try{
     const key='g'+Date.now();
+    const answerTimes=(S.answerTimes||[]).filter(t=>Number.isFinite(t)&&t>=0);
+    const qCount=(S.questions&&S.questions.length)||10;
+    const avgArr=arr=>arr.length?Math.round((arr.reduce((a,b)=>a+b,0)/arr.length)*10)/10:null;
+    const avgTime=avgArr(answerTimes);
+    const fastestTime=answerTimes.length?Math.min(...answerTimes):null;
+    const slowestTime=answerTimes.length?Math.max(...answerTimes):null;
+    const timeoutCount=(S.myAnswers||[]).filter(a=>a.timeout).length;
+    const correctTimes=answerTimes.filter((t,i)=>S.myAnswers?.[i]?.correct);
+    const wrongTimes=answerTimes.filter((t,i)=>S.myAnswers?.[i]&&!S.myAnswers[i].correct);
+    const catGame={phrasal:{played:0,correct:0},grammar:{played:0,correct:0},vocab:{played:0,correct:0}};
+    (S.questions||[]).forEach((q,i)=>{
+      const k=catKey(q.type);
+      if(!catGame[k])return;
+      catGame[k].played++;
+      if(S.myAnswers?.[i]?.correct)catGame[k].correct++;
+    });
     const entry={
       date:Date.now(), oppName, oppUid,
       myScore, oppScore, result,
       format:format||'mixed', submode:submode||'competitive',
+      questionsCount:qCount,
+      accuracy:qCount?Math.round((myScore||0)/qCount*100):null,
+      avgTime, fastestTime, slowestTime, timeoutCount,
+      avgCorrectTime:avgArr(correctTimes),
+      avgWrongTime:avgArr(wrongTimes),
+      catGame,
       eloBefore:myElo-eloChange, eloAfter:myElo,
       eloChange,
       phrasal:stats?.phrasal?Math.round((stats.phrasal.correct||0)/(stats.phrasal.played||1)*100):null,
@@ -767,50 +705,6 @@ async function loadCefrHistory(){
 }
 
 const CEFR_SCORE={A2:1,B1:2,'B1+':2.5,B2:3,'B2+':3.5,C1:4,'C1+':4.5};
-
-function cefrFallbackAssessment(prof){
-  const stats=prof?.stats||{};
-  const ph=stats.phrasal||{played:0,correct:0};
-  const gr=stats.grammar||{played:0,correct:0};
-  const vo=stats.vocab||{played:0,correct:0};
-  const totalPlayed=(ph.played||0)+(gr.played||0)+(vo.played||0);
-  const totalCorrect=(ph.correct||0)+(gr.correct||0)+(vo.correct||0);
-  const pct=totalPlayed?Math.round(totalCorrect/totalPlayed*100):0;
-  const elo=prof?.elo||START_ELO;
-  const diff=calcDiff(prof);
-  const catPct2=s=>s?.played?Math.round((s.correct||0)/(s.played||1)*100):null;
-  const vals=[['Phrasal verbs',catPct2(ph)],['Gramatika',catPct2(gr)],['Slovná zásoba',catPct2(vo)]].filter(x=>x[1]!==null);
-  const strongest=vals.length?[...vals].sort((a,b)=>b[1]-a[1])[0]:['celková presnosť',pct];
-  const weakest=vals.length?[...vals].sort((a,b)=>a[1]-b[1])[0]:['celková presnosť',pct];
-  let level='B1+';
-  if(pct>=88&&elo>=1300&&diff>=3)level='C1+';
-  else if(pct>=78&&elo>=1200)level='C1';
-  else if(pct>=68&&elo>=1100)level='B2+';
-  else if(pct>=55&&elo>=950)level='B2';
-  else if(pct>=42)level='B1+';
-  else level='B1';
-  return{
-    level,
-    summary:`Odhadovaná receptívna úroveň je ${level}. Výpočet vychádza z celkovej presnosti ${pct}% po ${prof?.gamesPlayed||0} dueloch, ELO ${elo} a aktuálnej obtiažnosti otázok.`,
-    strengths:`Najsilnejšia oblasť: ${strongest[0]} (${strongest[1]}%).`,
-    weaknesses:`Najslabšia oblasť: ${weakest[0]} (${weakest[1]}%).`,
-    advice:`Zameraj sa najmä na ${weakest[0].toLowerCase()} a rob krátke B2/C1 tréningy po každom dueli.`,
-    assessedAt:Date.now(),
-    gamesAt:prof?.gamesPlayed||0,
-    source:'fallback'
-  };
-}
-
-async function ensureCefrAssessmentForCurrentUser(){
-  const prof=S.myProfile;
-  if(!prof)return;
-  const games=prof.gamesPlayed||0;
-  if(games<10)return;
-  // Refresh every 10 games, but if the user has no CEFR yet, create it immediately even at 11, 12, 13...
-  if(prof.cefrResult && games%10!==0)return;
-  await runCefrAssessment();
-}
-
 
 // ═══════════════════════════════════════════════════
 // HEAD-TO-HEAD
@@ -855,7 +749,7 @@ async function runCefrAssessment(){
   const prof=S.myProfile;
   if(!prof)return;
   const games=prof.gamesPlayed||0;
-  if(games<10)return;
+  if(games<10||games%10!==0)return; // only every 10 games
 
   const stats=prof.stats||{};
   const ph=stats.phrasal||{played:0,correct:0};
@@ -867,31 +761,16 @@ async function runCefrAssessment(){
   const diff=calcDiff(prof);
   const diffLabel=diff===1?'B2':diff===3?'C1':'B2/C1';
 
+  // Game history summary (last 10 games approximated from stats)
   const totalPlayed=ph.played+gr.played+vo.played;
   const totalCorrect=ph.correct+gr.correct+vo.correct;
   const overallPct=totalPlayed?Math.round(totalCorrect/totalPlayed*100):50;
-
-  const saveResult=async(result)=>{
-    result.assessedAt=result.assessedAt||Date.now();
-    result.gamesAt=games;
-    S.cefrResult=result;
-    await dbUp('users/'+S.uid,{cefrResult:result});
-    S.myProfile={...S.myProfile,cefrResult:result};
-    saveCefrSnapshot(result.level);
-  };
-
-  // Important fix: the opponent usually does NOT have the API key.
-  // Before, CEFR silently failed for P2. Now every player gets at least a deterministic CEFR estimate.
-  if(!S.ak||!S.ak.startsWith('sk-')){
-    await saveResult(cefrFallbackAssessment(prof));
-    return;
-  }
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,messages:[{role:'user',content:
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:
         `You are an expert English language assessor. Based on these quiz performance statistics, assess the student's RECEPTIVE English level (reading comprehension, grammar, vocabulary knowledge) according to CEFR.
 
 Statistics from last ${games} games:
@@ -904,23 +783,24 @@ Statistics from last ${games} games:
 - Win rate: ${games>0?Math.round((prof.wins||0)/games*100)+'%':'n/a'}
 
 Respond ONLY in Slovak language with this exact JSON (no markdown):
-{"level":"B2+","summary":"2-3 sentences about their level","strengths":"1-2 specific strong areas","weaknesses":"1-2 specific weak areas","advice":"1 concrete study recommendation"}
+{"level":"B2+","summary":"Odhad jazykovej úrovne","strengths":"1-2 specific strong areas","weaknesses":"1-2 specific weak areas","advice":"1 concrete study recommendation"}
 
 Level must be one of: A2, B1, B1+, B2, B2+, C1, C1+`
       }]})
     });
-    if(!res.ok)throw new Error('CEFR API '+res.status);
+    if(!res.ok)return;
     const data=await res.json();
     const text=data.content?.find(b=>b.type==='text')?.text||'';
     const m=text.match(/\{[\s\S]*\}/);
-    if(!m)throw new Error('CEFR API nevrátila JSON');
+    if(!m)return;
     const result=JSON.parse(m[0]);
-    result.source='ai';
-    await saveResult(result);
-  }catch(e){
-    console.warn('CEFR assessment failed, using fallback',e);
-    await saveResult(cefrFallbackAssessment(prof));
-  }
+    result.summary='Odhad jazykovej úrovne';
+    result.assessedAt=Date.now();result.gamesAt=games;
+    S.cefrResult=result;
+    await dbUp('users/'+S.uid,{cefrResult:result});
+    S.myProfile={...S.myProfile,cefrResult:result};
+    saveCefrSnapshot(result.level);
+  }catch(e){console.warn('CEFR assessment failed',e);}
 }
 
 // ═══════════════════════════════════════════════════
@@ -941,7 +821,7 @@ Rules: level must be "B2", "B2-C1", or "C1". type must be "Phrasal Verbs","Advan
   const text=data.content?.find(b=>b.type==='text')?.text||'';
   const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('Neplatná odpoveď');
   const p=JSON.parse(m[0]);if(!p.questions?.length)throw new Error('Prázdne');
-  return normalizeGeneratedQuestions(p.questions);
+  return p.questions;
 }
 
 function calcPlacementElo(answers,questions){
@@ -1121,7 +1001,6 @@ async function loadProfile(){
     const p=await dbGet('users/'+S.uid);
     S.myProfile=p||{elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null,xp:0,cefrResult:null};
     if(p?.cefrResult)S.cefrResult=p.cefrResult;
-    if(p && (p.gamesPlayed||0)>=10 && !p.cefrResult){setTimeout(()=>ensureCefrAssessmentForCurrentUser().then(render).catch(()=>{}),600);}
     if(!p)await dbSet('users/'+S.uid,{name:S.name,elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',xp:0});
   }catch(e){S.myProfile={elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null};}
 }
@@ -1353,7 +1232,7 @@ async function runAnalysis(){
         S.score>S.oppScore?'win':S.score===S.oppScore?'draw':'loss',
         S.format,S.submode,delta,S.newElo,newStats);
     }
-    ensureCefrAssessmentForCurrentUser();
+    runCefrAssessment();
     // Cleanup room — skip for Bo3 (room reused between rounds)
     if(S.roomCode&&S.submode!=='bo3')S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
   }catch(e){console.error(e);S.analysisReady=true;render();}
@@ -1366,7 +1245,7 @@ function g(id){return document.getElementById(id);}
 function render(){
   const app=document.getElementById('app');
   const card=document.createElement('div');card.className='card';
-  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,bo3_results:hBo3Results,bo3_summary:hBo3Summary,analysis:hAnalysis,history:hHistory,statistics:hStatistics,sudden_death:hSuddenDeath};
+  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,bo3_results:hBo3Results,bo3_summary:hBo3Summary,analysis:hAnalysis,history:hHistory,stats:hStats,sudden_death:hSuddenDeath};
   card.innerHTML=(map[S.screen]||hLoad)();
   // Apply result-specific animation
   if(S.screen==='results'){
@@ -1379,7 +1258,7 @@ function render(){
 }
 function updateLiveBar(){
   const isCoop=S.submode==='coop';
-  const cur=S.score+(S.selected!==null&&S.selected===S.questions[S.current]?.correct?1:0);
+  const cur=S.score;
   if(isCoop){
     const combined=cur+S.oppScore,tot=S.questions.length*2,target=Math.ceil(tot*COOP_TARGET_PCT);
     const w=Math.min(100,Math.round(combined/tot*100));
@@ -1472,7 +1351,7 @@ function hSetup(){
     ?`<img src="${S.user.photoURL}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`
     :`<span style="font-size:1.1rem;font-weight:700;color:#080c14">${(S.name||'?')[0].toUpperCase()}</span>`;
   return`
-  <div class="logo" style="font-size:1.3rem;margin-bottom:4px">Nastavenia</div>
+  <div class="logo" style="font-size:1.3rem;margin-bottom:4px">NASTAVENIA</div>
   ${isFromHome?`
   <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 15px;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
@@ -1484,8 +1363,14 @@ function hSetup(){
     </div>
     <button class="btn btn-danger" id="signOutBtn">Odhlásiť sa</button>
   </div>`:''}
-  <div class="lbl" style="margin-top:4px">Prezývka</div>
-  <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name||''}" autocomplete="nickname"/>
+  <div class="sec-title" style="margin-top:4px">Profil</div>
+  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 15px;margin-bottom:16px">
+    <div class="lbl">Prezývka</div>
+    <input type="text" id="settingsNameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name||''}" autocomplete="nickname"/>
+    <button class="btn btn-primary" id="saveNickBtn">ULOŽIŤ</button>
+  </div>
+
+  <div class="sec-title" style="margin-top:4px">API</div>
   <div class="lbl" style="margin-top:4px">Anthropic API kľúč</div>
   <div class="info-box"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
   <input type="password" id="ak" placeholder="sk-ant-api03-..." value="${S.ak}" autocomplete="off"/>
@@ -1585,12 +1470,12 @@ function hHome(){
         <div class="cefr-circle-sm">${prof?.cefrResult?prof.cefrResult.level:'?'}</div>
         <div class="cefr-info-sm">
           <span class="cefr-info-label">CEFR</span>
-          <span class="cefr-info-val">${prof?.cefrResult?prof.cefrResult.summary?.split('.')[0].substring(0,28)+'...':'Zatiaľ bez odhadu'}</span>
+          <span class="cefr-info-val">${prof?.cefrResult?'Odhad jazykovej úrovne':'Odhad po 10 dueloch'}</span>
         </div>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,.28);text-align:right">Odhad jazykovej úrovne</div>
     </div>
   </div>
+
 
   <div class="action-lbl">Hrať</div>
   <button class="cta-primary-btn ${ctaStyle}" id="goBtn" ${!canGo?'disabled':''} style="${!canGo?'opacity:.4;cursor:not-allowed':''}">
@@ -1633,13 +1518,13 @@ function hHome(){
       <div class="nav-label">Domov</div>
       <div class="nav-dot"></div>
     </div>
-    <div class="nav-item" id="histBtn">
-      <div class="nav-icon">📜</div>
-      <div class="nav-label">História</div>
-    </div>
     <div class="nav-item" id="statsBtn">
       <div class="nav-icon">📊</div>
       <div class="nav-label">Štatistika</div>
+    </div>
+    <div class="nav-item" id="histBtn">
+      <div class="nav-icon">📜</div>
+      <div class="nav-label">História</div>
     </div>
     <div class="nav-item" id="cfgBtn">
       <div class="nav-icon">⚙️</div>
@@ -1661,7 +1546,6 @@ function hLobby(){
     <div style="font-size:22px">${myRankR.emoji}</div>
     <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:${myRankR.color}">${myRankR.n}</div>
     <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.myProfile?.elo||START_ELO} ELO</div>
-    <div style="font-size:10px;color:${S.myProfile?.cefrResult?'#00ffc8':'rgba(255,255,255,.22)'}">CEFR ${S.myProfile?.cefrResult?S.myProfile.cefrResult.level:'bez odhadu'}</div>
   </div>`;
   const fmtBadge=`<span style="padding:4px 12px;border-radius:20px;font-size:.74rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</span>`;
   const readyCards=`<div class="player-ready-row">
@@ -1690,7 +1574,6 @@ function hLobby(){
           <div style="font-size:22px">${getRank(S.oppProfile.elo||START_ELO).emoji}</div>
           <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:${getRank(S.oppProfile.elo||START_ELO).color}">${getRank(S.oppProfile.elo||START_ELO).n.toUpperCase()}</div>
           <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppProfile.elo||START_ELO} ELO</div>
-          <div style="font-size:10px;color:${S.oppProfile.cefrResult?'#00ffc8':'rgba(255,255,255,.22)'}">CEFR ${S.oppProfile.cefrResult?S.oppProfile.cefrResult.level:'bez odhadu'}</div>
         `:oppJoined?`
           <div style="font-size:22px;opacity:.5">⏳</div>
           <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppName||'Súper'}</div>
@@ -1736,7 +1619,7 @@ function bo3BarHTML(){
 function hQuiz(){
   const q=S.questions[S.current],tot=S.questions.length,ans=S.selected!==null;
   const pw=Math.round(S.current/tot*100),isCoop=S.submode==='coop';
-  const ls=S.score+(ans&&S.selected===q.correct?1:0);
+  const ls=S.score;
   const combinedTot=tot*2,combined=ls+S.oppScore,target=Math.ceil(combinedTot*COOP_TARGET_PCT);
   const cw=Math.min(100,Math.round(combined/combinedTot*100)),mrkL=Math.min(100,Math.round(target/combinedTot*100));
   function bc(t){return t?.includes('Phrasal')?'bp':t?.includes('Grammar')?'bg2':'bv';}
@@ -1854,9 +1737,33 @@ function hResults(){
   <button class="btn btn-rematch" id="rematchBtn" style="margin-top:9px">⚔️ REMATCH</button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
+function metricCard(label,value,color='#fff',sub=''){
+  return`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:13px 12px;text-align:center;min-height:76px;display:flex;flex-direction:column;justify-content:center">
+    <div style="font-family:'Orbitron',sans-serif;font-size:1.35rem;font-weight:900;color:${color};line-height:1.1">${value}</div>
+    <div style="font-size:.64rem;color:rgba(255,255,255,.35);margin-top:5px;letter-spacing:.5px">${label}</div>
+    ${sub?`<div style="font-size:.62rem;color:rgba(255,255,255,.25);margin-top:3px">${sub}</div>`:''}
+  </div>`;
+}
+
+function svgLineChart(values,{color='#00ffc8',height=54,width=280,labelMin=true}={}){
+  const vals=(values||[]).filter(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))).map(Number);
+  if(vals.length<2)return'';
+  const W=width,H=height,pad=6;
+  const minV=Math.min(...vals),maxV=Math.max(...vals),range=maxV-minV||1;
+  const x=i=>pad+i*(W-pad*2)/(vals.length-1);
+  const y=v=>H-pad-(v-minV)/range*(H-pad*2);
+  const pts=vals.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  return`<svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible;display:block">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${vals.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${color}"/>`).join('')}
+    ${labelMin?`<text x="0" y="${H}" font-size="8" fill="rgba(255,255,255,.3)">${Math.round(minV)}</text>
+    <text x="0" y="${pad+5}" font-size="8" fill="rgba(255,255,255,.3)">${Math.round(maxV)}</text>`:''}
+  </svg>`;
+}
+
 function hHistory(){
   const hist=S.gameHistory||[];
-  const histItems=hist.slice(0,40).map(g=>{
+  const histItems=hist.slice(0,30).map(g=>{
     const v=g.result||'draw';
     const date=new Date(g.date).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'});
     const eloStr=g.eloChange!=null?(g.eloChange>0?`<span style="color:#00ffc8">+${g.eloChange}</span>`:`<span style="color:#ff5252">${g.eloChange}</span>`):'<span style="color:#ffb300">±0</span>';
@@ -1878,101 +1785,234 @@ function hHistory(){
   return`
   <div class="logo" style="font-size:1.3rem;margin-bottom:4px">HISTÓRIA</div>
   <div class="logo-sub" style="margin-bottom:18px">Posledné zápasy</div>
+  <div class="info-box" style="margin-bottom:14px">📊 Súhrnné metriky, win rate a ELO krivku nájdeš v novej sekcii <strong>Štatistika</strong>.</div>
   ${histItems||'<div style="font-size:.82rem;color:rgba(255,255,255,.28);text-align:center;padding:16px">Zatiaľ žiadne zápasy</div>'}
-  <button class="btn btn-ghost" id="statsBtn" style="margin-top:12px">📊 Otvoriť štatistiku</button>
+  <button class="btn btn-primary" id="statsBtnInline" style="margin-top:14px">📊 OTVORIŤ ŠTATISTIKU</button>
   <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:9px">← Späť</button>
 `;}
 
-function hStatistics(){
+function hStats(){
   const hist=S.gameHistory||[];
   const prof=S.myProfile||{};
-  const stats=prof.stats||{};
-  const total=hist.length;
-  const wins=hist.filter(g=>g.result==='win').length;
-  const draws=hist.filter(g=>g.result==='draw').length;
-  const losses=hist.filter(g=>g.result==='loss').length;
-  const winRate=total?Math.round(wins/total*100):0;
-  const avgScore=total?Math.round(hist.reduce((s,g)=>s+(Number(g.myScore)||0),0)/total*10)/10:0;
-  const avgEloChange=total?Math.round(hist.reduce((s,g)=>s+(Number(g.eloChange)||0),0)/total*10)/10:0;
-  const bestWin=hist.filter(g=>g.result==='win').sort((a,b)=>(b.eloChange||0)-(a.eloChange||0))[0];
+  const now=Date.now();
+  const dayMs=86400000;
+  const fmtDate=ts=>new Date(ts||0).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'});
+  const pct=(num,den)=>den?Math.round(num/den*100):0;
+  const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10:null;
+  const gameAcc=g=>g.accuracy!=null?g.accuracy:(g.myScore!=null?Math.round((g.myScore||0)/(g.questionsCount||10)*100):null);
+
+  const total=prof.gamesPlayed||hist.length||0;
+  const wins=prof.wins!=null?(prof.wins||0):hist.filter(g=>g.result==='win').length;
+  const draws=prof.draws!=null?(prof.draws||0):hist.filter(g=>g.result==='draw').length;
+  const losses=Math.max(0,total-wins-draws);
+  const winRate=pct(wins,total);
   const currentElo=prof.elo||START_ELO;
-  const rank=getRank(currentElo);
+  const highestElo=hist.length?Math.max(currentElo,...hist.map(g=>g.eloAfter||0).filter(Boolean)):currentElo;
+  const lowestElo=hist.length?Math.min(currentElo,...hist.map(g=>g.eloAfter||currentElo).filter(Boolean)):currentElo;
+  const eloValues=hist.slice(0,30).reverse().map(g=>g.eloAfter).filter(v=>Number.isFinite(Number(v))).map(Number);
+  const accValues=hist.slice(0,30).reverse().map(gameAcc).filter(v=>v!==null);
 
-  const eloPoints=hist.slice(0,30).reverse();
-  const elos=eloPoints.map(g=>g.eloAfter).filter(Boolean);
-  let sparkline='';
-  if(elos.length>1){
-    const minE=Math.min(...elos),maxE=Math.max(...elos),range=maxE-minE||1;
-    const W=300,H=72,pad=8;
-    const pts=elos.map((e,i)=>`${pad+i*(W-pad*2)/(elos.length-1)},${H-pad-(e-minE)/range*(H-pad*2)}`).join(' ');
-    sparkline=`<div class="cefr-chart-wrap" style="padding:14px;margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span class="lbl" style="margin-bottom:0">ELO krivka</span>
-        <span style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:800;color:${rank.color}">${currentElo} · ${rank.n}</span>
-      </div>
-      <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">
-        <defs><linearGradient id="eloLine" x1="0" x2="1"><stop offset="0" stop-color="#00ffc8"/><stop offset="1" stop-color="#7c4dff"/></linearGradient></defs>
-        <polyline points="${pts}" fill="none" stroke="url(#eloLine)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-        ${elos.map((e,i)=>`<circle cx="${pad+i*(W-pad*2)/(elos.length-1)}" cy="${H-pad-(e-minE)/range*(H-pad*2)}" r="3" fill="#00ffc8"/>`).join('')}
-        <text x="0" y="${H-1}" font-size="9" fill="rgba(255,255,255,.35)">${minE}</text>
-        <text x="0" y="${pad+4}" font-size="9" fill="rgba(255,255,255,.35)">${maxE}</text>
-      </svg>
-    </div>`;
-  }else{
-    sparkline=`<div class="cefr-chart-wrap" style="padding:18px;text-align:center;color:rgba(255,255,255,.32);font-size:.82rem;margin-bottom:14px">ELO krivka sa zobrazí po viacerých dueloch.</div>`;
-  }
+  const recent5=hist.slice(0,5);
+  const recent10=hist.slice(0,10);
+  const prev10=hist.slice(10,20);
+  const recentForm=recent5.length?recent5.map(g=>{
+    const v=g.result||'draw';
+    const bg=v==='win'?'rgba(0,255,200,.13)':v==='draw'?'rgba(255,179,0,.13)':'rgba(255,82,82,.13)';
+    const col=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
+    return`<span style="width:30px;height:30px;border-radius:9px;background:${bg};color:${col};display:inline-flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:900">${v==='win'?'W':v==='draw'?'D':'L'}</span>`;
+  }).join(''):'<span style="color:rgba(255,255,255,.3);font-size:.8rem">Zatiaľ žiadna forma</span>';
+  const recent10Acc=recent10.length?Math.round(recent10.map(gameAcc).filter(v=>v!==null).reduce((s,v)=>s+v,0)/(recent10.map(gameAcc).filter(v=>v!==null).length||1)):null;
+  const prev10Acc=prev10.length?Math.round(prev10.map(gameAcc).filter(v=>v!==null).reduce((s,v)=>s+v,0)/(prev10.map(gameAcc).filter(v=>v!==null).length||1)):null;
+  const accTrend=(recent10Acc!==null&&prev10Acc!==null)?recent10Acc-prev10Acc:null;
+  const last5Chron=recent5.slice().reverse();
+  const eloTrend5=last5Chron.length>=2?(last5Chron[last5Chron.length-1].eloAfter||currentElo)-(last5Chron[0].eloBefore||last5Chron[0].eloAfter||currentElo):null;
+  const recentEloChange=recent10.reduce((s,g)=>s+(g.eloChange||0),0);
 
+  const qHistSum=hist.reduce((s,g)=>s+(g.questionsCount||10),0);
+  const correctHistSum=hist.reduce((s,g)=>s+(g.myScore||0),0);
+  const stats=prof.stats||{};
+  const totalPlayed=Object.values(stats).reduce((s,c)=>s+(c?.played||0),0);
+  const totalCorrect=Object.values(stats).reduce((s,c)=>s+(c?.correct||0),0);
+  const qTotal=totalPlayed||qHistSum;
+  const correctTotal=totalCorrect||correctHistSum;
+  const overallAcc=pct(correctTotal,qTotal);
+  const avgScore=hist.length?Math.round(hist.reduce((s,g)=>s+(g.myScore||0),0)/hist.length*10)/10:null;
+
+  const activeDays=new Set(hist.map(g=>new Date(g.date||0).toISOString().slice(0,10))).size;
+  const weekGames=hist.filter(g=>(g.date||0)>=now-7*dayMs);
+  const weekQuestions=weekGames.reduce((s,g)=>s+(g.questionsCount||10),0);
+  const weekCorrect=weekGames.reduce((s,g)=>s+(g.myScore||0),0);
+  const weekElo=weekGames.reduce((s,g)=>s+(g.eloChange||0),0);
+
+  const avgTime=avg(hist.map(g=>g.avgTime).filter(v=>v!=null));
+  const fastestVals=hist.map(g=>g.fastestTime).filter(v=>v!=null);
+  const fastest=fastestVals.length?Math.min(...fastestVals):null;
+  const slowestVals=hist.map(g=>g.slowestTime).filter(v=>v!=null);
+  const slowest=slowestVals.length?Math.max(...slowestVals):null;
+  const avgCorrectTime=avg(hist.map(g=>g.avgCorrectTime).filter(v=>v!=null));
+  const avgWrongTime=avg(hist.map(g=>g.avgWrongTime).filter(v=>v!=null));
+  const timeoutSum=hist.reduce((s,g)=>s+(g.timeoutCount||0),0);
+  const timeoutRate=pct(timeoutSum,qHistSum||qTotal||1);
+
+  const bestGame=hist.slice().filter(g=>gameAcc(g)!==null).sort((a,b)=>(gameAcc(b)-gameAcc(a))||((b.myScore||0)-(a.myScore||0))||((b.eloChange||0)-(a.eloChange||0)))[0];
+  const worstGame=hist.slice().filter(g=>gameAcc(g)!==null).sort((a,b)=>(gameAcc(a)-gameAcc(b))||((a.myScore||0)-(b.myScore||0)))[0];
+
+  const rivalMap={};
+  hist.filter(g=>g.oppUid&&g.oppName&&g.oppName!=='Sólo').forEach(g=>{
+    const key=g.oppUid||g.oppName;
+    rivalMap[key]=rivalMap[key]||{name:g.oppName,total:0,wins:0,draws:0,losses:0,myScore:0,oppScore:0};
+    const r=rivalMap[key]; r.total++; r.myScore+=g.myScore||0; r.oppScore+=g.oppScore||0;
+    if(g.result==='win')r.wins++; else if(g.result==='draw')r.draws++; else if(g.result==='loss')r.losses++;
+  });
+  const rivals=Object.values(rivalMap).sort((a,b)=>b.total-a.total);
+  const topRival=rivals[0]||null;
+  const hardest=rivals.slice().filter(r=>r.total>=2).sort((a,b)=>(a.wins/a.total)-(b.wins/b.total))[0]||null;
+
+  const recentCat={phrasal:{played:0,correct:0},grammar:{played:0,correct:0},vocab:{played:0,correct:0}};
+  recent10.forEach(g=>{
+    if(!g.catGame)return;
+    Object.keys(recentCat).forEach(k=>{recentCat[k].played+=g.catGame[k]?.played||0;recentCat[k].correct+=g.catGame[k]?.correct||0;});
+  });
   const catRows=Object.entries(CATS).map(([k,c])=>{
-    const s=stats[k]||{played:0,correct:0};
-    const pct=s.played?Math.round(s.correct/s.played*100):0;
-    return`<div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-        <span style="font-size:.82rem;color:rgba(255,255,255,.7);font-weight:600">${c.label}</span>
-        <span style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:${c.color};font-weight:900">${s.correct||0}/${s.played||0}</span>
+    const p=catPct(stats,k);
+    const played=stats?.[k]?.played||0;
+    const correct=stats?.[k]?.correct||0;
+    const rp=recentCat[k].played?pct(recentCat[k].correct,recentCat[k].played):null;
+    return`<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-size:.78rem;color:rgba(255,255,255,.62);font-weight:600">${c.label}</span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:.76rem;color:${c.color};font-weight:900">${p!==null?p+'%':'—'}</span>
       </div>
-      <div class="cat-bar-wrap" style="height:7px"><div class="cat-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
-      <div style="font-size:.68rem;color:rgba(255,255,255,.32);margin-top:5px">Úspešnosť ${s.played?pct+'%':'—'}</div>
+      <div style="height:7px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden"><div style="height:100%;width:${p??0}%;background:${c.color};border-radius:10px"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:.64rem;color:rgba(255,255,255,.28);margin-top:4px">
+        <span>${played?`${correct}/${played} správne`:'bez dát'}</span>
+        <span>${rp!==null?`posledných 10: ${rp}%`:''}</span>
+      </div>
     </div>`;
   }).join('');
+  const wk=stats?weakestCat(stats):null;
+  const wkPct=wk?catPct(stats,wk):null;
+  const strong=Object.keys(CATS).map(k=>({k,p:catPct(stats,k)})).filter(x=>x.p!==null).sort((a,b)=>b.p-a.p)[0];
+  const focus=wkPct!==null?`${CATS[wk].label} (${wkPct}%)`:'Zahraj viac duelov';
+  const focusAdvice=wkPct===null?'Odporúčanie sa spresní po viacerých otázkach.':wkPct<55?'Toto je hlavná rezerva. Daj si najbližších 5 hier na túto oblasť.':wkPct<70?'Je to najlepšia oblasť na ďalšie zlepšenie.':'Výkon je vyrovnaný, pokračuj v zmiešanom tréningu.';
+  const trendText=accTrend===null?'Trend sa zobrazí po ďalších hrách':`${accTrend>=0?'+':''}${accTrend}% oproti predchádzajúcim 10 hrám`;
+  const trendColor=accTrend===null?'rgba(255,255,255,.35)':accTrend>=0?'#00ffc8':'#ff5252';
+  const cefrLevel=prof.cefrResult?.level||prof.cefrLevel||'—';
 
   return`
   <div class="logo" style="font-size:1.3rem;margin-bottom:4px">ŠTATISTIKA</div>
-  <div class="logo-sub" style="margin-bottom:18px">Prehľad výkonu</div>
+  <div class="logo-sub" style="margin-bottom:18px">Prehľad výkonu a progresu</div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
-    <div style="background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.18);border-radius:14px;padding:14px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;color:#00ffc8">${winRate}%</div>
-      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Win rate</div>
+    ${metricCard('Počet zápasov',total,'#ffb300')}
+    ${metricCard('Win rate',winRate+'%','#00ffc8')}
+    ${metricCard('Bilancia',`${wins}W ${draws}D ${losses}L`,'#b388ff')}
+    ${metricCard('Aktuálny ELO',currentElo,'#fff',`max ${highestElo}`)}
+  </div>
+
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="lbl" style="margin-bottom:0">Forma a momentum</div>
+      <div style="font-size:.7rem;color:${trendColor};font-weight:700">${trendText}</div>
     </div>
-    <div style="background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.18);border-radius:14px;padding:14px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;color:#ffb300">${total}</div>
-      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Počet zápasov</div>
-    </div>
-    <div style="background:rgba(124,77,255,.06);border:1px solid rgba(124,77,255,.2);border-radius:14px;padding:14px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:900;color:#b388ff">${wins} / ${draws} / ${losses}</div>
-      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Výhry / Remízy / Prehry</div>
-    </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:900;color:${avgEloChange>=0?'#00ffc8':'#ff5252'}">${avgEloChange>0?'+'+avgEloChange:avgEloChange}</div>
-      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Priemerná ELO zmena</div>
+    <div style="display:flex;gap:7px;margin-bottom:12px">${recentForm}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${metricCard('ELO posledných 5',eloTrend5===null?'—':(eloTrend5>=0?`+${eloTrend5}`:eloTrend5),eloTrend5===null?'#fff':eloTrend5>=0?'#00ffc8':'#ff5252')}
+      ${metricCard('ELO posledných 10',recent10.length?(recentEloChange>=0?`+${recentEloChange}`:recentEloChange):'—',recentEloChange>=0?'#00ffc8':'#ff5252')}
+      ${metricCard('Priemerné skóre',avgScore!==null?avgScore+'/10':'—','#00ffc8')}
+      ${metricCard('Celková accuracy',overallAcc?overallAcc+'%':'—','#ffb300')}
     </div>
   </div>
 
-  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;margin-bottom:14px">
-    <div class="lbl" style="margin-bottom:10px">Súhrn</div>
-    <div class="stat-row"><span class="stat-lbl">Aktuálne ELO</span><span class="stat-val" style="color:${rank.color}">${currentElo} · ${rank.n}</span></div>
-    <div class="stat-row"><span class="stat-lbl">Priemerné skóre</span><span class="stat-val">${total?avgScore:'—'}</span></div>
-    <div class="stat-row" style="border-bottom:none"><span class="stat-lbl">Najlepší ELO zisk</span><span class="stat-val">${bestWin?.eloChange?('+'+bestWin.eloChange):'—'}</span></div>
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div class="lbl" style="margin-bottom:12px">Learning activity</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${metricCard('Vyriešené otázky',qTotal||'—','#b388ff')}
+      ${metricCard('Správne odpovede',correctTotal||'—','#00ffc8')}
+      ${metricCard('Aktívne dni',activeDays||'—','#ffb300')}
+      ${metricCard('Tento týždeň',weekQuestions?`${weekCorrect}/${weekQuestions}`:'—',weekElo>=0?'#00ffc8':'#ff5252',weekQuestions?`${weekElo>=0?'+':''}${weekElo} ELO`:'bez dát')}
+    </div>
   </div>
 
-  ${sparkline}
+  ${eloValues.length>1?`<div class="cefr-chart-wrap" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="lbl" style="margin-bottom:0">ELO krivka</span>
+      <span style="font-family:'Orbitron',sans-serif;font-size:.78rem;color:#00ffc8;font-weight:900">${eloValues[eloValues.length-1]}</span>
+    </div>
+    ${svgLineChart(eloValues,{color:'#00ffc8',height:52})}
+  </div>`:''}
+
+  ${accValues.length>1?`<div class="cefr-chart-wrap" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="lbl" style="margin-bottom:0">Accuracy trend</span>
+      <span style="font-family:'Orbitron',sans-serif;font-size:.78rem;color:#ffb300;font-weight:900">${accValues[accValues.length-1]}%</span>
+    </div>
+    ${svgLineChart(accValues,{color:'#ffb300',height:52})}
+  </div>`:''}
+
   <div id="cefr-hist-wrap"></div>
 
-  <div class="sec-title">Výkon podľa kategórií</div>
-  ${catRows}
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="lbl" style="margin-bottom:0">CEFR odhad</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:.95rem;color:#00ffc8;font-weight:900">${cefrLevel}</div>
+    </div>
+    <div style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.45">Odhad jazykovej úrovne na základe odohraných duelov, accuracy a obtiažnosti otázok.</div>
+  </div>
 
-  <button class="btn btn-ghost" id="histBtn" style="margin-top:12px">📜 Otvoriť históriu</button>
-  <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:9px">← Späť</button>
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div class="lbl" style="margin-bottom:12px">Výkon podľa kategórií</div>
+    ${catRows}
+  </div>
+
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div class="lbl" style="margin-bottom:12px">Čas odpovedí</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${metricCard('Priemerný čas',avgTime!==null?avgTime+'s':'—','#b388ff')}
+      ${metricCard('Najrýchlejšia odpoveď',fastest!==null?fastest+'s':'—','#00ffc8')}
+      ${metricCard('Správne odpovede',avgCorrectTime!==null?avgCorrectTime+'s':'—','#00ffc8','priemerný čas')}
+      ${metricCard('Nesprávne odpovede',avgWrongTime!==null?avgWrongTime+'s':'—','#ff5252','priemerný čas')}
+      ${metricCard('Timeout rate',timeoutRate+'%','#ff5252')}
+      ${metricCard('Najpomalšia odpoveď',slowest!==null?slowest+'s':'—','#ffb300')}
+    </div>
+  </div>
+
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div class="lbl" style="margin-bottom:12px">Najlepšie a najslabšie hry</div>
+    <div style="display:grid;grid-template-columns:1fr;gap:8px">
+      <div style="background:rgba(0,255,200,.05);border:1px solid rgba(0,255,200,.14);border-radius:13px;padding:12px">
+        <div style="font-size:.66rem;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Najlepší zápas</div>
+        <div style="font-size:.86rem;color:rgba(255,255,255,.72)">${bestGame?`${fmtDate(bestGame.date)} · ${bestGame.myScore}/${bestGame.questionsCount||10} · ${gameAcc(bestGame)}% · ${bestGame.eloChange>=0?'+':''}${bestGame.eloChange||0} ELO`:'Zatiaľ bez dát'}</div>
+      </div>
+      <div style="background:rgba(255,82,82,.05);border:1px solid rgba(255,82,82,.14);border-radius:13px;padding:12px">
+        <div style="font-size:.66rem;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Najslabší zápas</div>
+        <div style="font-size:.86rem;color:rgba(255,255,255,.72)">${worstGame?`${fmtDate(worstGame.date)} · ${worstGame.myScore}/${worstGame.questionsCount||10} · ${gameAcc(worstGame)}% · ${worstGame.eloChange>=0?'+':''}${worstGame.eloChange||0} ELO`:'Zatiaľ bez dát'}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analysis-box" style="margin-bottom:14px">
+    <div class="lbl" style="margin-bottom:12px">Rivals</div>
+    ${topRival?`<div style="display:grid;grid-template-columns:1fr;gap:8px">
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:12px">
+        <div style="font-size:.66rem;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Najväčší rival</div>
+        <div style="font-size:.9rem;font-weight:700;color:#fff;margin-bottom:4px">${topRival.name}</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.5)">${topRival.total} duelov · ${topRival.wins}W ${topRival.draws}D ${topRival.losses}L · skóre ${Math.round(topRival.myScore/topRival.total*10)/10}:${Math.round(topRival.oppScore/topRival.total*10)/10}</div>
+      </div>
+      ${hardest?`<div style="background:rgba(255,82,82,.05);border:1px solid rgba(255,82,82,.14);border-radius:13px;padding:12px">
+        <div style="font-size:.66rem;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Najťažší súper</div>
+        <div style="font-size:.9rem;font-weight:700;color:#fff;margin-bottom:4px">${hardest.name}</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.5)">${hardest.total} duelov · win rate ${pct(hardest.wins,hardest.total)}%</div>
+      </div>`:''}
+    </div>`:'<div style="font-size:.82rem;color:rgba(255,255,255,.32);text-align:center;padding:10px">Rival štatistiky sa zobrazia po viacerých dueloch proti rovnakým súperom.</div>'}
+  </div>
+
+  <div class="insight-box" style="margin-top:0;margin-bottom:14px">
+    <div class="insight-label">🎯 FOCUS NEXT</div>
+    <div class="insight-text">Trénuj hlavne <strong style="color:#ffb300">${focus}</strong>. ${focusAdvice}</div>
+  </div>
+
+  <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:4px">← Späť</button>
 `;}
 
 function hBo3Summary(){
@@ -2128,89 +2168,78 @@ function hBo3Results(){
 
 function hAnalysis(){
   if(!S.analysisReady)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${(S.myProfile?.gamesPlayed||0)%10===0&&(S.myProfile?.gamesPlayed||0)>0?'Hodnotím tvoju úroveň angličtiny...':'Počítam ELO a štatistiky...'}</div></div>`;
-  const safe=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
-  const isCoop=S.submode==='coop',isSolo=S.solo,tot=S.questions.length||1;
+  const isCoop=S.submode==='coop',tot=S.questions.length;
   const delta=S.eloChange,newElo=S.newElo||S.myProfile?.elo||START_ELO,oldElo=newElo-delta;
   const rank=getRank(newElo),prog=rankProg(newElo),nxt=nextRankN(newElo),stats=S.myProfile?.stats;
-  const xpG=S.xpGained||0,nXp=S.newXp||0,xpLvl=xpLevel(nXp),xpProg=xpProgress(nXp),xpNxt=xpToNext(nXp);
-  const validTimes=S.answerTimes.filter(t=>Number.isFinite(t)&&t>0);
-  const avgTime=validTimes.length?(validTimes.reduce((a,b)=>a+b,0)/validTimes.length):0;
-  const fastest=validTimes.length?Math.min(...validTimes):0;
-  const slowest=validTimes.length?Math.max(...validTimes):0;
-  const accuracy=Math.round((S.score/tot)*100);
-  const gameResult=isCoop?'coop':isSolo?'solo':S.score>S.oppScore?'win':S.score===S.oppScore?'draw':'loss';
-  const resultLabel={win:'Víťazstvo',loss:'Prehra',draw:'Remíza',coop:'Co-op hotovo',solo:'Tréning hotový'}[gameResult];
-  const resultCaption=isCoop?'Spoločný výkon s partnerom':isSolo?'Sólo tréning bez zmeny ELO':'Duel proti súperovi';
-  const scoreLine=isCoop?`${S.score+(S.oppScore||0)} / ${tot*2}`:isSolo?`${S.score} / ${tot}`:`${S.score} : ${S.oppScore}`;
-  const scoreLabel=isCoop?'spolu':isSolo?'správne':'ty vs súper';
-  const wk=stats?weakestCat(stats):null,wkP=wk?catPct(stats,wk):null,diff=calcDiff(S.myProfile);
-  const diffMsg=diff===1?'Obtiažnosť zostáva skôr B2, aby si upevnil základ.':diff===3?'Aplikácia ťa môže posúvať viac do C1 otázok.':'Si približne na prechode B2 → C1.';
-  const weakestLabel=wk&&wkP!==null?CATS[wk].label:'Zatiaľ bez dát';
-  const weakestShort=wk&&wkP!==null?CATS[wk].label.replace('Slovná zásoba','Vocab').replace('Phrasal Verbs','Phrasal').replace('Gramatika','Grammar'):'—';
+  const xpG=S.xpGained||0,nXp=S.newXp||0;
+  const isSolo=S.solo;
+  const xpLvl=xpLevel(nXp),xpProg=xpProgress(nXp),xpNxt=xpToNext(nXp);
+  const eloBlock=`<div class="elo-change-wrap">
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:4px">
+      <div>
+        ${!isSolo?`<div class="elo-delta ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta} ELO</div><div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">ELO</div>`:''}
+      </div>
+      ${!isSolo?`<div style="width:1px;height:40px;background:rgba(255,255,255,.08)"></div>`:''}
+      <div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#b388ff;text-align:center" id="xp-counter">+${xpG}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">XP</div>
+      </div>
+    </div>
+    ${isSolo?`<div style="text-align:center;font-size:.78rem;color:rgba(255,179,0,.7);margin-top:4px">🧑 Sólo tréning · ELO sa nemení</div>`:`<div class="elo-path">${oldElo} → ${newElo} · ${rankBadge(newElo)}</div>`}
+    ${delta===0&&!isCoop?'<div style="font-size:.72rem;color:rgba(0,255,200,.7);margin-top:5px">🛡️ Shield absorboval ELO stratu!</div>':''}
+    <div style="margin-top:10px">
+      <div class="rank-progress-label" style="font-size:.62rem;color:rgba(255,255,255,.25);display:flex;justify-content:space-between;margin-bottom:4px"><span>${rank.n}</span><span>${nxt}</span></div>
+      <div class="rank-progress-bar"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
+    </div>
+    <div class="xp-bar-wrap" style="margin-top:8px">
+      <div class="xp-bar-label"><span><span class="xp-badge">⭐ Level ${xpLvl}</span></span><span>${nXp} XP · +${xpNxt} do ďalšieho</span></div>
+      <div class="xp-bar"><div class="xp-bar-fill" style="width:${xpProg}%"></div></div>
+    </div>
+    ${S.leveledUp?`<div style="text-align:center;margin-top:10px;padding:10px;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.35);border-radius:12px"><div style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:#b388ff;font-weight:700">🎉 LEVEL UP! → Level ${S.leveledUp}</div></div>`:''}
+  </div>`;
+  const shieldBlock=S.shieldJustEarned?`<div class="shield-earned-box"><div style="font-family:'Orbitron',sans-serif;font-size:.8rem;color:#00ffc8;margin-bottom:3px">🛡️ Shield získaný!</div><div style="font-size:.78rem;color:rgba(255,255,255,.44)">Hrals/a ${S.myProfile?.streak} dní za sebou. Ďalšia ELO strata bude chránená.</div></div>`:'';
   const catRows=Object.entries(CATS).map(([k,c])=>{
     const myQs=S.questions.filter(q=>catKey(q.type)===k);if(!myQs.length)return'';
     const myOk=myQs.filter(q=>{const i=S.questions.indexOf(q);return S.myAnswers[i]?.correct;}).length;
-    const n=myQs.length,myP=Math.round(myOk/n*100);
-    if(isSolo){
-      return`<div class="result-cat-row solo"><div class="result-cat-name">${safe(c.label.split('&')[0].trim())}</div><div class="result-cat-bar"><div class="result-cat-fill" style="width:${myP}%;background:${c.color}"></div></div><div class="result-cat-score" style="color:${c.color}">${myOk}/${n}</div></div>`;
-    }
     const oppOk=myQs.filter(q=>{const i=S.questions.indexOf(q);return S.oppAnswers[i]?.c===1;}).length;
-    const oppP=Math.round(oppOk/n*100);
-    return`<div class="result-cat-row"><div class="result-cat-name">${safe(c.label.split('&')[0].trim())}</div><div class="result-cat-bar"><div class="result-cat-fill" style="width:${myP}%;background:${c.color}"></div></div><div class="result-cat-score" style="color:${c.color}">${myOk}/${n}</div><div class="result-cat-bar"><div class="result-cat-fill" style="width:${oppP}%;background:rgba(255,255,255,.28)"></div></div><div class="result-cat-score" style="color:rgba(255,255,255,.48)">${oppOk}/${n}</div></div>`;
+    const n=myQs.length,myP=Math.round(myOk/n*100),oppP=Math.round(oppOk/n*100);
+    return`<div class="cat-compare-row"><span class="cat-lbl-sm">${c.label.split('&')[0].trim()}</span>
+    <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${myP}%;background:${c.color}80"></div></div>
+    <span class="mini-pct" style="color:${c.color}">${myOk}/${n}</span>
+    <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${oppP}%;background:#ffffff25"></div></div>
+    <span class="mini-pct" style="color:rgba(255,255,255,.42)">${oppOk}/${n}</span></div>`;
   }).join('');
-  const bothWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&S.oppAnswers[i]&&S.oppAnswers[i].c!==1);
-  const myWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct);
-  const reviewList=(bothWrong.length?bothWrong:myWrong).slice(0,4);
-  const reviewTitle=bothWrong.length?'Otázky, ktoré ste pokazili obaja':'Tvoje chybné odpovede';
-  const shieldBlock=S.shieldJustEarned?`<div class="shield-earned-box" style="margin-bottom:0"><div style="font-family:'Orbitron',sans-serif;font-size:.8rem;color:#00ffc8;margin-bottom:3px">🛡️ Shield získaný!</div><div style="font-size:.78rem;color:rgba(255,255,255,.5)">Hrals/a ${S.myProfile?.streak} dní za sebou. Ďalšia ELO strata bude chránená.</div></div>`:'';
-  return`<div class="result-shell">
-    <div class="result-hero-v4 ${gameResult}">
-      <div class="result-kicker">Rozbor duelu</div>
-      <div class="result-head-v4">
-        <div>
-          <div class="result-status-v4 ${gameResult}">${resultLabel}</div>
-          <div class="result-caption-v4">${resultCaption}</div>
-        </div>
-        <div class="result-score-pill">
-          <div class="result-score-main">${scoreLine}</div>
-          <div class="result-score-label">${scoreLabel}</div>
-        </div>
-      </div>
-      <div class="result-metrics-v4">
-        <div class="result-metric-card">
-          ${isSolo?`<div class="result-metric-value zero">ELO</div><div class="result-metric-label">bez zmeny</div><div class="result-metric-sub">sólo režim</div>`:`<div class="result-metric-value ${delta>0?'pos':delta<0?'neg':'zero'}">${delta>0?'+'+delta:delta===0?'±0':delta}</div><div class="result-metric-label">ELO</div><div class="result-metric-sub">${oldElo} → <span id="elo-counter">${newElo}</span></div>`}
-        </div>
-        <div class="result-metric-card">
-          <div class="result-metric-value xp">+${xpG}</div>
-          <div class="result-metric-label">XP</div>
-          <div class="result-metric-sub"><span id="xp-counter">${nXp}</span> XP celkovo</div>
-        </div>
-      </div>
+  const wk=stats?weakestCat(stats):null,wkP=wk?catPct(stats,wk):null,diff=calcDiff(S.myProfile);
+  const diffMsg=diff===1?'Obtiažnosť zostáva nízka — viac B2 tréning.':diff===3?'Obtiažnosť rastie — C1 výzvy ťa čakajú!':'Obtiažnosť kalibrovaná na B2→C1.';
+  const weakBlock=wk&&wkP!==null?`<div class="weak-box"><div class="weak-title">⚠️ Najslabšia oblasť</div>
+    <div class="weak-body"><strong style="color:${CATS[wk].color}">${CATS[wk].label}</strong> — ${wkP}% (${stats[wk].correct}/${stats[wk].played} historicky)</div>
+    <div style="font-size:.72rem;color:rgba(255,255,255,.32);margin-top:5px">AI zahrnie viac tejto oblasti v ďalšom dueli. ${diffMsg}</div></div>`:'';
+  const bothWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&S.oppAnswers[i]&&S.oppAnswers[i].c!==1).slice(0,2);
+  const wrongBlock=bothWrong.length?`<div class="sec-title">Obaja ste pokazili</div>${bothWrong.map(q=>`<div class="q-review"><div class="q-review-text">${q.question}</div><div class="q-review-ans">✅ ${q.options[q.correct]}</div></div>`).join('')}`:'';
+  return`<div class="logo" style="font-size:1.2rem;margin-bottom:4px">ROZBOR DUELU</div>
+  <div class="logo-sub" style="margin-bottom:16px">${isCoop?'Kooperatívna analýza':'Analýza výkonu'}</div>
+  ${eloBlock}${shieldBlock}
+  <div class="sec-title">Výkon po kategóriách</div>
+  <div class="analysis-box">
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:7px;font-size:.62rem;color:rgba(255,255,255,.26)"><span style="width:44px;text-align:right">TY</span><span style="width:44px;text-align:right">${isCoop?'PARTNER':'SÚPER'}</span></div>
+    ${catRows}
+  </div>
+  ${weakBlock}${wrongBlock}
+  ${S.answerTimes.length>1?`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:12px">
+    <div class="sec-title" style="margin-top:0">Čas odpovedí</div>
+    <div style="display:flex;gap:0">
+      ${[
+        {l:'Najrýchlejší',v:Math.min(...S.answerTimes.filter(t=>t>0))+'s',c:'#00ffc8'},
+        {l:'Priemer',v:(S.answerTimes.reduce((a,b)=>a+b,0)/S.answerTimes.length).toFixed(1)+'s',c:'#ffb300'},
+        {l:'Najpomalší',v:Math.max(...S.answerTimes)+'s',c:'rgba(255,255,255,.4)'}
+      ].map(s=>`<div style="flex:1;text-align:center">
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:${s.c}">${s.v}</div>
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:2px">${s.l}</div>
+      </div>`).join('<div style="width:1px;background:rgba(255,255,255,.07)"></div>')}
     </div>
-    <div class="result-progress-card">
-      ${!isSolo?`<div class="result-progress-row"><span>${rank.n}</span><span>${nxt}</span></div><div class="result-progress-track"><div class="result-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>`:''}
-      <div class="result-progress-row"><span><span class="result-xp-badge">⭐ Level ${xpLvl}</span></span><span>${xpNxt?`+${xpNxt} XP do ďalšieho`:'Max level'}</span></div>
-      <div class="result-progress-track"><div class="result-progress-fill" style="width:${xpProg}%;background:linear-gradient(90deg,#7c4dff,#b388ff)"></div></div>
-      ${S.leveledUp?`<div style="text-align:center;margin-top:10px;padding:10px;background:rgba(124,77,255,.15);border:1px solid rgba(124,77,255,.35);border-radius:12px"><div style="font-family:'Orbitron',sans-serif;font-size:.85rem;color:#b388ff;font-weight:700">🎉 LEVEL UP! → Level ${S.leveledUp}</div></div>`:''}
-    </div>
-    ${shieldBlock}
-    <div class="result-section-title">Rýchly prehľad</div>
-    <div class="result-stats-grid">
-      <div class="result-stat-card accent"><div class="result-stat-value">${accuracy}%</div><div class="result-stat-label">Presnosť odpovedí</div></div>
-      <div class="result-stat-card warn"><div class="result-stat-value">${avgTime?avgTime.toFixed(1)+'s':'—'}</div><div class="result-stat-label">Priemerný čas</div></div>
-      <div class="result-stat-card purple"><div class="result-stat-value">${fastest?fastest+'s':'—'}</div><div class="result-stat-label">Najrýchlejšia odpoveď</div></div>
-      <div class="result-stat-card danger"><div class="result-stat-value">${safe(weakestShort)}</div><div class="result-stat-label">Najslabšia oblasť</div></div>
-    </div>
-    <div class="result-section-title">Kategórie</div>
-    <div class="result-category-card">
-      ${!isSolo?`<div style="display:grid;grid-template-columns:92px 1fr 42px 1fr 42px;gap:7px;margin-bottom:2px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.32)"><div></div><div></div><div style="text-align:right">Ty</div><div></div><div style="text-align:right">${isCoop?'Partner':'Súper'}</div></div>`:''}
-      ${catRows||`<div style="font-size:13px;color:rgba(255,255,255,.45);padding:8px">Žiadne kategórie na zobrazenie.</div>`}
-    </div>
-    ${wk&&wkP!==null?`<div class="result-coach-card"><div class="result-coach-title">🎯 Focus next</div><div class="result-coach-body"><strong style="color:${CATS[wk].color}">${safe(weakestLabel)}</strong> máš historicky na úrovni <strong>${wkP}%</strong> (${stats[wk].correct}/${stats[wk].played}). V ďalšom tréningu odporúčam viac otázok z tejto oblasti. ${diffMsg}</div></div>`:''}
-    ${reviewList.length?`<details class="result-review-details"><summary><span class="result-review-title">${reviewTitle}</span><span class="result-review-count">${reviewList.length} položky ▾</span></summary><div class="result-review-content">${reviewList.map(q=>`<div class="result-review-item"><div class="result-review-q">${safe(q.question)}</div><div class="result-review-a">✅ ${safe(q.options[q.correct])}</div></div>`).join('')}</div></details>`:''}
-    ${validTimes.length>1?`<div class="result-section-title">Čas odpovedí</div><div class="result-stats-grid"><div class="result-stat-card accent"><div class="result-stat-value">${fastest}s</div><div class="result-stat-label">Najrýchlejší čas</div></div><div class="result-stat-card warn"><div class="result-stat-value">${avgTime.toFixed(1)}s</div><div class="result-stat-label">Priemer</div></div><div class="result-stat-card"><div class="result-stat-value" style="color:rgba(255,255,255,.72)">${slowest}s</div><div class="result-stat-label">Najpomalší čas</div></div><div class="result-stat-card purple"><div class="result-stat-value">${validTimes.length}</div><div class="result-stat-label">Merané odpovede</div></div></div>`:''}
-    <div class="result-actions-v4"><button class="btn btn-rematch" id="rematchBtn">⚔️ REMATCH</button><button class="btn btn-ghost" id="newBtn">NOVÝ DUEL</button></div>
-  </div>`;}
+  </div>`:''}
+  <button class="btn btn-rematch" id="rematchBtn" style="margin-top:4px">⚔️ REMATCH</button>
+  <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
 // ═══════════════════════════════════════════════════
 // EVENTS
@@ -2219,27 +2248,40 @@ function bindAll(){
   // Auth screen
   g('googleSignIn')?.addEventListener('click',()=>signInGoogle());
   // Setup screen
-  g('saveSetup')?.addEventListener('click',async()=>{
-    const nick=(g('nameInp')?.value||S.name||'').trim();
-    if(!nick){S.error='Zadaj prezývku.';render();return;}
+  g('saveSetup')?.addEventListener('click',()=>{
     const ak=(g('ak')?.value||'').trim();
     if(!ak||!ak.startsWith('sk-')){S.error='API kľúč musí začínať "sk-"';render();return;}
-    S.name=nick;
-    localStorage.setItem('ed_nick',nick);
     S.ak=ak;S.error=null;
     localStorage.setItem('ed_ak',ak);
-    if(S.uid)await dbUp('users/'+S.uid,{name:nick}).catch(()=>{});
     // If already logged in, just go back to home — don't re-trigger auth/placement
-    if(S.uid&&S.myProfile){S.myProfile={...S.myProfile,name:nick};S.screen='home';render();return;}
+    if(S.uid&&S.myProfile){S.screen='home';render();return;}
     if(!initFB(FB_CONFIG)){render();return;}
     startAuthListener();
+  });
+  g('saveNickBtn')?.addEventListener('click',async()=>{
+    const nick=(g('settingsNameInp')?.value||'').trim();
+    if(!nick){S.error='Zadaj prezývku.';render();return;}
+    S.name=nick;
+    S.error=null;
+    localStorage.setItem('ed_nick',nick);
+    if(S.uid&&S.db){
+      await dbUp('users/'+S.uid,{name:nick}).catch(()=>{});
+      S.myProfile={...S.myProfile,name:nick};
+    }
+    const btn=g('saveNickBtn');
+    if(btn){
+      const oldText=btn.textContent;
+      btn.textContent='ULOŽENÉ ✓';
+      btn.disabled=true;
+      setTimeout(()=>{btn.textContent=oldText;btn.disabled=false;},1100);
+    }
   });
   // Home
   g('signOutBtn')?.addEventListener('click',()=>signOut());
   g('nameInp')?.addEventListener('input',e=>{
     S.name=e.target.value;
     if(S.name.trim())localStorage.setItem('ed_nick',S.name.trim());
-    const ok=S.name.trim()&&S.mode&&(S.mode==='solo'||S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
+    const ok=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
     if(g('goBtn'))g('goBtn').disabled=!ok;
   });
   g('mSolo')?.addEventListener('click',()=>{S.mode='solo';S.solo=true;render();});
@@ -2260,18 +2302,21 @@ function bindAll(){
   });
   g('goBtn')?.addEventListener('click',handleGo);
   g('cfgBtn')?.addEventListener('click',()=>{S.screen='setup';S.error=null;render();});
-  g('histBtn')?.addEventListener('click',async()=>{
+  const openHistory=async()=>{
     S.screen='loading';S.loadingMsg='Načítavam históriu...';render();
     S.gameHistory=await loadHistory();
     S.historyLoaded=true;
     S.screen='history';render();
-  });
-  g('statsBtn')?.addEventListener('click',async()=>{
-    S.screen='loading';S.loadingMsg='Načítavam štatistiku...';render();
+  };
+  const openStats=async()=>{
+    S.screen='loading';S.loadingMsg='Počítam štatistiky...';render();
     S.gameHistory=await loadHistory();
     S.historyLoaded=true;
-    S.screen='statistics';render();
-  });
+    S.screen='stats';render();
+  };
+  g('histBtn')?.addEventListener('click',openHistory);
+  g('statsBtn')?.addEventListener('click',openStats);
+  g('statsBtnInline')?.addEventListener('click',openStats);
   g('readyBtn')?.addEventListener('click',async()=>{
     if(S.myReady)return;
     S.myReady=true;render();
@@ -2398,8 +2443,8 @@ function bindAll(){
   }
   g('bo3SummaryBtn')?.addEventListener('click',()=>{S.screen='bo3_summary';render();});
   g('backHomeBtn')?.addEventListener('click',()=>{S.screen='home';render();});
-  // Load CEFR history async on statistics screen
-  if(S.screen==='statistics'){
+  // Load CEFR history async on stats screen
+  if(S.screen==='stats'){
     loadCefrHistory().then(cefrHist=>{
       const wrap=document.getElementById('cefr-hist-wrap');
       if(!wrap||cefrHist.length<2)return;
@@ -2616,7 +2661,7 @@ function showRoundIntro(roundNum, onDone){
 // ═══════════════════════════════════════════════════
 function startTimer(){
   clearTimer();
-  S.timerVal=25;
+  S.timerVal=QUESTION_TIME;
   S.timerInterval=setInterval(()=>{
     S.timerVal--;
     updateTimerUI();
@@ -2626,7 +2671,7 @@ function startTimer(){
       if(S.selected===null){
         S.selected=-1; // -1 = timeout
         S.myAnswers.push({correct:false,type:S.questions[S.current]?.type,timeout:true});
-        S.answerTimes.push(25);
+        S.answerTimes.push(QUESTION_TIME);
         dbUp('rooms/'+S.roomCode+'/'+S.role,{score:S.score}).catch(()=>{});
         render();
       }
@@ -2641,7 +2686,7 @@ function updateTimerUI(){
   const circle=document.getElementById('timer-circle');
   if(!num||!circle)return;
   num.textContent=S.timerVal;
-  const pct=S.timerVal/25;
+  const pct=S.timerVal/QUESTION_TIME;
   const r=15,circ=2*Math.PI*r;
   circle.style.strokeDashoffset=circ*(1-pct);
   const color=S.timerVal>10?'#00ffc8':S.timerVal>5?'#ffb300':'#ff5252';
@@ -2649,7 +2694,7 @@ function updateTimerUI(){
   num.style.color=color;
 }
 function timerHTML(){
-  const pct=S.timerVal/25,r=15,circ=2*Math.PI*r;
+  const pct=S.timerVal/QUESTION_TIME,r=15,circ=2*Math.PI*r;
   const color=S.timerVal>10?'#00ffc8':S.timerVal>5?'#ffb300':'#ff5252';
   return`<div class="timer-ring">
     <svg width="36" height="36" viewBox="0 0 36 36">
@@ -2666,7 +2711,7 @@ function timerHTML(){
 // GAME LOGIC
 // ═══════════════════════════════════════════════════
 async function handleGo(){
-  S.error=null;S.name=(S.name||localStorage.getItem('ed_nick')||randomNick()).trim();
+  S.error=null;S.name=g('nameInp')?.value.trim()||S.name;
   if(S.mode==='solo'){
     S.solo=true;S.roomCode='solo';S.role='p1';
     S.oppName='';S.oppScore=0;S.oppDone=false;
@@ -2776,7 +2821,6 @@ Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","
 Rules:
 - type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms"
 - correct is 0-based index
-- Do NOT always put the correct answer first. Distribute correct answers across A, B, C and D.
 - explanation MUST be in Slovak
 - example is a short natural English sentence showing the correct answer in real context
 - CRITICAL — answer quality rules:
@@ -2794,7 +2838,7 @@ Rules:
   try{p=JSON.parse(m[0]);}
   catch(err){throw new Error('Neplatný JSON z AI. Skús znova alebo zvýš max_tokens. Detail: '+err.message);}
   if(!Array.isArray(p.questions)||!p.questions.length)throw new Error('Prázdne otázky');
-  return normalizeGeneratedQuestions(p.questions);
+  return p.questions;
 }
 
 // ═══════════════════════════════════════════════════
