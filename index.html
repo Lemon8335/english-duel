@@ -526,6 +526,16 @@ function calcDiff(prof){
   if(tot<10)return 2;const acc=ok/tot;
   return acc>0.78?3:acc<0.52?1:2;
 }
+function calcSharedDiff(myProf, oppElo){
+  // Use average ELO to determine shared difficulty — both players on equal footing
+  const myElo=myProf?.elo||START_ELO;
+  const avgElo=(myElo+(oppElo||myElo))/2;
+  // Also factor in my accuracy
+  const myDiff=calcDiff(myProf);
+  // Weight: 60% ELO-based, 40% accuracy-based
+  let eloDiff=avgElo>1150?3:avgElo>950?2:1;
+  return Math.round(eloDiff*0.6+myDiff*0.4+0.4); // round to 1,2,3
+}
 function diffHint(d){
   if(d===1)return'Focus on B2 level questions. Student is struggling, keep contexts clear, avoid very advanced C1.';
   if(d===3)return'Focus on C1 level questions. Advanced idioms, complex grammar, nuanced vocabulary. Push the student.';
@@ -548,41 +558,36 @@ function weakestCat(stats){let min=101,key='vocab';Object.keys(CATS).forEach(k=>
 // SUDDEN DEATH
 // ═══════════════════════════════════════════════════
 async function genSuddenDeathQuestion(){
-  showSuddenDeathIntro(async()=>{
-    S.suddenDeath=true;S.suddenDone=false;
-    S.loadingMsg='Generujem otázku rozstrelu...';S.screen='loading';render();
-    try{
+  // Generate/fetch SD question BEFORE showing intro (so P2 isn't disadvantaged)
+  S.suddenDeath=true;S.suddenDone=false;
+  try{
+    let sdQ=null;
+    if(S.role==='p1'){
+      // P1 generates and uploads BEFORE animation starts
       const diff=calcDiff(S.myProfile);
       const qs=await genQ(diff,S.myProfile?.stats,[],S.format);
-      // Take just 1 question
-      const sdQ=qs[0];
-      // Reset quiz state for SD
-      S.questions=[sdQ];S.current=0;S.selected=null;
-      if(S.role==='p1'){
-        // P1 uploads SD question to Firebase
-        await dbUp('rooms/'+S.roomCode,{
-          sdQuestion:sdQ,sdStatus:'ready',
-          sdP1done:false,sdP2done:false,sdP1time:null,sdP2time:null
-        });
-      }else{
-        // P2 waits for SD question
-        S.loadingMsg='Čakám na otázku rozstrelu...';render();
-        let tries=0;
-        const waitForSD=setInterval(async()=>{
-          tries++;
-          const r=await dbGet('rooms/'+S.roomCode);
-          if(r?.sdQuestion){
-            clearInterval(waitForSD);
-            S.questions=[r.sdQuestion];S.current=0;S.selected=null;
-            S.screen='sudden_death';render();
-          }
-          if(tries>20){clearInterval(waitForSD);S.screen='home';render();}
-        },500);
-        return;
+      sdQ=qs[0];
+      await dbUp('rooms/'+S.roomCode,{
+        sdQuestion:sdQ,sdStatus:'ready',
+        sdP1done:false,sdP2done:false,sdP1time:null,sdP2time:null
+      });
+    }else{
+      // P2 fetches the question (starts polling immediately)
+      let tries=0;
+      while(tries<20){
+        const r=await dbGet('rooms/'+S.roomCode);
+        if(r?.sdQuestion){sdQ=r.sdQuestion;break;}
+        await new Promise(res=>setTimeout(res,300));
+        tries++;
       }
+      if(!sdQ){S.error='Chyba: SD otázka nedostupná';S.screen='home';render();return;}
+    }
+    // NOW show the animation — both players have the question ready
+    S.questions=[sdQ];S.current=0;S.selected=null;
+    showSuddenDeathIntro(()=>{
       S.screen='sudden_death';render();
-    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
-  });
+    });
+  }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
 }
 
 // ═══════════════════════════════════════════════════
@@ -1036,7 +1041,18 @@ async function runAnalysis(){
     }else{
       const res=S.score>S.oppScore?1:S.score===S.oppScore?.5:0;
       delta=calcEloDelta(myElo,oppElo,res);
-      if(delta<0&&S.myProfile?.shieldActive){delta=0;await dbUp('users/'+S.uid,{shieldActive:false});}
+      if(delta<0&&S.myProfile?.shieldActive){
+        delta=0;
+        await dbUp('users/'+S.uid,{shieldActive:false});
+        // Mark in room that shield was used — opponent gets 0 ELO too (fair)
+        if(S.roomCode)await dbUp('rooms/'+S.roomCode,{shieldUsed:S.role}).catch(()=>{});
+      }
+      // Check if opponent used shield — if so, our gain is also 0
+      if(delta>0&&S.roomCode){
+        const roomCheck=await dbGet('rooms/'+S.roomCode);
+        const oppRole=S.role==='p1'?'p2':'p1';
+        if(roomCheck?.shieldUsed===oppRole)delta=0;
+      }
     }
     // Deduct hint penalty
     const hintPenalty=S.hintUsed?5:0;
@@ -1921,9 +1937,30 @@ function bindAll(){
     // Check if both ready
     const room=await dbGet('rooms/'+S.roomCode);
     if(room?.p1ready&&room?.p2ready){
-      // Both ready — set countdown status (p1 triggers it)
       if(S.role==='p1'){
-        await dbUp('rooms/'+S.roomCode,{status:'countdown'});
+        // P1 generates questions using SHARED difficulty (avg of both ELOs)
+        try{
+          const p2uid=room.p2uid||'';
+          let oppElo=START_ELO;
+          if(p2uid){const op=await dbGet('users/'+p2uid);if(op?.elo)oppElo=op.elo;}
+          const sharedDiff=calcSharedDiff(S.myProfile,oppElo);
+          S.srQuestions=await loadDueSRQuestions();
+          let qs;
+          if(S.format==='sr'){qs=await genSROnlyQuestions(S.srQuestions);}
+          else{qs=await genQ(sharedDiff,S.myProfile?.stats,S.srQuestions,S.format);}
+          S.questions=qs;
+          // Store shared difficulty info in room for transparency
+          await dbUp('rooms/'+S.roomCode,{
+            questions:qs,
+            status:'countdown',
+            sharedDiff,
+            p1elo:S.myProfile?.elo||START_ELO,
+            p2elo:oppElo
+          });
+        }catch(e){
+          // Fallback: use own diff if fetch fails
+          await dbUp('rooms/'+S.roomCode,{status:'countdown'});
+        }
       }
     }
   });
@@ -1955,6 +1992,8 @@ function bindAll(){
   g('hintBtn')?.addEventListener('click',()=>{
     if(S.hintUsed||S.selected!==null)return;
     S.hintUsed=true;
+    // Notify opponent about hint usage
+    if(!S.solo&&S.roomCode)dbUp('rooms/'+S.roomCode+'/'+S.role,{usedHint:true}).catch(()=>{});
     // Eliminate 2 wrong options visually
     const q=S.questions[S.current];
     const wrongIdxs=q.options.map((_,i)=>i).filter(i=>i!==q.correct);
@@ -2273,25 +2312,18 @@ async function handleGo(){
     return;
   }
   if(S.mode==='create'){
-    S.loadingMsg='Generujem otázky...';S.screen='loading';render();
+    S.loadingMsg='Vytváram duel...';S.screen='loading';render();
     try{
-      const diff=calcDiff(S.myProfile);
+      if(S.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=0;S.bo3OppWins=0;S.bo3Game=1;S.bo3OppUid='';S.bo3OppName='';}
       S.srQuestions=await loadDueSRQuestions();
-      // SR mode: each player gets own questions, store only metadata in room
-      let qs;
-      if(S.format==='sr'){
-        qs=await genSROnlyQuestions(S.srQuestions);
-      }else{
-        qs=await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
-      }
+      // SR mode: pre-load SR questions for self
+      if(S.format==='sr')S.questions=await genSROnlyQuestions(S.srQuestions);
       const code=String(Math.floor(1000+Math.random()*9000));
       S.roomCode=code;S.role='p1';
-      // In SR mode don't store questions in Firebase (each player has own)
-      if(S.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=0;S.bo3OppWins=0;S.bo3Game=1;S.bo3OppUid='';S.bo3OppName='';}
-      const roomData={status:'waiting',submode:S.submode,format:S.format,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false},bo3:{game:1,p1wins:0,p2wins:0}}; 
-      if(S.format!=='sr')roomData.questions=qs;
+      // Don't generate normal questions yet — wait for READY (need opponent ELO)
+      const roomData={status:'waiting',submode:S.submode,format:S.format,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false},bo3:{game:1,p1wins:0,p2wins:0}};
       await dbSet('rooms/'+code,roomData);
-      S.questions=qs;attach(code);S.screen='lobby';render();
+      attach(code);S.screen='lobby';render();
     }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
   }else{
     const code=g('codeInp')?.value.trim()||S.roomCode;
