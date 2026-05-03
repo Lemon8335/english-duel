@@ -1,17 +1,24 @@
 {
   "name": "English Duel",
-  "short_name": "EnglishDuel",
-  "description": "B2→C1 competitive English learning game",
-  "start_url": "/",
+  "short_name": "English Duel",
+  "description": "Multiplayer English learning duels",
+  "start_url": "/english-duel/",
+  "scope": "/english-duel/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#080c14",
   "theme_color": "#00ffc8",
-  "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
