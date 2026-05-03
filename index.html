@@ -768,6 +768,50 @@ async function loadCefrHistory(){
 
 const CEFR_SCORE={A2:1,B1:2,'B1+':2.5,B2:3,'B2+':3.5,C1:4,'C1+':4.5};
 
+function cefrFallbackAssessment(prof){
+  const stats=prof?.stats||{};
+  const ph=stats.phrasal||{played:0,correct:0};
+  const gr=stats.grammar||{played:0,correct:0};
+  const vo=stats.vocab||{played:0,correct:0};
+  const totalPlayed=(ph.played||0)+(gr.played||0)+(vo.played||0);
+  const totalCorrect=(ph.correct||0)+(gr.correct||0)+(vo.correct||0);
+  const pct=totalPlayed?Math.round(totalCorrect/totalPlayed*100):0;
+  const elo=prof?.elo||START_ELO;
+  const diff=calcDiff(prof);
+  const catPct2=s=>s?.played?Math.round((s.correct||0)/(s.played||1)*100):null;
+  const vals=[['Phrasal verbs',catPct2(ph)],['Gramatika',catPct2(gr)],['Slovná zásoba',catPct2(vo)]].filter(x=>x[1]!==null);
+  const strongest=vals.length?[...vals].sort((a,b)=>b[1]-a[1])[0]:['celková presnosť',pct];
+  const weakest=vals.length?[...vals].sort((a,b)=>a[1]-b[1])[0]:['celková presnosť',pct];
+  let level='B1+';
+  if(pct>=88&&elo>=1300&&diff>=3)level='C1+';
+  else if(pct>=78&&elo>=1200)level='C1';
+  else if(pct>=68&&elo>=1100)level='B2+';
+  else if(pct>=55&&elo>=950)level='B2';
+  else if(pct>=42)level='B1+';
+  else level='B1';
+  return{
+    level,
+    summary:`Odhadovaná receptívna úroveň je ${level}. Výpočet vychádza z celkovej presnosti ${pct}% po ${prof?.gamesPlayed||0} dueloch, ELO ${elo} a aktuálnej obtiažnosti otázok.`,
+    strengths:`Najsilnejšia oblasť: ${strongest[0]} (${strongest[1]}%).`,
+    weaknesses:`Najslabšia oblasť: ${weakest[0]} (${weakest[1]}%).`,
+    advice:`Zameraj sa najmä na ${weakest[0].toLowerCase()} a rob krátke B2/C1 tréningy po každom dueli.`,
+    assessedAt:Date.now(),
+    gamesAt:prof?.gamesPlayed||0,
+    source:'fallback'
+  };
+}
+
+async function ensureCefrAssessmentForCurrentUser(){
+  const prof=S.myProfile;
+  if(!prof)return;
+  const games=prof.gamesPlayed||0;
+  if(games<10)return;
+  // Refresh every 10 games, but if the user has no CEFR yet, create it immediately even at 11, 12, 13...
+  if(prof.cefrResult && games%10!==0)return;
+  await runCefrAssessment();
+}
+
+
 // ═══════════════════════════════════════════════════
 // HEAD-TO-HEAD
 // ═══════════════════════════════════════════════════
@@ -811,7 +855,7 @@ async function runCefrAssessment(){
   const prof=S.myProfile;
   if(!prof)return;
   const games=prof.gamesPlayed||0;
-  if(games<10||games%10!==0)return; // only every 10 games
+  if(games<10)return;
 
   const stats=prof.stats||{};
   const ph=stats.phrasal||{played:0,correct:0};
@@ -823,16 +867,31 @@ async function runCefrAssessment(){
   const diff=calcDiff(prof);
   const diffLabel=diff===1?'B2':diff===3?'C1':'B2/C1';
 
-  // Game history summary (last 10 games approximated from stats)
   const totalPlayed=ph.played+gr.played+vo.played;
   const totalCorrect=ph.correct+gr.correct+vo.correct;
   const overallPct=totalPlayed?Math.round(totalCorrect/totalPlayed*100):50;
+
+  const saveResult=async(result)=>{
+    result.assessedAt=result.assessedAt||Date.now();
+    result.gamesAt=games;
+    S.cefrResult=result;
+    await dbUp('users/'+S.uid,{cefrResult:result});
+    S.myProfile={...S.myProfile,cefrResult:result};
+    saveCefrSnapshot(result.level);
+  };
+
+  // Important fix: the opponent usually does NOT have the API key.
+  // Before, CEFR silently failed for P2. Now every player gets at least a deterministic CEFR estimate.
+  if(!S.ak||!S.ak.startsWith('sk-')){
+    await saveResult(cefrFallbackAssessment(prof));
+    return;
+  }
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,messages:[{role:'user',content:
         `You are an expert English language assessor. Based on these quiz performance statistics, assess the student's RECEPTIVE English level (reading comprehension, grammar, vocabulary knowledge) according to CEFR.
 
 Statistics from last ${games} games:
@@ -850,18 +909,18 @@ Respond ONLY in Slovak language with this exact JSON (no markdown):
 Level must be one of: A2, B1, B1+, B2, B2+, C1, C1+`
       }]})
     });
-    if(!res.ok)return;
+    if(!res.ok)throw new Error('CEFR API '+res.status);
     const data=await res.json();
     const text=data.content?.find(b=>b.type==='text')?.text||'';
     const m=text.match(/\{[\s\S]*\}/);
-    if(!m)return;
+    if(!m)throw new Error('CEFR API nevrátila JSON');
     const result=JSON.parse(m[0]);
-    result.assessedAt=Date.now();result.gamesAt=games;
-    S.cefrResult=result;
-    await dbUp('users/'+S.uid,{cefrResult:result});
-    S.myProfile={...S.myProfile,cefrResult:result};
-    saveCefrSnapshot(result.level);
-  }catch(e){console.warn('CEFR assessment failed',e);}
+    result.source='ai';
+    await saveResult(result);
+  }catch(e){
+    console.warn('CEFR assessment failed, using fallback',e);
+    await saveResult(cefrFallbackAssessment(prof));
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -1062,6 +1121,7 @@ async function loadProfile(){
     const p=await dbGet('users/'+S.uid);
     S.myProfile=p||{elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null,xp:0,cefrResult:null};
     if(p?.cefrResult)S.cefrResult=p.cefrResult;
+    if(p && (p.gamesPlayed||0)>=10 && !p.cefrResult){setTimeout(()=>ensureCefrAssessmentForCurrentUser().then(render).catch(()=>{}),600);}
     if(!p)await dbSet('users/'+S.uid,{name:S.name,elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',xp:0});
   }catch(e){S.myProfile={elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null};}
 }
@@ -1293,7 +1353,7 @@ async function runAnalysis(){
         S.score>S.oppScore?'win':S.score===S.oppScore?'draw':'loss',
         S.format,S.submode,delta,S.newElo,newStats);
     }
-    runCefrAssessment();
+    ensureCefrAssessmentForCurrentUser();
     // Cleanup room — skip for Bo3 (room reused between rounds)
     if(S.roomCode&&S.submode!=='bo3')S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
   }catch(e){console.error(e);S.analysisReady=true;render();}
@@ -1306,7 +1366,7 @@ function g(id){return document.getElementById(id);}
 function render(){
   const app=document.getElementById('app');
   const card=document.createElement('div');card.className='card';
-  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,bo3_results:hBo3Results,bo3_summary:hBo3Summary,analysis:hAnalysis,history:hHistory,sudden_death:hSuddenDeath};
+  const map={setup:hSetup,auth:hAuth,home:hHome,loading:hLoad,placement_loading:hPlacementLoading,placement:hPlacement,placement_result:hPlacementResult,lobby:hLobby,quiz:hQuiz,waiting:hWaiting,results:hResults,bo3_results:hBo3Results,bo3_summary:hBo3Summary,analysis:hAnalysis,history:hHistory,statistics:hStatistics,sudden_death:hSuddenDeath};
   card.innerHTML=(map[S.screen]||hLoad)();
   // Apply result-specific animation
   if(S.screen==='results'){
@@ -1424,6 +1484,8 @@ function hSetup(){
     </div>
     <button class="btn btn-danger" id="signOutBtn">Odhlásiť sa</button>
   </div>`:''}
+  <div class="lbl" style="margin-top:4px">Prezývka</div>
+  <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name||''}" autocomplete="nickname"/>
   <div class="lbl" style="margin-top:4px">Anthropic API kľúč</div>
   <div class="info-box"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
   <input type="password" id="ak" placeholder="sk-ant-api03-..." value="${S.ak}" autocomplete="off"/>
@@ -1523,15 +1585,12 @@ function hHome(){
         <div class="cefr-circle-sm">${prof?.cefrResult?prof.cefrResult.level:'?'}</div>
         <div class="cefr-info-sm">
           <span class="cefr-info-label">CEFR</span>
-          <span class="cefr-info-val">${prof?.cefrResult?prof.cefrResult.summary?.split('.')[0].substring(0,28)+'...':'Po 10 hrách'}</span>
+          <span class="cefr-info-val">${prof?.cefrResult?prof.cefrResult.summary?.split('.')[0].substring(0,28)+'...':'Zatiaľ bez odhadu'}</span>
         </div>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,.28)">${prof?.gamesPlayed||0} duelov · ${prof?.wins||0} výhier</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.28);text-align:right">Odhad jazykovej úrovne</div>
     </div>
   </div>
-
-  <div class="lbl" style="margin-bottom:8px">Prezývka</div>
-  <input type="text" id="nameInp" placeholder="Napíš prezývku..." maxlength="18" value="${S.name}" style="margin-bottom:12px"/>
 
   <div class="action-lbl">Hrať</div>
   <button class="cta-primary-btn ${ctaStyle}" id="goBtn" ${!canGo?'disabled':''} style="${!canGo?'opacity:.4;cursor:not-allowed':''}">
@@ -1578,6 +1637,10 @@ function hHome(){
       <div class="nav-icon">📜</div>
       <div class="nav-label">História</div>
     </div>
+    <div class="nav-item" id="statsBtn">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label">Štatistika</div>
+    </div>
     <div class="nav-item" id="cfgBtn">
       <div class="nav-icon">⚙️</div>
       <div class="nav-label">Nastavenia</div>
@@ -1598,6 +1661,7 @@ function hLobby(){
     <div style="font-size:22px">${myRankR.emoji}</div>
     <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:${myRankR.color}">${myRankR.n}</div>
     <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.myProfile?.elo||START_ELO} ELO</div>
+    <div style="font-size:10px;color:${S.myProfile?.cefrResult?'#00ffc8':'rgba(255,255,255,.22)'}">CEFR ${S.myProfile?.cefrResult?S.myProfile.cefrResult.level:'bez odhadu'}</div>
   </div>`;
   const fmtBadge=`<span style="padding:4px 12px;border-radius:20px;font-size:.74rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</span>`;
   const readyCards=`<div class="player-ready-row">
@@ -1626,6 +1690,7 @@ function hLobby(){
           <div style="font-size:22px">${getRank(S.oppProfile.elo||START_ELO).emoji}</div>
           <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:${getRank(S.oppProfile.elo||START_ELO).color}">${getRank(S.oppProfile.elo||START_ELO).n.toUpperCase()}</div>
           <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppProfile.elo||START_ELO} ELO</div>
+          <div style="font-size:10px;color:${S.oppProfile.cefrResult?'#00ffc8':'rgba(255,255,255,.22)'}">CEFR ${S.oppProfile.cefrResult?S.oppProfile.cefrResult.level:'bez odhadu'}</div>
         `:oppJoined?`
           <div style="font-size:22px;opacity:.5">⏳</div>
           <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppName||'Súper'}</div>
@@ -1791,39 +1856,7 @@ function hResults(){
 
 function hHistory(){
   const hist=S.gameHistory||[];
-  // Summary stats
-  const total=hist.length;
-  const wins=hist.filter(g=>g.result==='win').length;
-  const draws=hist.filter(g=>g.result==='draw').length;
-  const losses=hist.filter(g=>g.result==='loss').length;
-  const avgScore=total?Math.round(hist.reduce((s,g)=>s+(g.myScore||(g.eloChange>0?8:5)),0)/total*10)/10:0;
-  const winRate=total?Math.round(wins/total*100):0;
-  // Format distribution
-  const fmtCount={};
-  hist.forEach(g=>{const f=g.format||'mixed';fmtCount[f]=(fmtCount[f]||0)+1;});
-  const topFmt=Object.entries(fmtCount).sort((a,b)=>b[1]-a[1])[0];
-  // ELO sparkline via SVG
-  const eloPoints=hist.slice(0,20).reverse();
-  const elos=eloPoints.map(g=>g.eloAfter).filter(Boolean);
-  let sparkline='';
-  if(elos.length>1){
-    const minE=Math.min(...elos),maxE=Math.max(...elos),range=maxE-minE||1;
-    const W=280,H=40,pad=4;
-    const pts=elos.map((e,i)=>`${pad+i*(W-pad*2)/(elos.length-1)},${H-pad-(e-minE)/range*(H-pad*2)}`).join(' ');
-    sparkline=`<div class="cefr-chart-wrap" style="padding:10px 14px 8px">
-      <div class="lbl" style="margin-bottom:8px">ELO krivka (posledných ${elos.length} hier)</div>
-      <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">
-        <polyline points="${pts}" fill="none" stroke="#00ffc8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-        ${elos.map((e,i)=>`<circle cx="${pad+i*(W-pad*2)/(elos.length-1)}" cy="${H-pad-(e-minE)/range*(H-pad*2)}" r="3" fill="#00ffc8"/>`).join('')}
-        <text x="0" y="${H}" font-size="9" fill="rgba(255,255,255,.3)">${minE}</text>
-        <text x="0" y="${pad+6}" font-size="9" fill="rgba(255,255,255,.3)">${maxE}</text>
-      </svg>
-    </div>`;
-  }
-  // CEFR history line (loaded async — we'll load inline)
-  const cefrLevels=['A2','B1','B1+','B2','B2+','C1','C1+'];
-  // History list
-  const histItems=hist.slice(0,25).map(g=>{
+  const histItems=hist.slice(0,40).map(g=>{
     const v=g.result||'draw';
     const date=new Date(g.date).toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit'});
     const eloStr=g.eloChange!=null?(g.eloChange>0?`<span style="color:#00ffc8">+${g.eloChange}</span>`:`<span style="color:#ff5252">${g.eloChange}</span>`):'<span style="color:#ffb300">±0</span>';
@@ -1844,30 +1877,102 @@ function hHistory(){
 
   return`
   <div class="logo" style="font-size:1.3rem;margin-bottom:4px">HISTÓRIA</div>
-  <div class="logo-sub" style="margin-bottom:18px">${S.name}</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#00ffc8">${winRate}%</div>
-      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Win rate</div>
+  <div class="logo-sub" style="margin-bottom:18px">Posledné zápasy</div>
+  ${histItems||'<div style="font-size:.82rem;color:rgba(255,255,255,.28);text-align:center;padding:16px">Zatiaľ žiadne zápasy</div>'}
+  <button class="btn btn-ghost" id="statsBtn" style="margin-top:12px">📊 Otvoriť štatistiku</button>
+  <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:9px">← Späť</button>
+`;}
+
+function hStatistics(){
+  const hist=S.gameHistory||[];
+  const prof=S.myProfile||{};
+  const stats=prof.stats||{};
+  const total=hist.length;
+  const wins=hist.filter(g=>g.result==='win').length;
+  const draws=hist.filter(g=>g.result==='draw').length;
+  const losses=hist.filter(g=>g.result==='loss').length;
+  const winRate=total?Math.round(wins/total*100):0;
+  const avgScore=total?Math.round(hist.reduce((s,g)=>s+(Number(g.myScore)||0),0)/total*10)/10:0;
+  const avgEloChange=total?Math.round(hist.reduce((s,g)=>s+(Number(g.eloChange)||0),0)/total*10)/10:0;
+  const bestWin=hist.filter(g=>g.result==='win').sort((a,b)=>(b.eloChange||0)-(a.eloChange||0))[0];
+  const currentElo=prof.elo||START_ELO;
+  const rank=getRank(currentElo);
+
+  const eloPoints=hist.slice(0,30).reverse();
+  const elos=eloPoints.map(g=>g.eloAfter).filter(Boolean);
+  let sparkline='';
+  if(elos.length>1){
+    const minE=Math.min(...elos),maxE=Math.max(...elos),range=maxE-minE||1;
+    const W=300,H=72,pad=8;
+    const pts=elos.map((e,i)=>`${pad+i*(W-pad*2)/(elos.length-1)},${H-pad-(e-minE)/range*(H-pad*2)}`).join(' ');
+    sparkline=`<div class="cefr-chart-wrap" style="padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="lbl" style="margin-bottom:0">ELO krivka</span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:800;color:${rank.color}">${currentElo} · ${rank.n}</span>
+      </div>
+      <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">
+        <defs><linearGradient id="eloLine" x1="0" x2="1"><stop offset="0" stop-color="#00ffc8"/><stop offset="1" stop-color="#7c4dff"/></linearGradient></defs>
+        <polyline points="${pts}" fill="none" stroke="url(#eloLine)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+        ${elos.map((e,i)=>`<circle cx="${pad+i*(W-pad*2)/(elos.length-1)}" cy="${H-pad-(e-minE)/range*(H-pad*2)}" r="3" fill="#00ffc8"/>`).join('')}
+        <text x="0" y="${H-1}" font-size="9" fill="rgba(255,255,255,.35)">${minE}</text>
+        <text x="0" y="${pad+4}" font-size="9" fill="rgba(255,255,255,.35)">${maxE}</text>
+      </svg>
+    </div>`;
+  }else{
+    sparkline=`<div class="cefr-chart-wrap" style="padding:18px;text-align:center;color:rgba(255,255,255,.32);font-size:.82rem;margin-bottom:14px">ELO krivka sa zobrazí po viacerých dueloch.</div>`;
+  }
+
+  const catRows=Object.entries(CATS).map(([k,c])=>{
+    const s=stats[k]||{played:0,correct:0};
+    const pct=s.played?Math.round(s.correct/s.played*100):0;
+    return`<div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <span style="font-size:.82rem;color:rgba(255,255,255,.7);font-weight:600">${c.label}</span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:${c.color};font-weight:900">${s.correct||0}/${s.played||0}</span>
+      </div>
+      <div class="cat-bar-wrap" style="height:7px"><div class="cat-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      <div style="font-size:.68rem;color:rgba(255,255,255,.32);margin-top:5px">Úspešnosť ${s.played?pct+'%':'—'}</div>
+    </div>`;
+  }).join('');
+
+  return`
+  <div class="logo" style="font-size:1.3rem;margin-bottom:4px">ŠTATISTIKA</div>
+  <div class="logo-sub" style="margin-bottom:18px">Prehľad výkonu</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
+    <div style="background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.18);border-radius:14px;padding:14px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;color:#00ffc8">${winRate}%</div>
+      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Win rate</div>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#ffb300">${total}</div>
-      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Zápasov</div>
+    <div style="background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.18);border-radius:14px;padding:14px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;color:#ffb300">${total}</div>
+      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Počet zápasov</div>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:#b388ff">${wins}W ${draws}D ${losses}L</div>
-      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Výhry / Remízy / Prehry</div>
+    <div style="background:rgba(124,77,255,.06);border:1px solid rgba(124,77,255,.2);border-radius:14px;padding:14px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:900;color:#b388ff">${wins} / ${draws} / ${losses}</div>
+      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Výhry / Remízy / Prehry</div>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center">
-      <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:#ff6b35">${topFmt?FORMATS[topFmt[0]]?.icon+' '+FORMATS[topFmt[0]]?.label:'–'}</div>
-      <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:3px">Obľúbený formát</div>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;text-align:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:900;color:${avgEloChange>=0?'#00ffc8':'#ff5252'}">${avgEloChange>0?'+'+avgEloChange:avgEloChange}</div>
+      <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Priemerná ELO zmena</div>
     </div>
   </div>
+
+  <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;margin-bottom:14px">
+    <div class="lbl" style="margin-bottom:10px">Súhrn</div>
+    <div class="stat-row"><span class="stat-lbl">Aktuálne ELO</span><span class="stat-val" style="color:${rank.color}">${currentElo} · ${rank.n}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Priemerné skóre</span><span class="stat-val">${total?avgScore:'—'}</span></div>
+    <div class="stat-row" style="border-bottom:none"><span class="stat-lbl">Najlepší ELO zisk</span><span class="stat-val">${bestWin?.eloChange?('+'+bestWin.eloChange):'—'}</span></div>
+  </div>
+
   ${sparkline}
   <div id="cefr-hist-wrap"></div>
-  <div class="sec-title">Posledné zápasy</div>
-  ${histItems||'<div style="font-size:.82rem;color:rgba(255,255,255,.28);text-align:center;padding:16px">Zatiaľ žiadne zápasy</div>'}
-  <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:14px">← Späť</button>
+
+  <div class="sec-title">Výkon podľa kategórií</div>
+  ${catRows}
+
+  <button class="btn btn-ghost" id="histBtn" style="margin-top:12px">📜 Otvoriť históriu</button>
+  <button class="btn btn-ghost" id="backHomeBtn" style="margin-top:9px">← Späť</button>
 `;}
 
 function hBo3Summary(){
@@ -2114,13 +2219,18 @@ function bindAll(){
   // Auth screen
   g('googleSignIn')?.addEventListener('click',()=>signInGoogle());
   // Setup screen
-  g('saveSetup')?.addEventListener('click',()=>{
+  g('saveSetup')?.addEventListener('click',async()=>{
+    const nick=(g('nameInp')?.value||S.name||'').trim();
+    if(!nick){S.error='Zadaj prezývku.';render();return;}
     const ak=(g('ak')?.value||'').trim();
     if(!ak||!ak.startsWith('sk-')){S.error='API kľúč musí začínať "sk-"';render();return;}
+    S.name=nick;
+    localStorage.setItem('ed_nick',nick);
     S.ak=ak;S.error=null;
     localStorage.setItem('ed_ak',ak);
+    if(S.uid)await dbUp('users/'+S.uid,{name:nick}).catch(()=>{});
     // If already logged in, just go back to home — don't re-trigger auth/placement
-    if(S.uid&&S.myProfile){S.screen='home';render();return;}
+    if(S.uid&&S.myProfile){S.myProfile={...S.myProfile,name:nick};S.screen='home';render();return;}
     if(!initFB(FB_CONFIG)){render();return;}
     startAuthListener();
   });
@@ -2129,7 +2239,7 @@ function bindAll(){
   g('nameInp')?.addEventListener('input',e=>{
     S.name=e.target.value;
     if(S.name.trim())localStorage.setItem('ed_nick',S.name.trim());
-    const ok=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
+    const ok=S.name.trim()&&S.mode&&(S.mode==='solo'||S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
     if(g('goBtn'))g('goBtn').disabled=!ok;
   });
   g('mSolo')?.addEventListener('click',()=>{S.mode='solo';S.solo=true;render();});
@@ -2155,6 +2265,12 @@ function bindAll(){
     S.gameHistory=await loadHistory();
     S.historyLoaded=true;
     S.screen='history';render();
+  });
+  g('statsBtn')?.addEventListener('click',async()=>{
+    S.screen='loading';S.loadingMsg='Načítavam štatistiku...';render();
+    S.gameHistory=await loadHistory();
+    S.historyLoaded=true;
+    S.screen='statistics';render();
   });
   g('readyBtn')?.addEventListener('click',async()=>{
     if(S.myReady)return;
@@ -2282,8 +2398,8 @@ function bindAll(){
   }
   g('bo3SummaryBtn')?.addEventListener('click',()=>{S.screen='bo3_summary';render();});
   g('backHomeBtn')?.addEventListener('click',()=>{S.screen='home';render();});
-  // Load CEFR history async on history screen
-  if(S.screen==='history'){
+  // Load CEFR history async on statistics screen
+  if(S.screen==='statistics'){
     loadCefrHistory().then(cefrHist=>{
       const wrap=document.getElementById('cefr-hist-wrap');
       if(!wrap||cefrHist.length<2)return;
@@ -2550,7 +2666,7 @@ function timerHTML(){
 // GAME LOGIC
 // ═══════════════════════════════════════════════════
 async function handleGo(){
-  S.error=null;S.name=g('nameInp')?.value.trim()||S.name;
+  S.error=null;S.name=(S.name||localStorage.getItem('ed_nick')||randomNick()).trim();
   if(S.mode==='solo'){
     S.solo=true;S.roomCode='solo';S.role='p1';
     S.oppName='';S.oppScore=0;S.oppDone=false;
