@@ -224,6 +224,15 @@
     .xp-levelup{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);z-index:1001;animation:fadeIn .3s ease}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     .xp-levelup-card{background:linear-gradient(135deg,rgba(124,77,255,.3),rgba(0,255,200,.15));border:2px solid #7c4dff;border-radius:20px;padding:32px 28px;text-align:center;animation:xpPop .4s ease}
+    /* CEFR assessment */
+    .cefr-level{font-family:'Orbitron',sans-serif;font-size:2.6rem;font-weight:900;text-align:center;margin:14px 0 4px;background:linear-gradient(135deg,#00ffc8,#7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .cefr-label{text-align:center;font-size:.75rem;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+    .cefr-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:14px;margin-bottom:10px;font-size:.85rem;color:rgba(255,255,255,.65);line-height:1.6}
+    .cefr-box .cefr-box-title{font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:7px;font-weight:600}
+    .cefr-strong{color:#00ffc8;font-weight:600}
+    .cefr-weak{color:#ff8a80;font-weight:600}
+    .cefr-tip{color:#ffb300;font-weight:600}
+    .cefr-notify{background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);border-radius:11px;padding:11px 14px;text-align:center;margin-bottom:14px;font-size:.82rem;color:rgba(255,255,255,.5)}
     /* Placement test */
     .placement-progress{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
     .placement-pip{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s}
@@ -247,8 +256,6 @@
     .example-box .ex-label{font-size:.63rem;letter-spacing:1.5px;text-transform:uppercase;color:#00ffc8;margin-bottom:4px;font-weight:600}
     .example-box .ex-text{font-style:italic;color:rgba(255,255,255,.75)}
     /* Reactions */
-    .reaction-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3.5rem;pointer-events:none;z-index:999;animation:reactionPop .8s ease forwards}
-    @keyframes reactionPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}60%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(.8)}}
     /* Timer */
     .timer-ring{position:relative;width:36px;height:36px;flex-shrink:0}
     .timer-ring svg{transform:rotate(-90deg)}
@@ -256,6 +263,10 @@
     .timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:900}
     /* SR badge */
     .sr-badge{display:inline-block;padding:2px 7px;background:rgba(255,179,0,.12);border:1px solid rgba(255,179,0,.3);border-radius:10px;font-size:.62rem;color:#ffb300;margin-bottom:10px}
+    .sr-card{background:rgba(255,179,0,.07);border:1.5px solid rgba(255,179,0,.25);border-radius:13px;padding:12px 14px;margin-bottom:13px;animation:fadeUp .25s ease}
+    .sr-card-label{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,179,0,.7);margin-bottom:5px;font-weight:600}
+    .sr-card-keyword{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:#ffb300;margin-bottom:4px}
+    .sr-card-sub{font-size:.75rem;color:rgba(255,255,255,.4);line-height:1.4}
     /* Rematch */
     .btn-rematch{background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff}
     .spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.07);border-top-color:#00ffc8;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
@@ -286,16 +297,16 @@ const FB_CONFIG = {
 // CONSTANTS
 // ═══════════════════════════════════════════════════
 const RANKS=[
-  {n:'B2 Recruit', min:0,    color:'#78909c',emoji:'🎖️'},
-  {n:'B2 Soldier', min:850,  color:'#42a5f5',emoji:'⚔️'},
-  {n:'B2 Veteran', min:950,  color:'#66bb6a',emoji:'🛡️'},
-  {n:'C1 Initiate',min:1050, color:'#00ffc8',emoji:'✨'},
-  {n:'C1 Scholar', min:1150, color:'#b388ff',emoji:'📚'},
-  {n:'C1 Expert',  min:1250, color:'#ffb300',emoji:'🔥'},
-  {n:'C1 Master',  min:1350, color:'#ff6b35',emoji:'👑'},
+  {n:'Iron',     min:0,    color:'#78909c',emoji:'⚙️'},
+  {n:'Bronze',   min:850,  color:'#cd7f32',emoji:'🥉'},
+  {n:'Silver',   min:950,  color:'#aab4be',emoji:'🥈'},
+  {n:'Gold',     min:1050, color:'#ffd700',emoji:'🥇'},
+  {n:'Platinum', min:1150, color:'#00ffc8',emoji:'💎'},
+  {n:'Diamond',  min:1250, color:'#b388ff',emoji:'🔷'},
+  {n:'Master',   min:1350, color:'#ff6b35',emoji:'👑'},
 ];
 const CATS={phrasal:{label:'Phrasal Verbs',color:'#00ffc8'},grammar:{label:'Gramatika',color:'#ffb300'},vocab:{label:'Slovná zásoba',color:'#b388ff'}};
-const DIFF_LABELS=['','B2 Ľahká','B2→C1','C1 Ťažká'];
+const DIFF_LABELS=['','B2','B2/C1','C1'];
 const LT=['A','B','C','D'];
 const K=32, START_ELO=1000, SHIELD_EVERY=5, COOP_TARGET_PCT=0.7;
 const FORMATS={
@@ -305,6 +316,7 @@ const FORMATS={
   collocations:{label:'Kolokácie',  icon:'🔀', color:'#ffb300', hint:'Typické anglické spojenia',   prompt:'All 10 questions must be about collocations — typical word combinations in English (verb+noun, adj+noun, adv+adj etc.). type="Vocabulary & Idioms" for all.'},
   idioms:    {label:'Idiomy',       icon:'💬', color:'#ff6b35', hint:'Frazeologizmy & výrazy',       prompt:'All 10 questions must be about English idioms and fixed expressions. type="Vocabulary & Idioms" for all.'},
   grammar:   {label:'Gramatika',    icon:'📐', color:'#66bb6a', hint:'Pokročilá gramatika',          prompt:'All 10 questions must be about advanced English grammar (conditionals, perfect tenses, passive, inversions, cleft sentences, etc.). type="Advanced Grammar" for all.'},
+  sr:        {label:'Opakovanie',   icon:'🔁', color:'#ffb300', hint:'Tvoje vlastné SR otázky',       prompt:''},
 };
 const XP_CORRECT=10, XP_WIN=50, XP_DRAW=20, XP_STREAK_BONUS=15, XP_PERFECT=100, XP_HINT_USED=-5;
 const XP_LEVELS=[0,100,250,500,800,1200,1700,2300,3000,4000,5500,7500,10000];
@@ -331,6 +343,7 @@ const S={
   rematchCode:'', rematchRole:'',
   hintUsed:false,
   xpGained:0, newXp:0, leveledUp:0,
+  cefrResult:null,
   oppReaction:null, reactionTimer:null,
   // Placement test
   placementQs:[], placementCurrent:0, placementAnswers:[], placementResult:null,
@@ -377,9 +390,9 @@ function calcDiff(prof){
   return acc>0.78?3:acc<0.52?1:2;
 }
 function diffHint(d){
-  if(d===1)return'Focus on solid B2 questions. Student is struggling, keep contexts clear, avoid very advanced C1.';
-  if(d===3)return'Focus on challenging C1 questions. Advanced idioms, complex grammar, nuanced vocabulary. Push the student.';
-  return'Mix B2 and C1 evenly at the B2→C1 transition level.';
+  if(d===1)return'Focus on B2 level questions. Student is struggling, keep contexts clear, avoid very advanced C1.';
+  if(d===3)return'Focus on C1 level questions. Advanced idioms, complex grammar, nuanced vocabulary. Push the student.';
+  return'Mix B2 and C1 questions evenly at the B2/C1 transition level.';
 }
 
 // ═══════════════════════════════════════════════════
@@ -393,6 +406,65 @@ function mergeStats(ex,answers,questions){
 }
 function catPct(stats,k){const s=stats?.[k];if(!s||!s.played)return null;return Math.round(s.correct/s.played*100);}
 function weakestCat(stats){let min=101,key='vocab';Object.keys(CATS).forEach(k=>{const p=catPct(stats,k);if(p!==null&&p<min){min=p;key=k;}});return key;}
+
+// ═══════════════════════════════════════════════════
+// CEFR AI ASSESSMENT
+// ═══════════════════════════════════════════════════
+async function runCefrAssessment(){
+  const prof=S.myProfile;
+  if(!prof)return;
+  const games=prof.gamesPlayed||0;
+  if(games<10||games%10!==0)return; // only every 10 games
+
+  const stats=prof.stats||{};
+  const ph=stats.phrasal||{played:0,correct:0};
+  const gr=stats.grammar||{played:0,correct:0};
+  const vo=stats.vocab||{played:0,correct:0};
+  const phPct=ph.played?Math.round(ph.correct/ph.played*100):null;
+  const grPct=gr.played?Math.round(gr.correct/gr.played*100):null;
+  const voPct=vo.played?Math.round(vo.correct/vo.played*100):null;
+  const diff=calcDiff(prof);
+  const diffLabel=diff===1?'B2':diff===3?'C1':'B2/C1';
+
+  // Game history summary (last 10 games approximated from stats)
+  const totalPlayed=ph.played+gr.played+vo.played;
+  const totalCorrect=ph.correct+gr.correct+vo.correct;
+  const overallPct=totalPlayed?Math.round(totalCorrect/totalPlayed*100):50;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:
+        `You are an expert English language assessor. Based on these quiz performance statistics, assess the student's RECEPTIVE English level (reading comprehension, grammar, vocabulary knowledge) according to CEFR.
+
+Statistics from last ${games} games:
+- Phrasal Verbs accuracy: ${phPct!==null?phPct+'%':'no data'}  (${ph.correct}/${ph.played} questions)
+- Advanced Grammar accuracy: ${grPct!==null?grPct+'%':'no data'} (${gr.correct}/${gr.played} questions)  
+- Vocabulary & Idioms accuracy: ${voPct!==null?voPct+'%':'no data'} (${vo.correct}/${vo.played} questions)
+- Overall accuracy: ${overallPct}%
+- Current question difficulty: ${diffLabel}
+- ELO rating: ${prof.elo||1000}
+- Win rate: ${games>0?Math.round((prof.wins||0)/games*100)+'%':'n/a'}
+
+Respond ONLY in Slovak language with this exact JSON (no markdown):
+{"level":"B2+","summary":"2-3 sentences about their level","strengths":"1-2 specific strong areas","weaknesses":"1-2 specific weak areas","advice":"1 concrete study recommendation"}
+
+Level must be one of: A2, B1, B1+, B2, B2+, C1, C1+`
+      }]})
+    });
+    if(!res.ok)return;
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m)return;
+    const result=JSON.parse(m[0]);
+    result.assessedAt=Date.now();result.gamesAt=games;
+    S.cefrResult=result;
+    await dbUp('users/'+S.uid,{cefrResult:result});
+    S.myProfile={...S.myProfile,cefrResult:result};
+  }catch(e){console.warn('CEFR assessment failed',e);}
+}
 
 // ═══════════════════════════════════════════════════
 // PLACEMENT TEST
@@ -453,9 +525,13 @@ async function saveSRQuestions(wrongQuestions){
       const key='q'+q.id+'_'+catKey(q.type);
       const prev=existing[key];
       const interval=prev?SR_INTERVALS[Math.min(prev.stage,SR_INTERVALS.length-1)]:SR_INTERVALS[0];
+      // Extract keyword from correct answer (first 3 words or whole answer if short)
+      const correctAns=q.options[q.correct]||'';
+      const keyword=q.srKeyword||correctAns.split(' ').slice(0,3).join(' ');
       existing[key]={
         question:q.question,options:q.options,correct:q.correct,
         explanation:q.explanation,type:q.type,
+        srKeyword:keyword,
         dueDate:now+interval*86400000,
         stage:prev?(prev.stage||0)+1:0,
         addedAt:now
@@ -472,9 +548,40 @@ async function loadDueSRQuestions(){
     const now=Date.now();
     return Object.values(all)
       .filter(q=>q.dueDate<=now)
-      .slice(0,3) // max 3 SR questions per duel
+      .slice(0,3)
       .map((q,i)=>({...q,id:900+i,isSR:true}));
   }catch(e){return[];}
+}
+
+async function loadAllSRQuestions(){
+  try{
+    const all=await dbGet('sr/'+S.uid);
+    if(!all)return[];
+    // Sort by dueDate ascending (most overdue first)
+    return Object.values(all)
+      .sort((a,b)=>a.dueDate-b.dueDate)
+      .slice(0,10)
+      .map((q,i)=>({...q,id:900+i,isSR:true}));
+  }catch(e){return[];}
+}
+
+async function genSROnlyQuestions(srQs){
+  const tot=10;
+  // If enough SR questions, use them all
+  if(srQs.length>=tot){
+    return srQs.slice(0,tot).map((q,i)=>({...q,id:900+i,isSR:true}));
+  }
+  // Load more from all SR (not just due today)
+  const allSR=await loadAllSRQuestions();
+  if(allSR.length>=tot){
+    return allSR.slice(0,tot).map((q,i)=>({...q,id:900+i,isSR:true}));
+  }
+  // Not enough SR questions — fill rest with normal questions
+  const needed=tot-allSR.length;
+  const diff=calcDiff(S.myProfile);
+  const filler=await genQ(diff,S.myProfile?.stats,[],S.format==='sr'?'mixed':S.format);
+  const fillerSlice=filler.slice(0,needed);
+  return [...allSR,...fillerSlice].slice(0,tot);
 }
 
 // ═══════════════════════════════════════════════════
@@ -552,7 +659,8 @@ async function signOut(){
 async function loadProfile(){
   try{
     const p=await dbGet('users/'+S.uid);
-    S.myProfile=p||{elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null,xp:0};
+    S.myProfile=p||{elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null,xp:0,cefrResult:null};
+    if(p?.cefrResult)S.cefrResult=p.cefrResult;
     if(!p)await dbSet('users/'+S.uid,{name:S.name,elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',xp:0});
   }catch(e){S.myProfile={elo:START_ELO,gamesPlayed:0,wins:0,draws:0,streak:0,shieldActive:false,lastPlayedDate:'',stats:null};}
 }
@@ -574,7 +682,7 @@ function attach(code){
     if(S.oppDone&&opp.answers)S.oppAnswers=opp.answers;
     if(S.screen==='lobby'){
       if(S.role==='p1'&&r.p2&&r.status==='playing'){S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
-      if(S.role==='p2'&&r.questions&&r.status==='playing'){S.questions=r.questions;S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
+      if(S.role==='p2'&&r.status==='playing'&&(r.questions||S.format==='sr')&&S.questions.length){S.submode=r.submode||'competitive';S.format=r.format||'mixed';S.screen='quiz';render();return;}
     }
     if(S.screen==='waiting'&&S.oppDone){runAnalysis();return;}
     if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
@@ -635,6 +743,8 @@ async function runAnalysis(){
     await dbUp('users/'+S.uid,upd);
     S.myProfile={...S.myProfile,...upd,stats:newStats};
     S.analysisReady=true;render();
+    // Run CEFR assessment every 10 games (async, non-blocking)
+    runCefrAssessment();
     // Cleanup room from Firebase
     if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
   }catch(e){console.error(e);S.analysisReady=true;render();}
@@ -767,12 +877,15 @@ function hHome(){
     <span class="cat-pct" style="color:${c.color}">${p!==null?p+'%':'—'}</span>${weak?'<span style="font-size:.7rem">⚠️</span>':''}</div>`;
   }).join('');
 
-  const formatCards=Object.entries(FORMATS).map(([k,f])=>`
-    <div class="format-card ${S.format===k?'sel':''}" id="fmt_${k}" style="--fc:${f.color};${S.format===k?'background:'+f.color+'1a;':''}">
+  const games=prof?.gamesPlayed||0;
+  const formatCards=Object.entries(FORMATS).map(([k,f])=>{
+    const locked=k==='sr'&&games<5;
+    return`<div class="format-card ${S.format===k?'sel':''} ${locked?'locked':''}" id="fmt_${k}" style="--fc:${f.color};${S.format===k?'background:'+f.color+'1a;':''}${locked?'opacity:.4;cursor:not-allowed;':''}">
       <div class="format-icon">${f.icon}</div>
       <div class="format-name" style="color:${S.format===k?f.color:''}">${f.label}</div>
-      <div class="format-hint">${f.hint}</div>
-    </div>`).join('');
+      <div class="format-hint">${locked?'Odomkne sa po 5 hrách':''+f.hint}</div>
+    </div>`;
+  }).join('');
   const submodeHTML=S.mode==='create'?`
     <div class="lbl" style="margin-bottom:9px">Typ duelu</div>
     <div class="submode-grid">
@@ -843,6 +956,7 @@ function hHome(){
   ${S.mode==='join'?`<div class="lbl">Kód duelu</div><input type="text" id="codeInp" placeholder="4-ciferný kód" maxlength="4" inputmode="numeric" value="${S.roomCode}" style="font-family:'Orbitron',sans-serif;font-size:1.5rem;letter-spacing:10px;text-align:center"/>`:''}
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
   <button class="btn ${S.submode==='coop'?'btn-coop':'btn-primary'}" id="goBtn" ${!canGo?'disabled':''}>${S.mode==='join'?'PRIPOJIŤ SA':'VYTVORIŤ DUEL'}</button>
+  <button class="btn btn-ghost" id="cfgBtn" style="margin-top:9px;font-size:.72rem">🔑 Zmeniť API kľúč</button>
 `;}
 
 function hLobby(){
@@ -858,6 +972,7 @@ function hLobby(){
         ${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}
       </span>
     </div>
+    ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky na opakovanie</div>`:''}
     <div style="text-align:center;color:rgba(255,255,255,.28);font-size:.82rem;margin-bottom:16px">Čakám kým sa ${isCoop?'partner':'súper'} pripojí...</div>
     <button class="btn btn-ghost" id="cancelBtn">Zrušiť</button>`;
   return hLoad();
@@ -891,8 +1006,8 @@ function hQuiz(){
     </div>`;
   return`${liveSection}
   <div class="quiz-head">${!ans?timerHTML():''}<div class="prog-bar"><div class="prog-fill" style="width:${pw}%"></div></div><span class="q-cnt">${S.current+1}/${tot}</span></div>
-  ${q.isSR?'<div class="sr-badge">🔁 Opakovanie</div>':''}
-  <span class="badge ${bc(q.type)}">${q.type}</span>
+
+  ${q.isSR?'<span class="sr-badge" style="margin-right:6px">🔁</span>':''}<span class="badge ${bc(q.type)}">${q.type}</span>
   <div class="q-text">${q.question}</div>
   <div class="options">${opts}</div>
   ${!ans&&!S.hintUsed?`<button class="hint-btn" id="hintBtn">💡 Nápoveda <span class="hint-cost">(-5 ELO)</span></button>`:''}
@@ -940,31 +1055,36 @@ function hResults(){
     <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
   const mp=Math.round(S.score/tot*100),op=Math.round(S.oppScore/tot*100);
   const v=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
-  const mc=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252',oc=v==='loss'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
-  const bannerColor=v==='win'?'rgba(0,255,200,.1)':v==='draw'?'rgba(255,179,0,.08)':'rgba(255,82,82,.08)';
-  const bannerBorder=v==='win'?'rgba(0,255,200,.3)':v==='draw'?'rgba(255,179,0,.3)':'rgba(255,82,82,.25)';
-  const bannerText=v==='win'?'Vyhral/a si! 👑':v==='draw'?'Remíza 🤝':'Prehral/a si 😤';
-  const bannerSub=v==='win'?`Porazil/a si ${S.oppName||'súpera'} ${S.score}–${S.oppScore}`:v==='draw'?`Oba tímy skórovali ${S.score}–${S.oppScore}`:`${S.oppName||'Súper'} vyhral/a ${S.oppScore}–${S.score}`;
+  const mc=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
+  const oc=v==='loss'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
+  const myWrong=tot-S.score, oppWrong=tot-S.oppScore;
+  const headline=v==='win'?'VÍŤAZSTVO':v==='draw'?'REMÍZA':'PREHRA';
+  const headColor=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
+  const headBg=v==='win'?'rgba(0,255,200,.08)':v==='draw'?'rgba(255,179,0,.07)':'rgba(255,82,82,.07)';
+  const headBorder=v==='win'?'rgba(0,255,200,.25)':v==='draw'?'rgba(255,179,0,.25)':'rgba(255,82,82,.22)';
   return`
-  <div style="text-align:center;padding:18px 16px;background:${bannerColor};border:1.5px solid ${bannerBorder};border-radius:16px;margin-bottom:18px">
-    <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:${v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252'};margin-bottom:5px">${bannerText}</div>
-    <div style="font-size:.88rem;color:rgba(255,255,255,.45)">${bannerSub}</div>
+  <div style="text-align:center;padding:20px 16px 16px;background:${headBg};border:1.5px solid ${headBorder};border-radius:16px;margin-bottom:16px">
+    <div style="font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:${headColor};letter-spacing:3px;margin-bottom:8px">${headline}</div>
+    <div style="display:flex;justify-content:center;align-items:center;gap:20px">
+      <div style="text-align:center">
+        <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:${mc}">${S.score}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px">${S.name}</div>
+      </div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:rgba(255,255,255,.2);font-weight:700">VS</div>
+      <div style="text-align:center">
+        <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:${oc}">${S.oppScore}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px">${S.oppName||'Súper'}</div>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:rgba(255,255,255,.3);margin-top:8px">z ${tot} otázok</div>
   </div>
-  <div class="vs-row">
-    <div class="vs-card ${v==='win'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.name}</div><div class="vs-score" style="color:${mc}">${S.score}</div><div class="vs-lbl" style="color:${mc}">${mp}%</div></div>
-    <div class="vs-sep">VS</div>
-    <div class="vs-card ${v==='loss'?'winner':v==='draw'?'draw':'loser'}"><div class="vs-pname">${S.oppName||'Súper'}</div><div class="vs-score" style="color:${oc}">${S.oppScore}</div><div class="vs-lbl" style="color:${oc}">${op}%</div></div>
-  </div>
-  <div style="margin-bottom:18px">
-    <div class="stat-row"><span class="stat-lbl">Tvoje skóre</span><span class="stat-val" style="color:${mc}">${S.score}/${tot} (${mp}%)</span></div>
-    <div class="stat-row" style="border:none"><span class="stat-lbl">Skóre súpera</span><span class="stat-val" style="color:${oc}">${S.oppScore}/${tot} (${op}%)</span></div>
-  </div>
+
   <button class="btn btn-primary" id="analysisBtn">📊 ROZBOR DUELU</button>
   <button class="btn btn-rematch" id="rematchBtn" style="margin-top:9px">⚔️ REMATCH</button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
 function hAnalysis(){
-  if(!S.analysisReady)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Počítam ELO a štatistiky...</div></div>`;
+  if(!S.analysisReady)return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${(S.myProfile?.gamesPlayed||0)%10===0&&(S.myProfile?.gamesPlayed||0)>0?'Hodnotím tvoju úroveň angličtiny...':'Počítam ELO a štatistiky...'}</div></div>`;
   const isCoop=S.submode==='coop',tot=S.questions.length;
   const delta=S.eloChange,newElo=S.newElo||S.myProfile?.elo||START_ELO,oldElo=newElo-delta;
   const rank=getRank(newElo),prog=rankProg(newElo),nxt=nextRankN(newElo),stats=S.myProfile?.stats;
@@ -1052,7 +1172,10 @@ function bindAll(){
   g('sCmp')?.addEventListener('click',()=>{S.submode='competitive';render();});
   g('sCoop')?.addEventListener('click',()=>{S.submode='coop';render();});
   Object.keys(FORMATS).forEach(k=>{
-    g('fmt_'+k)?.addEventListener('click',()=>{S.format=k;render();});
+    g('fmt_'+k)?.addEventListener('click',()=>{
+      if(k==='sr'&&(S.myProfile?.gamesPlayed||0)<5)return;
+      S.format=k;render();
+    });
   });
   g('codeInp')?.addEventListener('input',e=>{
     S.roomCode=e.target.value.replace(/\D/g,'');e.target.value=S.roomCode;
@@ -1153,24 +1276,6 @@ function showXpPopup(text){
 }
 
 // ═══════════════════════════════════════════════════
-// REACTIONS
-// ═══════════════════════════════════════════════════
-function showReaction(emoji){
-  const el=document.createElement('div');
-  el.className='reaction-overlay';
-  el.textContent=emoji;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),900);
-}
-
-function triggerOppReaction(wasCorrect){
-  const correct=['⚡','🔥','💪','🎯','😤'];
-  const wrong=['😅','💀','🤦','😬'];
-  const pool=wasCorrect?correct:wrong;
-  showReaction(pool[Math.floor(Math.random()*pool.length)]);
-}
-
-// ═══════════════════════════════════════════════════
 // TIMER
 // ═══════════════════════════════════════════════════
 function startTimer(){
@@ -1230,10 +1335,19 @@ async function handleGo(){
     try{
       const diff=calcDiff(S.myProfile);
       S.srQuestions=await loadDueSRQuestions();
-      const qs=await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
+      // SR mode: each player gets own questions, store only metadata in room
+      let qs;
+      if(S.format==='sr'){
+        qs=await genSROnlyQuestions(S.srQuestions);
+      }else{
+        qs=await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
+      }
       const code=String(Math.floor(1000+Math.random()*9000));
       S.roomCode=code;S.role='p1';
-      await dbSet('rooms/'+code,{status:'waiting',submode:S.submode,format:S.format,questions:qs,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false}});
+      // In SR mode don't store questions in Firebase (each player has own)
+      const roomData={status:'waiting',submode:S.submode,format:S.format,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false}};
+      if(S.format!=='sr')roomData.questions=qs;
+      await dbSet('rooms/'+code,roomData);
       S.questions=qs;attach(code);S.screen='lobby';render();
     }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
   }else{
@@ -1243,8 +1357,16 @@ async function handleGo(){
       const room=await dbGet('rooms/'+code);
       if(!room)throw new Error('Duel '+code+' neexistuje');
       if(room.status!=='waiting')throw new Error('Duel už beží alebo skončil');
-      S.questions=room.questions;S.submode=room.submode||'competitive';S.format=room.format||'mixed';
+      S.submode=room.submode||'competitive';S.format=room.format||'mixed';
       S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
+      // SR mode: generate own questions, don't use room questions
+      if(S.format==='sr'){
+        S.loadingMsg='Načítavam tvoje SR otázky...';render();
+        S.srQuestions=await loadDueSRQuestions();
+        S.questions=await genSROnlyQuestions(S.srQuestions);
+      }else{
+        S.questions=room.questions;
+      }
       attach(code);
       await dbUp('rooms/'+code,{status:'playing',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false}});
       S.screen='quiz';render();
@@ -1270,7 +1392,8 @@ function resetGame(){
   S.questions=[];S.current=0;S.score=0;S.selected=null;
   S.myAnswers=[];S.myDone=false;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
-  S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;S.error=null;
+  S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;
+  S.cefrResult=S.myProfile?.cefrResult||null;S.error=null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1282,7 +1405,7 @@ async function genQ(diff,stats,srQs=[],fmt='mixed'){
   // Inject due SR questions directly (replace up to 3 normal questions)
   let srHint='';
   if(srQs.length){
-    srHint='\nIMPORTANT: The player previously got these questions wrong. Include them VERBATIM as questions in the set (use exact same question text, options, correct index): '+JSON.stringify(srQs.map(q=>({question:q.question,options:q.options,correct:q.correct,explanation:q.explanation,type:q.type})));
+    srHint='\nIMPORTANT: The player previously got these questions wrong. Include them VERBATIM as questions in the set (same question text, options, correct index). For each repeated question, set the "srKeyword" field to the specific word, phrase or grammar point being tested (e.g. "give up", "present perfect", "on the contrary"): '+JSON.stringify(srQs.map(q=>({question:q.question,options:q.options,correct:q.correct,explanation:q.explanation,type:q.type,srKeyword:q.srKeyword||''})));
   }
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
@@ -1291,7 +1414,16 @@ async function genQ(diff,stats,srQs=[],fmt='mixed'){
       `Generate exactly 10 multiple-choice English questions. Difficulty: ${diffHint(diff)}${weakHint}
 ${FORMATS[fmt]?.prompt||FORMATS.mixed.prompt}${srHint}
 Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","question":"...","options":["A","B","C","D"],"correct":0,"explanation":"...","example":"She gave up smoking after 10 years."}]}
-Rules: type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms". correct is 0-based index. The "explanation" field MUST be in Slovak. The "example" field must be a short natural English sentence showing the correct answer in real context.`
+Rules:
+- type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms"
+- correct is 0-based index
+- explanation MUST be in Slovak
+- example is a short natural English sentence showing the correct answer in real context
+- CRITICAL — answer quality rules:
+  1. There must be ONE clearly correct answer. The other 3 options must be CLEARLY wrong — wrong grammar, wrong meaning, or wrong word entirely. NOT "almost correct but less formal".
+  2. If the question is about register (formal/informal/neutral), you MUST explicitly state it in the question text, e.g. "In an INFORMAL conversation, which phrase..." or "In a FORMAL business email, which is correct..."
+  3. Never create questions where multiple options could be defended as correct in any context.
+  4. Distractors should be plausible but unambiguously incorrect — wrong tense, wrong preposition, non-existent phrase, or opposite meaning.`
     }]})
   });
   if(!res.ok){const t=await res.text();throw new Error('API '+res.status+': '+t);}
