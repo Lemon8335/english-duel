@@ -10,6 +10,7 @@
   <link rel="manifest" href="manifest.json"/>
   <title>English Duel</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600&subset=latin,latin-ext&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -471,6 +472,7 @@ const S={
   name:'', mode:null, submode:'competitive', format:'mixed', solo:false, roomCode:'', role:'',
   questions:[], current:0, score:0, selected:null,
   myAnswers:[], myDone:false,
+  answerTimes:[], questionStartTime:0,
   oppName:'', oppScore:0, oppDone:false, oppAnswers:[], oppUid:'',
   myProfile:null,
   eloChange:0, newElo:0, analysisReady:false, shieldJustEarned:false, analysisStarted:false,
@@ -1427,7 +1429,17 @@ function hHome(){
   ${submodeHTML}
   ${S.error?`<div class="err-box">${S.error}</div>`:''}
 
-  <div class="bottom-nav">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0">
+      <div class="user-avatar" style="width:28px;height:28px;font-size:.75rem;flex-shrink:0">${S.user?.photoURL?`<img src="${S.user.photoURL}" alt=""/>`:S.name?S.name[0].toUpperCase():'?'}</div>
+      <div style="min-width:0">
+        <div style="font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${S.name||'Hráč'}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${S.user?.email||''}</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="signOutBtn" style="width:auto;padding:6px 12px;font-size:.65rem;margin:0;flex-shrink:0">Odhlásiť</button>
+  </div>
+  <div class="bottom-nav" style="border-top:none;padding-top:4px">
     <div class="nav-item nav-active">
       <div class="nav-icon">🏠</div>
       <div class="nav-label">Domov</div>
@@ -1883,7 +1895,7 @@ function hAnalysis(){
       </div>
       ${!isSolo?`<div style="width:1px;height:40px;background:rgba(255,255,255,.08)"></div>`:''}
       <div>
-        <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#b388ff;text-align:center">+${xpG}</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:#b388ff;text-align:center" id="xp-counter">+${xpG}</div>
         <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-align:center">XP</div>
       </div>
     </div>
@@ -1927,6 +1939,19 @@ function hAnalysis(){
     ${catRows}
   </div>
   ${weakBlock}${wrongBlock}
+  ${S.answerTimes.length>1?`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:12px">
+    <div class="sec-title" style="margin-top:0">Čas odpovedí</div>
+    <div style="display:flex;gap:0">
+      ${[
+        {l:'Najrýchlejší',v:Math.min(...S.answerTimes.filter(t=>t>0))+'s',c:'#00ffc8'},
+        {l:'Priemer',v:(S.answerTimes.reduce((a,b)=>a+b,0)/S.answerTimes.length).toFixed(1)+'s',c:'#ffb300'},
+        {l:'Najpomalší',v:Math.max(...S.answerTimes)+'s',c:'rgba(255,255,255,.4)'}
+      ].map(s=>`<div style="flex:1;text-align:center">
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:${s.c}">${s.v}</div>
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:2px">${s.l}</div>
+      </div>`).join('<div style="width:1px;background:rgba(255,255,255,.07)"></div>')}
+    </div>
+  </div>`:''}
   <button class="btn btn-rematch" id="rematchBtn" style="margin-top:4px">⚔️ REMATCH</button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
@@ -2105,23 +2130,32 @@ function bindAll(){
     btn.addEventListener('click',()=>{
       if(S.selected!==null)return;
       clearTimer();
+      const ansTime=S.questionStartTime?Math.round((Date.now()-S.questionStartTime)/100)/10:0;
       const i=parseInt(btn.dataset.i);S.selected=i;
       const q=S.questions[S.current];const correct=i===q.correct;
       if(correct)S.score++;
       S.myAnswers.push({correct,type:q.type});
+      S.answerTimes.push(ansTime);
       dbUp('rooms/'+S.roomCode+'/'+S.role,{score:S.score}).catch(()=>{});
       render();
       if(correct)setTimeout(()=>showXpPopup('+'+XP_CORRECT+' XP'),50);
     });
   });
   // Start timer when quiz question is shown and unanswered
-  if(S.screen==='quiz'&&S.selected===null) startTimer();
+  if(S.screen==='quiz'&&S.selected===null){
+    startTimer();
+    S.questionStartTime=Date.now();
+  }
   g('nextBtn')?.addEventListener('click',()=>{
     clearTimer();
     if(S.current+1>=S.questions.length)finishQuiz();
     else{S.current++;S.selected=null;S.hintUsed=false;render();}
   });
   g('analysisBtn')?.addEventListener('click',()=>runAnalysis());
+  // Fire confetti on perfect score
+  if(S.screen==='results'&&S.score===S.questions.length&&S.score>0){
+    setTimeout(fireConfetti, 300);
+  }
   g('bo3SummaryBtn')?.addEventListener('click',()=>{S.screen='bo3_summary';render();});
   g('backHomeBtn')?.addEventListener('click',()=>{S.screen='home';render();});
   // Load CEFR history async on history screen
@@ -2153,6 +2187,8 @@ function bindAll(){
     });
   }
   // Generate AI insight when results screen appears (async, non-blocking)
+  // Animate ELO/XP counters on analysis screen
+  if(S.screen==='analysis'&&S.analysisReady)initCounters();
   if(S.screen==='results'&&!S.aiInsight&&!S.aiInsightLoading&&S.myAnswers.length>1){
     S.aiInsightLoading=true;
     generateInsight().then(text=>{
@@ -2169,7 +2205,7 @@ function bindAll(){
     S.bo3Game++;
     // Reset game state, keep series state
     S.questions=[];S.current=0;S.score=0;S.selected=null;
-    S.myAnswers=[];S.myDone=false;S.oppScore=0;S.oppDone=false;S.oppAnswers=[];
+    S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;S.oppScore=0;S.oppDone=false;S.oppAnswers=[];
     S.analysisStarted=false;S.eloChange=0;S.newElo=0;S.analysisReady=false;
     S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
     // Show round intro animation then generate
@@ -2215,8 +2251,49 @@ function bindAll(){
 }
 
 // ═══════════════════════════════════════════════════
+// COUNTER ANIMATION
+// ═══════════════════════════════════════════════════
+function animateCounter(el, from, to, duration=800){
+  if(!el)return;
+  const diff=to-from;
+  if(diff===0){el.textContent=to;return;}
+  const start=performance.now();
+  function step(now){
+    const p=Math.min((now-start)/duration,1);
+    // Ease out cubic
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+diff*ease);
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function initCounters(){
+  // Animate ELO on analysis screen
+  setTimeout(()=>{
+    const eloEl=document.getElementById('elo-counter');
+    if(eloEl){
+      const from=S.newElo-S.eloChange;
+      animateCounter(eloEl,from,S.newElo,900);
+    }
+    const xpEl=document.getElementById('xp-counter');
+    if(xpEl){
+      const fromXp=(S.newXp||0)-(S.xpGained||0);
+      animateCounter(xpEl,fromXp,S.newXp||0,700);
+    }
+  },200);
+}
+
+// ═══════════════════════════════════════════════════
 // XP POPUP
 // ═══════════════════════════════════════════════════
+function fireConfetti(){
+  if(typeof confetti==='undefined')return;
+  const opts={particleCount:120,spread:80,origin:{y:.6},colors:['#00ffc8','#7c4dff','#ffb300','#ff6b35','#fff']};
+  confetti({...opts,angle:60,origin:{x:0,y:.6}});
+  setTimeout(()=>confetti({...opts,angle:120,origin:{x:1,y:.6}}),150);
+}
+
 function showXpPopup(text){
   const el=document.createElement('div');
   el.className='xp-popup';
@@ -2309,6 +2386,7 @@ function startTimer(){
       if(S.selected===null){
         S.selected=-1; // -1 = timeout
         S.myAnswers.push({correct:false,type:S.questions[S.current]?.type,timeout:true});
+        S.answerTimes.push(25);
         dbUp('rooms/'+S.roomCode+'/'+S.role,{score:S.score}).catch(()=>{});
         render();
       }
@@ -2381,16 +2459,17 @@ async function handleGo(){
     try{
       const room=await dbGet('rooms/'+code);
       if(!room)throw new Error('Duel '+code+' neexistuje');
-      if(room.status!=='waiting')throw new Error('Duel už beží alebo skončil');
+      if(room.status==='playing'||room.status==='countdown')throw new Error('Duel už beží');
+      if(room.p2uid&&room.p2uid!==S.uid)throw new Error('Duel je už obsadený');
       S.submode=room.submode||'competitive';S.format=room.format||'mixed';
       S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
-      // SR mode: generate own questions, don't use room questions
+      // SR mode: generate own questions
       if(S.format==='sr'){
         S.loadingMsg='Načítavam tvoje SR otázky...';render();
         S.srQuestions=await loadDueSRQuestions();
         S.questions=await genSROnlyQuestions(S.srQuestions);
       }else{
-        S.questions=room.questions;
+        S.questions=room.questions||[]; // may be empty until READY
       }
       S.oppName=room.p1?.name||'';S.oppUid=room.p1uid||'';
       if(room.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=room.bo3?.p2wins||0;S.bo3OppWins=room.bo3?.p1wins||0;S.bo3Game=room.bo3?.game||1;}
@@ -2421,7 +2500,7 @@ function resetGame(){
   S.xpGained=0;S.newXp=0;S.leveledUp=0;
   S.screen='home';S.mode=null;S.submode='competitive';S.format='mixed';S.solo=false;S.roomCode='';S.role='';
   S.questions=[];S.current=0;S.score=0;S.selected=null;
-  S.myAnswers=[];S.myDone=false;
+  S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
   S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;
   S.cefrResult=S.myProfile?.cefrResult||null;
