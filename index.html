@@ -1008,6 +1008,8 @@ function attach(code){
       const myReadyKey=S.role==='p1'?'p1ready':'p2ready';
       const oppReadyKey=S.role==='p1'?'p2ready':'p1ready';
       S.oppReady=!!r[oppReadyKey];
+      // Sync myReady from Firebase (prevents stale local state)
+      if(r[myReadyKey]!==undefined)S.myReady=!!r[myReadyKey];
       // Update opp name when they join
       if(S.role==='p1'&&r.p2?.name)S.oppName=r.p2.name;
       if(S.role==='p1'&&r.p2uid&&r.p2uid!==S._lastH2HUid){
@@ -1016,10 +1018,13 @@ function attach(code){
         dbGet('users/'+r.p2uid).then(p=>{S.oppProfile=p;render();});
         loadH2H(r.p2uid).then(h=>{S.h2h=h;render();});
       }
-      if(S.role==='p2'&&S.oppUid&&!S._h2hLoaded){
+      if(S.role==='p2'&&!S._h2hLoaded){
         S._h2hLoaded=true;
-        if(!S.oppProfile)dbGet('users/'+S.oppUid).then(p=>{S.oppProfile=p;render();});
-        loadH2H(S.oppUid).then(h=>{S.h2h=h;render();});
+        const p2oppUid=r.p1uid||S.oppUid;
+        if(p2oppUid){
+          dbGet('users/'+p2oppUid).then(p=>{S.oppProfile=p;render();});
+          loadH2H(p2oppUid).then(h=>{S.h2h=h;render();});
+        }
       }
       // Both ready → start countdown then quiz
       if(r.status==='countdown'&&!S._countdownStarted){
@@ -2495,7 +2500,6 @@ async function handleGo(){
       await dbUp('rooms/'+code,{status:'joined',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false},p1ready:false,p2ready:false});
       // Pre-load P1 profile for rank display
       if(S.oppUid)dbGet('users/'+S.oppUid).then(p=>{S.oppProfile=p;});
-      S.oppJoined=true;
       S.screen='lobby';render();
     }catch(e){detach();S.error='Chyba: '+e.message;S.screen='home';render();}
   }
@@ -2523,6 +2527,7 @@ function resetGame(){
   S.questions=[];S.current=0;S.score=0;S.selected=null;
   S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
+  S.myReady=false;S.oppReady=false;S.oppJoined=false;S._countdownStarted=false;
   S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;
   S.cefrResult=S.myProfile?.cefrResult||null;
   S.aiInsight=null;S.aiInsightLoading=false;S.error=null;
