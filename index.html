@@ -1018,13 +1018,38 @@ function attach(code){
         dbGet('users/'+r.p2uid).then(p=>{S.oppProfile=p;render();});
         loadH2H(r.p2uid).then(h=>{S.h2h=h;render();});
       }
-      if(S.role==='p2'&&!S._h2hLoaded){
-        S._h2hLoaded=true;
-        const p2oppUid=r.p1uid||S.oppUid;
-        if(p2oppUid){
-          dbGet('users/'+p2oppUid).then(p=>{S.oppProfile=p;render();});
-          loadH2H(p2oppUid).then(h=>{S.h2h=h;render();});
+      if(S.role==='p2'){
+        const p1uid=r.p1uid||S.oppUid;
+        if(p1uid&&!S.oppProfile){
+          dbGet('users/'+p1uid).then(p=>{if(p){S.oppProfile=p;render();}});
         }
+        if(p1uid&&!S._h2hLoaded){
+          S._h2hLoaded=true;
+          loadH2H(p1uid).then(h=>{S.h2h=h;render();});
+        }
+        // Update opp name from room data
+        if(r.p1?.name)S.oppName=r.p1.name;
+      }
+      // P1: auto-trigger countdown when BOTH ready flags appear in Firebase
+      if(S.role==='p1'&&r.p1ready&&r.p2ready&&r.status!=='countdown'&&!S._countdownStarted&&!S._generatingQuestions){
+        S._generatingQuestions=true;
+        const p2uid=r.p2uid||'';
+        (async()=>{
+          try{
+            let oppElo=START_ELO;
+            if(p2uid){const op=await dbGet('users/'+p2uid);if(op?.elo)oppElo=op.elo;}
+            const sharedDiff=calcSharedDiff(S.myProfile,oppElo);
+            S.srQuestions=await loadDueSRQuestions();
+            let qs;
+            if(S.format==='sr'){qs=await genSROnlyQuestions(S.srQuestions);}
+            else{qs=await genQ(sharedDiff,S.myProfile?.stats,S.srQuestions,S.format);}
+            S.questions=qs;
+            await dbUp('rooms/'+S.roomCode,{questions:qs,status:'countdown',sharedDiff,p1elo:S.myProfile?.elo||START_ELO,p2elo:oppElo});
+          }catch(e){
+            S._generatingQuestions=false;
+            await dbUp('rooms/'+S.roomCode,{status:'countdown'}).catch(()=>{});
+          }
+        })();
       }
       // Both ready → start countdown then quiz
       if(r.status==='countdown'&&!S._countdownStarted){
@@ -1522,7 +1547,7 @@ function hLobby(){
     ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky</div>`:''}
     ${S.h2h&&S.oppJoined?h2hHTML(S.h2h):''}
     ${readyCards}
-    ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
+    ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:S._generatingQuestions?`<button class="btn-ready pressed" id="readyBtn" style="background:rgba(255,179,0,.15);color:#ffb300;border:2px solid #ffb300;animation:none">⏳ GENERUJEM OTÁZKY...</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
     <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:11px;padding:11px 14px;margin-top:10px">
       <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,255,200,.5);margin-bottom:5px">💡 Tip kým čakáš</div>
       <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.5">${tip}</div>
@@ -2032,35 +2057,7 @@ function bindAll(){
     S.myReady=true;render();
     const myReadyKey=S.role==='p1'?'p1ready':'p2ready';
     await dbUp('rooms/'+S.roomCode,{[myReadyKey]:true}).catch(()=>{});
-    // Check if both ready
-    const room=await dbGet('rooms/'+S.roomCode);
-    if(room?.p1ready&&room?.p2ready){
-      if(S.role==='p1'){
-        // P1 generates questions using SHARED difficulty (avg of both ELOs)
-        try{
-          const p2uid=room.p2uid||'';
-          let oppElo=START_ELO;
-          if(p2uid){const op=await dbGet('users/'+p2uid);if(op?.elo)oppElo=op.elo;}
-          const sharedDiff=calcSharedDiff(S.myProfile,oppElo);
-          S.srQuestions=await loadDueSRQuestions();
-          let qs;
-          if(S.format==='sr'){qs=await genSROnlyQuestions(S.srQuestions);}
-          else{qs=await genQ(sharedDiff,S.myProfile?.stats,S.srQuestions,S.format);}
-          S.questions=qs;
-          // Store shared difficulty info in room for transparency
-          await dbUp('rooms/'+S.roomCode,{
-            questions:qs,
-            status:'countdown',
-            sharedDiff,
-            p1elo:S.myProfile?.elo||START_ELO,
-            p2elo:oppElo
-          });
-        }catch(e){
-          // Fallback: use own diff if fetch fails
-          await dbUp('rooms/'+S.roomCode,{status:'countdown'});
-        }
-      }
-    }
+    // Listener handles countdown trigger automatically
   });
   g('cancelBtn')?.addEventListener('click',()=>{
     detach();if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});resetGame();render();
@@ -2527,7 +2524,7 @@ function resetGame(){
   S.questions=[];S.current=0;S.score=0;S.selected=null;
   S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;
   S.oppName='';S.oppScore=0;S.oppDone=false;S.oppAnswers=[];S.oppUid='';
-  S.myReady=false;S.oppReady=false;S.oppJoined=false;S._countdownStarted=false;
+  S.myReady=false;S.oppReady=false;S.oppJoined=false;S._countdownStarted=false;S._generatingQuestions=false;
   S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;
   S.cefrResult=S.myProfile?.cefrResult||null;
   S.aiInsight=null;S.aiInsightLoading=false;S.error=null;
