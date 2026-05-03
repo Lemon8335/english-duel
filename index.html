@@ -1012,6 +1012,14 @@ async function runAnalysis(){
       const res=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
       if(res==='win')S.bo3MyWins++;
       else if(res==='loss')S.bo3OppWins++;
+      // Award series win bonus XP on final game
+      if(S.bo3MyWins>=BO3_WINS_NEEDED&&!S._bo3BonusGiven){
+        S._bo3BonusGiven=true;
+        const bonusXp=XP_BO3_WIN;
+        dbUp('users/'+S.uid,{xp:(S.myProfile?.xp||0)+bonusXp}).catch(()=>{});
+        S.newXp=(S.newXp||S.myProfile?.xp||0)+bonusXp;
+        S.xpGained=(S.xpGained||0)+bonusXp;
+      }
       // Save game to history
       S.bo3History.push({myScore:S.score,oppScore:S.oppScore,myAnswers:[...S.myAnswers],questions:[...S.questions],game:S.bo3Game});
       S.screen='bo3_results';render();
@@ -1025,8 +1033,8 @@ async function runAnalysis(){
         S.format,S.submode,delta,S.newElo,newStats);
     }
     runCefrAssessment();
-    // Cleanup room from Firebase
-    if(S.roomCode)S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
+    // Cleanup room — skip for Bo3 (room reused between rounds)
+    if(S.roomCode&&S.submode!=='bo3')S.db?.ref('rooms/'+S.roomCode).remove().catch(()=>{});
   }catch(e){console.error(e);S.analysisReady=true;render();}
 }
 
@@ -1831,6 +1839,7 @@ function bindAll(){
     btn.addEventListener('click',async()=>{
       if(S.selected!==null)return;
       clearTimer();
+      clearTimer();
       const i=parseInt(btn.dataset.sd);
       const answerTime=Date.now();
       S.selected=i;
@@ -1860,7 +1869,7 @@ function bindAll(){
           }
           const iWon=winner===S.role;
           S.suddenDone=true;
-          // Update scores for final results
+          S.analysisStarted=false; // Allow analysis after SD
           if(iWon)S.score+=1;else S.oppScore+=1;
           S.screen='results';render();
         }
@@ -1922,7 +1931,7 @@ function bindAll(){
     });
   }
   // Generate AI insight when results screen appears (async, non-blocking)
-  if(S.screen==='results'&&!S.aiInsight&&!S.aiInsightLoading){
+  if(S.screen==='results'&&!S.aiInsight&&!S.aiInsightLoading&&S.myAnswers.length>1){
     S.aiInsightLoading=true;
     generateInsight().then(text=>{
       S.aiInsight=text;S.aiInsightLoading=false;
