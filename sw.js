@@ -1,4 +1,4 @@
-const CACHE = 'english-duel-v2';
+const CACHE = 'english-duel-v4';
 const ASSETS = [
   '/english-duel/',
   '/english-duel/index.html',
