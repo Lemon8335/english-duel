@@ -1012,10 +1012,13 @@ function attach(code){
       if(S.role==='p1'&&r.p2?.name)S.oppName=r.p2.name;
       if(S.role==='p1'&&r.p2uid&&r.p2uid!==S._lastH2HUid){
         S._lastH2HUid=r.p2uid;S.oppUid=r.p2uid;
+        // Load opp profile for rank display
+        dbGet('users/'+r.p2uid).then(p=>{S.oppProfile=p;render();});
         loadH2H(r.p2uid).then(h=>{S.h2h=h;render();});
       }
       if(S.role==='p2'&&S.oppUid&&!S._h2hLoaded){
         S._h2hLoaded=true;
+        if(!S.oppProfile)dbGet('users/'+S.oppUid).then(p=>{S.oppProfile=p;render();});
         loadH2H(S.oppUid).then(h=>{S.h2h=h;render();});
       }
       // Both ready → start countdown then quiz
@@ -1497,7 +1500,18 @@ function hLobby(){
         <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.2)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        ${oppJoined?`<div style="font-size:22px">❓</div><div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.4)">Súper</div><div style="font-size:10px;color:rgba(255,255,255,.25)">Pripojený</div>`:`<div style="font-size:22px;opacity:.3">👤</div><div style="font-size:10px;color:rgba(255,255,255,.2)">Čakám...</div>`}
+        ${oppJoined&&S.oppProfile?`
+          <div style="font-size:22px">${getRank(S.oppProfile.elo||START_ELO).emoji}</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:${getRank(S.oppProfile.elo||START_ELO).color}">${getRank(S.oppProfile.elo||START_ELO).n.toUpperCase()}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppProfile.elo||START_ELO} ELO</div>
+        `:oppJoined?`
+          <div style="font-size:22px;opacity:.5">⏳</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppName||'Súper'}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.2)">načítavam...</div>
+        `:`
+          <div style="font-size:22px;opacity:.25">👤</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.2)">Čakám...</div>
+        `}
       </div>
     </div>
     ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky</div>`:''}
@@ -2479,6 +2493,9 @@ async function handleGo(){
       if(room.submode==='bo3'){S.bo3Active=true;S.bo3MyWins=room.bo3?.p2wins||0;S.bo3OppWins=room.bo3?.p1wins||0;S.bo3Game=room.bo3?.game||1;}
       attach(code);
       await dbUp('rooms/'+code,{status:'joined',p2uid:S.uid,'p2':{name:S.name,score:0,finished:false},p1ready:false,p2ready:false});
+      // Pre-load P1 profile for rank display
+      if(S.oppUid)dbGet('users/'+S.oppUid).then(p=>{S.oppProfile=p;});
+      S.oppJoined=true;
       S.screen='lobby';render();
     }catch(e){detach();S.error='Chyba: '+e.message;S.screen='home';render();}
   }
