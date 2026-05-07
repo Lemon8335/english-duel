@@ -445,11 +445,11 @@ function randomNick(){return NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]
 
 const FORMATS={
   mixed:     {label:'Zmiešaný',     icon:'⚡', color:'#00ffc8', hint:'Všetky typy otázok',         prompt:'Mix: 4 phrasal verbs, 3 advanced grammar, 3 vocabulary & idioms.'},
-  phrasal:   {label:'Frázové slovesá',icon:'🔗', color:'#42a5f5', hint:'Len frázové slovesá',         prompt:'All 10 questions must be about phrasal verbs in various contexts. type="Phrasal Verbs" for all.'},
-  vocab:     {label:'Slovná zásoba',icon:'📖', color:'#b388ff', hint:'Slovíčka & idiomy',            prompt:'All 10 questions must be about advanced vocabulary, idioms, and expressions. type="Vocabulary & Idioms" for all.'},
-  collocations:{label:'Kolokácie',  icon:'🔀', color:'#ffb300', hint:'Typické anglické spojenia',   prompt:'All 10 questions must be about collocations — typical word combinations in English (verb+noun, adj+noun, adv+adj etc.). type="Vocabulary & Idioms" for all.'},
-  idioms:    {label:'Idiomy',       icon:'💬', color:'#ff6b35', hint:'Frazeologizmy & výrazy',       prompt:'All 10 questions must be about English idioms and fixed expressions. type="Vocabulary & Idioms" for all.'},
-  grammar:   {label:'Gramatika',    icon:'📐', color:'#66bb6a', hint:'Pokročilá gramatika',          prompt:'All 10 questions must be about advanced English grammar (conditionals, perfect tenses, passive, inversions, cleft sentences, etc.). type="Advanced Grammar" for all.'},
+  phrasal:   {label:'Frázové slovesá',icon:'🔗', color:'#42a5f5', hint:'Len frázové slovesá',         prompt:'All 10 questions must be about phrasal verbs — multi-word verbs with particles that change meaning (look after, give up, run into, etc.). Do NOT include: single-word verbs, prepositional phrases, or idioms. Focus on: common phrasal verbs (take off, break down, put up with), formal vs informal variations (give up vs surrender), separable vs inseparable forms. type="Phrasal Verbs" for all.'},
+  vocab:     {label:'Slovná zásoba',icon:'📖', color:'#b388ff', hint:'Slovíčka & idiomy',            prompt:'All 10 questions must be about advanced single-word vocabulary at B2-C1 level (sophisticated adjectives, formal verbs, academic nouns, nuanced adverbs). Focus on: synonyms with subtle differences (decrease vs diminish vs dwindle), formal vs informal register (buy vs purchase vs acquire), confusing pairs (affect/effect, advice/advise). Do NOT include phrasal verbs or multi-word idioms. type="Vocabulary & Idioms" for all.'},
+  collocations:{label:'Kolokácie',  icon:'🔀', color:'#ffb300', hint:'Typické anglické spojenia',   prompt:'All 10 questions must be about natural word combinations that native speakers use (make a decision NOT do a decision, heavy rain NOT strong rain, etc.). Focus on: verb+noun (take a break, do homework, make progress), adjective+noun (deep sleep, fierce competition, golden opportunity), adverb+adjective (highly unlikely, utterly exhausted). Do NOT include phrasal verbs or fixed idioms. type="Vocabulary & Idioms" for all.'},
+  idioms:    {label:'Idiomy',       icon:'💬', color:'#ff6b35', hint:'Frazeologizmy & výrazy',       prompt:'All 10 questions must be about TRUE English idioms — fixed figurative expressions whose meaning cannot be derived from individual words. Focus on: body idioms (break a leg, cost an arm and a leg, on your toes), color idioms (once in a blue moon, out of the blue, green with envy), animal idioms (let the cat out of the bag, raining cats and dogs), common sayings (piece of cake, the ball is in your court, miss the boat). Do NOT include: simple phrasal verbs (give up), literal expressions, or single-word vocabulary. Each idiom must have a metaphorical/non-literal meaning. type="Vocabulary & Idioms" for all.'},
+  grammar:   {label:'Gramatika',    icon:'📐', color:'#66bb6a', hint:'Pokročilá gramatika',          prompt:'All 10 questions must be about advanced English grammar structures at B2-C1 level. Focus on: conditional sentences (mixed conditionals, wish/if only), perfect tenses (present perfect continuous, past perfect in context), passive voice (agent omission, passive reporting), inversion (negative adverbials, hardly/scarcely), relative clauses (defining vs non-defining, omission), subjunctive mood (suggest that he BE, it\'s time you WENT), articles (zero article, definite/indefinite nuances). Do NOT include basic grammar or vocabulary questions. type="Advanced Grammar" for all.'},
   sr:        {label:'Opakovanie',   icon:'🔁', color:'#ffb300', hint:'Tvoje vlastné SR otázky',       prompt:''},
   military:  {label:'Military',      icon:'🎖️', color:'#78909c', hint:'Vojenská angličtina',           prompt:'All 10 questions must be about military English vocabulary at B2-C1 level. Focus on: tactical and operational vocabulary used in real military contexts, military verbs and phrases (deploy, neutralize, reconnoiter, suppress, establish a perimeter, conduct a sweep), situation reports and briefing language, words used in NATO operations and multinational exercises, advanced military adjectives and collocations (collateral damage, rules of engagement, close air support, area of operations). Avoid trivial questions like phonetic alphabet or basic rank names. Make questions that a soldier in a multinational NATO exercise would genuinely need. type="Vocabulary & Idioms" for all.'},
 };
@@ -1212,6 +1212,12 @@ async function runAnalysis(){
       const res=S.score>S.oppScore?'win':S.score<S.oppScore?'loss':'draw';
       if(res==='win')S.bo3MyWins++;
       else if(res==='loss')S.bo3OppWins++;
+      // Update ONLY my wins in Firebase when I win (prevents race condition)
+      // Opponent will update their own wins when they win
+      const myWinsKey=S.role==='p1'?'bo3/p1wins':'bo3/p2wins';
+      if(S.roomCode&&res==='win'){
+        dbUp('rooms/'+S.roomCode,{[myWinsKey]:S.bo3MyWins,'bo3/game':S.bo3Game}).catch(()=>{});
+      }
       // Award series win bonus XP on final game
       if(S.bo3MyWins>=BO3_WINS_NEEDED&&!S._bo3BonusGiven){
         S._bo3BonusGiven=true;
@@ -2403,9 +2409,12 @@ function bindAll(){
           S.suddenDone=true;
           S.analysisStarted=false; // Allow analysis after SD
           if(iWon)S.score+=1;else S.oppScore+=1;
-          S.screen='results';render();
+          // Mark both as done and trigger analysis (handles bo3 routing)
+          S.myDone=true;
+          S.oppDone=true;
+          runAnalysis();
         }
-        if(tries>30){clearInterval(waitResult);S.screen='results';render();}
+        if(tries>30){clearInterval(waitResult);runAnalysis();}
       },400);
     });
   });
@@ -2474,7 +2483,7 @@ function bindAll(){
   // Generate AI insight when results screen appears (async, non-blocking)
   // Animate ELO/XP counters on analysis screen
   if(S.screen==='analysis'&&S.analysisReady)initCounters();
-  if(S.screen==='results'&&!S.aiInsight&&!S.aiInsightLoading&&S.myAnswers.length>1){
+  if((S.screen==='results'||S.screen==='bo3_results')&&!S.aiInsight&&!S.aiInsightLoading&&S.myAnswers.length>1){
     S.aiInsightLoading=true;
     generateInsight().then(text=>{
       S.aiInsight=text;S.aiInsightLoading=false;
@@ -2493,6 +2502,7 @@ function bindAll(){
     S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;S.oppScore=0;S.oppDone=false;S.oppAnswers=[];
     S.analysisStarted=false;S.eloChange=0;S.newElo=0;S.analysisReady=false;
     S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
+    S.suddenDeath=false;S.suddenDone=false; // Reset sudden death for next game
     // Show round intro animation then generate
     showRoundIntro(S.bo3Game, async()=>{
       S.loadingMsg='Generujem kolo '+S.bo3Game+'...';S.screen='loading';render();
@@ -2811,12 +2821,19 @@ async function genQ(diff,stats,srQs=[],fmt='mixed'){
   if(srQs.length){
     srHint='\nIMPORTANT: The player previously got these questions wrong. Include them VERBATIM as questions in the set (same question text, options, correct index). For each repeated question, set the "srKeyword" field to the specific word, phrase or grammar point being tested (e.g. "give up", "present perfect", "on the contrary"): '+JSON.stringify(srQs.map(q=>({question:q.question,options:q.options,correct:q.correct,explanation:q.explanation,type:q.type,srKeyword:q.srKeyword||''})));
   }
+  
+  // ANTI-REPETITION: Generate unique seed + add variety instructions
+  const seed = Date.now() + Math.random();
+  const themes = ['workplace', 'travel', 'technology', 'relationships', 'education', 'health', 'entertainment', 'business', 'daily life', 'culture'];
+  const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+  const varietyHint = `\n\nVARIETY REQUIREMENT: Generate UNIQUE questions with diverse content. Use different phrasal verbs, grammar structures, and vocabulary than typical textbooks. Include modern conversational English. Random theme suggestion: ${randomTheme}. Session ID: ${seed}`;
+  
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:
       `Generate exactly 10 multiple-choice English questions. Difficulty: ${diffHint(diff)}${weakHint}
-${FORMATS[fmt]?.prompt||FORMATS.mixed.prompt}${srHint}
+${FORMATS[fmt]?.prompt||FORMATS.mixed.prompt}${srHint}${varietyHint}
 Return ONLY raw JSON no markdown: {"questions":[{"id":1,"type":"Phrasal Verbs","question":"...","options":["A","B","C","D"],"correct":0,"explanation":"...","example":"She gave up smoking after 10 years."}]}
 Rules:
 - type must be exactly "Phrasal Verbs", "Advanced Grammar", or "Vocabulary & Idioms"
