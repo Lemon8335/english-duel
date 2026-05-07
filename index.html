@@ -1248,6 +1248,16 @@ async function runAnalysis(){
 // RENDER
 // ═══════════════════════════════════════════════════
 function g(id){return document.getElementById(id);}
+// XSS Protection: Escape HTML entities in user input
+function esc(str){
+  if(!str)return'';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 function render(){
   const app=document.getElementById('app');
   const card=document.createElement('div');card.className='card';
@@ -1298,7 +1308,7 @@ function hPlacement(){
   const opts=q.options.map((o,i)=>{
     let c='opt';
     if(ans){if(i===q.correct)c+=' correct';else if(i===chosen)c+=' wrong';}
-    return`<button class="${c}" data-pi="${i}" ${ans?'disabled':''}><span class="opt-l">${['A','B','C','D'][i]}</span>${o}</button>`;
+    return`<button class="${c}" data-pi="${i}" ${ans?'disabled':''}><span class="opt-l">${['A','B','C','D'][i]}</span>${esc(o)}</button>`;
   }).join('');
   return`
   <div class="logo" style="font-size:1.3rem;margin-bottom:4px">PLACEMENT TEST</div>
@@ -1306,9 +1316,9 @@ function hPlacement(){
   <div class="placement-progress">${pips}</div>
   <span class="placement-level ${lc(q.level)}">${q.level}</span>
   <span class="badge ${bc(q.type)}" style="margin-left:6px">${q.type}</span>
-  <div class="q-text" style="margin-top:10px">${q.question}</div>
+  <div class="q-text" style="margin-top:10px">${esc(q.question)}</div>
   <div class="options">${opts}</div>
-  ${ans?`<div class="expl ${chosen!==q.correct?'bad':''}">${q.explanation}</div>
+  ${ans?`<div class="expl ${chosen!==q.correct?'bad':''}">${esc(q.explanation)}</div>
   ${q.example?`<div class="example-box"><div class="ex-label">Príklad použitia</div><div class="ex-text">"${q.example}"</div></div>`:''}
   <button class="next-btn" id="placementNextBtn">${S.placementCurrent+1>=tot?'ZOBRAZIŤ VÝSLEDOK →':'ĎALŠIA →'}</button>`:''}
 `;}
@@ -1342,7 +1352,7 @@ function hAuth(){return`
     <div class="auth-title">Prihlásiť sa pre uloženie progresu</div>
     <div class="auth-sub">Tvoje ELO, rank, štatistiky a streak sa uložia na všetkých zariadeniach. Stačí Google účet.</div>
   </div>
-  ${S.error?`<div class="err-box">${S.error}</div>`:''}
+  ${S.error?`<div class="err-box">${esc(S.error)}</div>`:''}
   <button class="google-btn" id="googleSignIn">
     <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
     Prihlásiť sa cez Google
@@ -1380,7 +1390,7 @@ function hSetup(){
   <div class="lbl" style="margin-top:4px">Anthropic API kľúč</div>
   <div class="info-box"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key</div>
   <input type="password" id="ak" placeholder="sk-ant-api03-..." value="${S.ak}" autocomplete="off"/>
-  ${S.error?`<div class="err-box">${S.error}</div>`:''}
+  ${S.error?`<div class="err-box">${esc(S.error)}</div>`:''}
   <button class="btn btn-primary" id="saveSetup">ULOŽIŤ A POKRAČOVAŤ</button>
   ${isFromHome?`<button class="btn btn-ghost" id="backHomeBtn" style="margin-top:9px">← Späť</button>`:''}
 `;}
@@ -1516,7 +1526,7 @@ function hHome(){
   ${S.mode==='join'?`<input type="text" id="codeInp" placeholder="4-ciferný kód" maxlength="4" inputmode="numeric" value="${S.roomCode}" style="font-family:'Orbitron',sans-serif;font-size:24px;letter-spacing:12px;text-align:center;margin-top:8px"/>`:''}
 
   ${submodeHTML}
-  ${S.error?`<div class="err-box">${S.error}</div>`:''}
+  ${S.error?`<div class="err-box">${esc(S.error)}</div>`:''}
 
   <div class="bottom-nav">
     <div class="nav-item nav-active">
@@ -1556,11 +1566,11 @@ function hLobby(){
   const fmtBadge=`<span style="padding:4px 12px;border-radius:20px;font-size:.74rem;font-weight:600;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)">${FORMATS[S.format]?.icon||'⚡'} ${FORMATS[S.format]?.label||'Zmiešaný'}</span>`;
   const readyCards=`<div class="player-ready-row">
     <div class="player-ready-card ${myR?'is-ready':''}">
-      <div class="player-ready-name">${S.name}</div>
+      <div class="player-ready-name">${esc(S.name)}</div>
       <div class="player-ready-status" style="color:${myR?'#00ffc8':'rgba(255,255,255,.3)'}">${myR?'✓ READY':'čakám...'}</div>
     </div>
     <div class="player-ready-card ${oppR?'is-ready':''}">
-      <div class="player-ready-name">${S.oppName||'Súper'}</div>
+      <div class="player-ready-name">${esc(S.oppName||'Súper')}</div>
       <div class="player-ready-status" style="color:${oppR?'#00ffc8':oppJoined?'rgba(255,255,255,.3)':'rgba(255,255,255,.15)'}">
         ${oppR?'✓ READY':oppJoined?'čakám...':'nepripojený'}
       </div>
@@ -1582,7 +1592,7 @@ function hLobby(){
           <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppProfile.elo||START_ELO} ELO</div>
         `:oppJoined?`
           <div style="font-size:22px;opacity:.5">⏳</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.3)">${S.oppName||'Súper'}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.3)">${esc(S.oppName||'Súper')}</div>
           <div style="font-size:10px;color:rgba(255,255,255,.2)">načítavam...</div>
         `:`
           <div style="font-size:22px;opacity:.25">👤</div>
@@ -1593,7 +1603,7 @@ function hLobby(){
     ${S.format==='sr'?`<div style="font-size:.76rem;color:rgba(255,179,0,.7);background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);border-radius:10px;padding:8px 12px;text-align:center;margin-bottom:10px">🔁 Každý hráč dostane svoje vlastné otázky</div>`:''}
     ${S.h2h&&S.oppJoined?h2hHTML(S.h2h):''}
     ${readyCards}
-    ${S.error?`<div class="err-box">${S.error}</div>`:''}
+    ${S.error?`<div class="err-box">${esc(S.error)}</div>`:''}
     ${!myR?`<button class="btn-ready" id="readyBtn">⚔️ SOM READY</button>`:S._generatingQuestions?`<button class="btn-ready pressed" id="readyBtn" style="background:rgba(255,179,0,.15);color:#ffb300;border:2px solid #ffb300;animation:none">⏳ PRIPRAVUJEM OTÁZKY...</button>`:`<button class="btn-ready pressed" id="readyBtn">✓ ČAKÁM NA SÚPERA...</button>`}
     <div style="background:rgba(0,255,200,.04);border:1px solid rgba(0,255,200,.12);border-radius:11px;padding:11px 14px;margin-top:10px">
       <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,255,200,.5);margin-bottom:5px">💡 Tip kým čakáš</div>
@@ -1610,12 +1620,12 @@ function bo3BarHTML(){
     <div style="text-align:center;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,107,53,.7);margin-bottom:8px">🏆 Best of ${S.bo3MaxGames} · Hra ${S.bo3Game}/${S.bo3MaxGames}</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:0">
       <div class="bo3-player">
-        <div class="bo3-player-name">${S.name}</div>
+        <div class="bo3-player-name">${esc(S.name)}</div>
         <div style="display:flex;justify-content:center;gap:5px">${myDots}</div>
       </div>
       <div class="bo3-sep">VS</div>
       <div class="bo3-player">
-        <div class="bo3-player-name">${S.oppName||'Súper'}</div>
+        <div class="bo3-player-name">${esc(S.oppName||'Súper')}</div>
         <div style="display:flex;justify-content:center;gap:5px">${oppDots}</div>
       </div>
     </div>
@@ -1635,7 +1645,7 @@ function hQuiz(){
       if(i===q.correct)c+=' correct';
       else if(i===S.selected&&S.selected!==-1)c+=' wrong';
     }
-    return`<button class="${c}" data-i="${i}" ${ans?'disabled':''}><span class="opt-l">${LT[i]}</span>${o}</button>`;
+    return`<button class="${c}" data-i="${i}" ${ans?'disabled':''}><span class="opt-l">${LT[i]}</span>${esc(o)}</button>`;
   }).join('');
   const liveSection=S.solo?`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.18);border-radius:12px;padding:9px 13px">
@@ -1645,22 +1655,22 @@ function hQuiz(){
     <div class="coop-bar-wrap">
       <div class="coop-bar-top"><span style="font-size:.66rem;color:rgba(255,255,255,.28);letter-spacing:1px;text-transform:uppercase">Spoločné skóre</span><span class="coop-combined" id="coop-combined">${combined}/${combinedTot}</span></div>
       <div class="coop-track"><div class="coop-fill" id="coop-fill" style="width:${cw}%"></div><div class="coop-marker" style="left:${mrkL}%"></div></div>
-      <div class="coop-players"><span id="p1-sub">${S.name}: ${ls}</span><span style="color:#ffb300;font-size:.64rem">Cieľ: ${target}</span><span id="p2-sub">${S.oppName||'Partner'}: ${S.oppScore}</span></div>
+      <div class="coop-players"><span id="p1-sub">${esc(S.name)}: ${ls}</span><span style="color:#ffb300;font-size:.64rem">Cieľ: ${target}</span><span id="p2-sub">${esc(S.oppName||'Partner')}: ${S.oppScore}</span></div>
     </div>`:`
     <div id="livebar" class="live-bar">
-      <div class="live-player"><div class="live-name">${S.name}</div><div class="live-score ls-my" id="my-ls">${ls}</div></div>
+      <div class="live-player"><div class="live-name">${esc(S.name)}</div><div class="live-score ls-my" id="my-ls">${ls}</div></div>
       <div class="live-sep">VS</div>
-      <div class="live-player"><div class="live-name" id="opp-nm">${S.oppName||'Súper'}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
+      <div class="live-player"><div class="live-name" id="opp-nm">${esc(S.oppName||'Súper')}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
     </div>`;
   return`${bo3BarHTML()}${liveSection}
   <div class="quiz-head">${!ans?timerHTML():''}<div class="prog-bar"><div class="prog-fill" style="width:${pw}%"></div></div><span class="q-cnt">${S.current+1}/${tot}</span></div>
 
   ${q.isSR?'<span class="sr-badge" style="margin-right:6px">🔁</span>':''}<span class="badge ${bc(q.type)}">${q.type}</span>
-  <div class="q-text">${q.question}</div>
+  <div class="q-text">${esc(q.question)}</div>
   <div class="options">${opts}</div>
   ${!ans&&!S.hintUsed?`<button class="hint-btn" id="hintBtn">💡 Nápoveda <span class="hint-cost">(-5 ELO)</span></button>`:''}
   ${ans?`<div class="expl ${S.selected===-1||S.selected!==q.correct?'bad':''}">
-    ${S.selected===-1?'Čas vypršal! ':''}${q.explanation}
+    ${S.selected===-1?'Čas vypršal! ':''}${esc(q.explanation)}
   </div>
   ${q.example?`<div class="example-box"><div class="ex-label">Príklad použitia</div><div class="ex-text">"${q.example}"</div></div>`:''}
   <button class="next-btn" id="nextBtn">${S.current+1>=tot?'DOKONČIŤ →':'ĎALŠIA →'}</button>`:''}`;}
@@ -1672,11 +1682,11 @@ function hWaiting(){
   const top=isCoop?`<div class="coop-bar-wrap" style="margin-bottom:14px">
     <div class="coop-bar-top"><span style="font-size:.66rem;color:rgba(255,255,255,.28);letter-spacing:1px;text-transform:uppercase">Spoločné skóre</span><span class="coop-combined" id="coop-combined">${combined}/${combinedTot}</span></div>
     <div class="coop-track"><div class="coop-fill" id="coop-fill" style="width:${cw}%"></div><div class="coop-marker" style="left:${mrkL}%"></div></div>
-    <div class="coop-players"><span id="p1-sub">${S.name}: ${S.score}</span><span style="color:#ffb300;font-size:.64rem">Cieľ: ${target}</span><span id="p2-sub">${S.oppName||'Partner'}: ${S.oppScore}</span></div>
+    <div class="coop-players"><span id="p1-sub">${esc(S.name)}: ${S.score}</span><span style="color:#ffb300;font-size:.64rem">Cieľ: ${target}</span><span id="p2-sub">${esc(S.oppName||'Partner')}: ${S.oppScore}</span></div>
   </div>`:`<div id="livebar" class="live-bar">
-    <div class="live-player"><div class="live-name">${S.name}</div><div class="live-score ls-my" id="my-ls">${S.score}</div></div>
+    <div class="live-player"><div class="live-name">${esc(S.name)}</div><div class="live-score ls-my" id="my-ls">${S.score}</div></div>
     <div class="live-sep">VS</div>
-    <div class="live-player"><div class="live-name" id="opp-nm">${S.oppName||'Partner'}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
+    <div class="live-player"><div class="live-name" id="opp-nm">${esc(S.oppName||'Partner')}</div><div class="live-score ls-opp" id="opp-ls">${S.oppScore}</div></div>
   </div>`;
   return`${bo3BarHTML()}${top}<div class="wait-overlay">
     <div class="wait-icon">⏳</div><div class="wait-title">Ty si skončil/a!</div>
@@ -1695,12 +1705,12 @@ function hResults(){
     <div class="coop-result-big"><div class="coop-result-score" style="color:${win?'#00ffc8':'#ff5252'}">${combined}/${combinedTot}</div>
     <div style="font-size:.8rem;color:rgba(255,255,255,.38);margin-top:4px">Cieľ bol ${target}/${combinedTot} (${Math.round(COOP_TARGET_PCT*100)}%)</div></div>
     <div style="margin-bottom:18px">
-      <div class="stat-row"><span class="stat-lbl">${S.name}</span><span class="stat-val">${S.score}/${tot}</span></div>
-      <div class="stat-row" style="border:none"><span class="stat-lbl">${S.oppName||'Partner'}</span><span class="stat-val">${S.oppScore}/${tot}</span></div>
+      <div class="stat-row"><span class="stat-lbl">${esc(S.name)}</span><span class="stat-val">${S.score}/${tot}</span></div>
+      <div class="stat-row" style="border:none"><span class="stat-lbl">${esc(S.oppName||'Partner')}</span><span class="stat-val">${S.oppScore}/${tot}</span></div>
     </div>
     <div class="insight-box">
       <div class="insight-label">🤖 AI hodnotenie hry</div>
-      ${S.aiInsight?`<div class="insight-text" id="ai-insight-content">${S.aiInsight}</div>`:`
+      ${S.aiInsight?`<div class="insight-text" id="ai-insight-content">${esc(S.aiInsight)}</div>`:`
       <div class="insight-loading" id="ai-insight-spinner"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>
       <div class="insight-text" id="ai-insight-content" style="display:none"></div>`}
     </div>
@@ -1722,12 +1732,12 @@ function hResults(){
     <div style="display:flex;justify-content:center;align-items:center;gap:20px">
       <div style="text-align:center">
         <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:${mc}">${S.score}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px">${S.name}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px">${esc(S.name)}</div>
       </div>
       <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:rgba(255,255,255,.2);font-weight:700">VS</div>
       <div style="text-align:center">
         <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:${oc}">${S.oppScore}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px">${S.oppName||'Súper'}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px">${esc(S.oppName||'Súper')}</div>
       </div>
     </div>
     <div style="font-size:.78rem;color:rgba(255,255,255,.3);margin-top:8px">z ${tot} otázok</div>
@@ -1735,7 +1745,7 @@ function hResults(){
 
   <div class="insight-box">
     <div class="insight-label">🤖 AI hodnotenie hry</div>
-    ${S.aiInsight?`<div class="insight-text" id="ai-insight-content">${S.aiInsight}</div>`:`
+    ${S.aiInsight?`<div class="insight-text" id="ai-insight-content">${esc(S.aiInsight)}</div>`:`
     <div class="insight-loading" id="ai-insight-spinner"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>
     <div class="insight-text" id="ai-insight-content" style="display:none"></div>`}
   </div>
@@ -2053,18 +2063,18 @@ function hBo3Summary(){
   }).join('');
   return`
   <div class="logo" style="font-size:1.2rem;margin-bottom:4px">ROZBOR SÉRIE</div>
-  <div class="logo-sub" style="margin-bottom:18px">${S.name} vs ${S.oppName||'Súper'}</div>
+  <div class="logo-sub" style="margin-bottom:18px">${esc(S.name)} vs ${esc(S.oppName||'Súper')}</div>
   <div style="background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);border-radius:14px;padding:14px;margin-bottom:14px">
     <div style="text-align:center;font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,107,53,.7);margin-bottom:12px">Celkový výsledok série</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:20px">
       <div style="text-align:center">
         <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:#00ffc8">${S.bo3MyWins}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">${S.name}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">${esc(S.name)}</div>
       </div>
       <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:rgba(255,255,255,.2)">VS</div>
       <div style="text-align:center">
         <div style="font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;color:#ff5252">${S.bo3OppWins}</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">${S.oppName||'Súper'}</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">${esc(S.oppName||'Súper')}</div>
       </div>
     </div>
   </div>
@@ -2091,7 +2101,7 @@ function hSuddenDeath(){
   const opts=q.options.map((o,i)=>{
     let c='opt';
     if(ans){if(i===q.correct)c+=' correct';else if(i===S.selected&&S.selected!==-1)c+=' wrong';}
-    return`<button class="${c}" data-sd="${i}" ${ans?'disabled':''}><span class="opt-l">${['A','B','C','D'][i]}</span>${o}</button>`;
+    return`<button class="${c}" data-sd="${i}" ${ans?'disabled':''}><span class="opt-l">${['A','B','C','D'][i]}</span>${esc(o)}</button>`;
   }).join('');
   return`
   <div style="text-align:center;margin-bottom:16px">
@@ -2101,9 +2111,9 @@ function hSuddenDeath(){
   <div style="background:rgba(255,82,82,.07);border:1.5px solid rgba(255,82,82,.25);border-radius:14px;padding:14px;margin-bottom:14px">
     ${!ans?timerHTML():''}
     <span class="badge ${bc(q.type)}" style="margin-bottom:10px">${q.type}</span>
-    <div class="q-text">${q.question}</div>
+    <div class="q-text">${esc(q.question)}</div>
     <div class="options">${opts}</div>
-    ${ans?`<div class="expl ${S.selected!==q.correct?'bad':''}">${q.explanation}</div>`:''}
+    ${ans?`<div class="expl ${S.selected!==q.correct?'bad':''}">${esc(q.explanation)}</div>`:''}
   </div>
   ${ans?`<div style="text-align:center;padding:10px;background:rgba(255,255,255,.04);border-radius:12px;font-size:.85rem;color:rgba(255,255,255,.45)">
     ${S.selected===q.correct?'✅ Správne! Čakám na výsledok...':'❌ Nesprávne! Čakám na výsledok...'}
@@ -2125,17 +2135,17 @@ function hBo3Results(){
     return`
     <div class="bo3-trophy">${myWon?'🏆':'💀'}</div>
     <div style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;text-align:center;color:${myWon?'#00ffc8':'#ff5252'};letter-spacing:2px;margin-bottom:4px">${myWon?'SÉRIA TVOJA!':'SÉRIA PREHRATÁ'}</div>
-    <div style="text-align:center;font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:22px">${S.name} vs ${S.oppName||'Súper'}</div>
+    <div style="text-align:center;font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:22px">${esc(S.name)} vs ${esc(S.oppName||'Súper')}</div>
     <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;margin-bottom:18px">
       <div style="display:flex;align-items:center">
         <div class="bo3-player" style="flex:1;text-align:center">
-          <div class="bo3-player-name">${S.name}</div>
+          <div class="bo3-player-name">${esc(S.name)}</div>
           <div class="bo3-player-wins" style="color:${myC}">${S.bo3MyWins}</div>
           <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${myDots}</div>
         </div>
         <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:rgba(255,255,255,.2)">VS</div>
         <div class="bo3-player" style="flex:1;text-align:center">
-          <div class="bo3-player-name">${S.oppName||'Súper'}</div>
+          <div class="bo3-player-name">${esc(S.oppName||'Súper')}</div>
           <div class="bo3-player-wins" style="color:${oppC}">${S.bo3OppWins}</div>
           <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${oppDots}</div>
         </div>
@@ -2153,13 +2163,13 @@ function hBo3Results(){
     <div style="text-align:center;font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,107,53,.7);margin-bottom:10px">Stav série</div>
     <div style="display:flex;align-items:center">
       <div class="bo3-player" style="flex:1;text-align:center">
-        <div class="bo3-player-name">${S.name}</div>
+        <div class="bo3-player-name">${esc(S.name)}</div>
         <div class="bo3-player-wins" style="color:#00ffc8">${S.bo3MyWins}</div>
         <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${myDots}</div>
       </div>
       <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:rgba(255,255,255,.2)">VS</div>
       <div class="bo3-player" style="flex:1;text-align:center">
-        <div class="bo3-player-name">${S.oppName||'Súper'}</div>
+        <div class="bo3-player-name">${esc(S.oppName||'Súper')}</div>
         <div class="bo3-player-wins" style="color:#ff5252">${S.bo3OppWins}</div>
         <div style="display:flex;justify-content:center;gap:5px;margin-top:6px">${oppDots}</div>
       </div>
@@ -2167,7 +2177,7 @@ function hBo3Results(){
   </div>
   <div class="insight-box" style="margin-bottom:16px">
     <div class="insight-label">🤖 AI hodnotenie hry</div>
-    ${S.aiInsight?`<div class="insight-text">${S.aiInsight}</div>`:`<div class="insight-loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>`}
+    ${S.aiInsight?`<div class="insight-text">${esc(S.aiInsight)}</div>`:`<div class="insight-loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>`}
   </div>
   <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px">⚔️ ĎALŠIA HRA SÉRIE</button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">Vzdať sériu</button>`;}
@@ -2221,7 +2231,7 @@ function hAnalysis(){
     <div class="weak-body"><strong style="color:${CATS[wk].color}">${CATS[wk].label}</strong> — ${wkP}% (${stats[wk].correct}/${stats[wk].played} historicky)</div>
     <div style="font-size:.72rem;color:rgba(255,255,255,.32);margin-top:5px">AI zahrnie viac tejto oblasti v ďalšom dueli. ${diffMsg}</div></div>`:'';
   const bothWrong=S.questions.filter((_,i)=>S.myAnswers[i]&&!S.myAnswers[i].correct&&S.oppAnswers[i]&&S.oppAnswers[i].c!==1).slice(0,2);
-  const wrongBlock=bothWrong.length?`<div class="sec-title">Obaja ste pokazili</div>${bothWrong.map(q=>`<div class="q-review"><div class="q-review-text">${q.question}</div><div class="q-review-ans">✅ ${q.options[q.correct]}</div></div>`).join('')}`:'';
+  const wrongBlock=bothWrong.length?`<div class="sec-title">Obaja ste pokazili</div>${bothWrong.map(q=>`<div class="q-review"><div class="q-review-text">${esc(q.question)}</div><div class="q-review-ans">✅ ${esc(q.options[q.correct])}</div></div>`).join('')}`:'';
   return`<div class="logo" style="font-size:1.2rem;margin-bottom:4px">ROZBOR DUELU</div>
   <div class="logo-sub" style="margin-bottom:16px">${isCoop?'Kooperatívna analýza':'Analýza výkonu'}</div>
   ${eloBlock}${shieldBlock}
@@ -2265,7 +2275,7 @@ function bindAll(){
     startAuthListener();
   });
   g('saveNickBtn')?.addEventListener('click',async()=>{
-    const nick=(g('settingsNameInp')?.value||'').trim();
+    const nick=(g('settingsNameInp')?.value||'').trim().slice(0,18);
     if(!nick){S.error='Zadaj prezývku.';render();return;}
     S.name=nick;
     S.error=null;
@@ -2285,7 +2295,8 @@ function bindAll(){
   // Home
   g('signOutBtn')?.addEventListener('click',()=>signOut());
   g('nameInp')?.addEventListener('input',e=>{
-    S.name=e.target.value;
+    S.name=e.target.value.trim().slice(0,18);
+    e.target.value=S.name; // Sync back to input
     if(S.name.trim())localStorage.setItem('ed_nick',S.name.trim());
     const ok=S.name.trim()&&S.mode&&(S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
     if(g('goBtn'))g('goBtn').disabled=!ok;
