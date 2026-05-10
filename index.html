@@ -1111,16 +1111,19 @@ function attach(code){
       render();return;
     }
     if(S.screen==='waiting'&&S.oppDone){runAnalysis();return;}
-    // Sync Bo3 wins from Firebase
+    // Sync Bo3 state from Firebase
     if(S.bo3Active&&r.bo3){
       if(S.role==='p1'){S.bo3OppWins=r.bo3.p2wins||0;}
       else{S.bo3OppWins=r.bo3.p1wins||0;}
+      // Sync game number to prevent desync
+      if(r.bo3.game!==undefined)S.bo3Game=r.bo3.game;
     }
     // Bo3 ready check: when both players ready, start next game
-    if(S.bo3Active&&S.screen==='bo3_results'&&r.bo3ready){
+    // Only trigger when on bo3_results screen and both ready
+    if(S.bo3Active&&S.screen==='bo3_results'&&r.bo3ready&&!S._bo3NextStarted){
       const p1Ready=r.bo3ready.p1||false;
       const p2Ready=r.bo3ready.p2||false;
-      if(p1Ready&&p2Ready&&!S._bo3NextStarted){
+      if(p1Ready&&p2Ready){
         S._bo3NextStarted=true; // Prevent double trigger
         startBo3NextRound();
         return;
@@ -1144,7 +1147,7 @@ async function startBo3NextRound(){
   S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
   S.suddenDeath=false;S.suddenDone=false;
   S.bo3NextReady=false; // Reset ready flag
-  S._bo3NextStarted=false; // Reset trigger flag
+  // NOTE: _bo3NextStarted will be reset in runAnalysis() when bo3_results screen shows again
   
   // Show round intro animation then generate
   showRoundIntro(S.bo3Game, async()=>{
@@ -2818,7 +2821,16 @@ async function handleGo(){
       const code=String(Math.floor(1000+Math.random()*9000));
       S.roomCode=code;S.role='p1';
       // Don't generate normal questions yet — wait for READY (need opponent ELO)
-      const roomData={status:'waiting',submode:S.submode,format:S.format,createdAt:Date.now(),p1uid:S.uid,p1:{name:S.name,score:0,finished:false},bo3:{game:1,p1wins:0,p2wins:0}};
+      const roomData={
+        status:'waiting',
+        submode:S.submode,
+        format:S.format,
+        createdAt:Date.now(),
+        p1uid:S.uid,
+        p1:{name:S.name,score:0,finished:false},
+        bo3:{game:1,p1wins:0,p2wins:0},
+        bo3ready:{p1:false,p2:false} // Initialize ready flags for bo3
+      };
       await dbSet('rooms/'+code,roomData);
       attach(code);S.screen='lobby';render();
     }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
