@@ -2891,6 +2891,11 @@ function resetGame(){
   S.eloChange=0;S.newElo=0;S.analysisReady=false;S.shieldJustEarned=false;S.analysisStarted=false;
   S.cefrResult=S.myProfile?.cefrResult||null;
   S.aiInsight=null;S.aiInsightLoading=false;S.error=null;
+  // Reset bo3 state
+  S.bo3Active=false;S.bo3MyWins=0;S.bo3OppWins=0;S.bo3Game=0;
+  S.bo3NextReady=false;S._bo3NextStarted=false;S.bo3History=[];
+  // Reset sudden death state
+  S.suddenDeath=false;S.suddenDone=false;
 }
 
 // ═══════════════════════════════════════════════════
