@@ -489,7 +489,7 @@ const S={
   placementQs:[], placementCurrent:0, placementAnswers:[], placementResult:null,
   // Best of 3
   suddenDeath:false, suddenDone:false,
-  bo3Active:false, bo3MyWins:0, bo3OppWins:0, bo3Game:0, bo3MaxGames:3,
+  bo3Active:false, bo3MyWins:0, bo3OppWins:0, bo3Game:0, bo3MaxGames:3, bo3NextReady:false,
   bo3OppName:'', bo3OppUid:'',
   bo3History:[],
   gameHistory:[], historyLoaded:false,
@@ -573,6 +573,12 @@ async function genSuddenDeathQuestion(){
     let sdQ=null;
     if(S.role==='p1'){
       // P1 generates and uploads BEFORE animation starts
+      // CRITICAL: Check API key before attempting to generate
+      if(!S.ak||!S.ak.startsWith('sk-')){
+        S.error='Sudden Death potrebuje Anthropic API kľúč! Otvor Nastavenia a zadaj API kľúč.';
+        S.screen='home';render();return;
+      }
+      S.screen='loading';render(); // Show loading while generating
       const diff=calcDiff(S.myProfile);
       const qs=await genQ(diff,S.myProfile?.stats,[],S.format);
       sdQ=qs[0];
@@ -582,14 +588,20 @@ async function genSuddenDeathQuestion(){
       });
     }else{
       // P2 fetches the question (starts polling immediately)
+      // Show loading screen while waiting for P1 to generate question
+      S.screen='loading';render();
       let tries=0;
-      while(tries<20){
+      const maxTries=60; // 60 × 400ms = 24 seconds (enough for AI generation)
+      while(tries<maxTries){
         const r=await dbGet('rooms/'+S.roomCode);
         if(r?.sdQuestion){sdQ=r.sdQuestion;break;}
-        await new Promise(res=>setTimeout(res,300));
+        await new Promise(res=>setTimeout(res,400));
         tries++;
       }
-      if(!sdQ){S.error='Chyba: SD otázka nedostupná';S.screen='home';render();return;}
+      if(!sdQ){
+        S.error='Sudden Death otázka sa nepodarilo načítať. Skontroluj či má zakladateľ hry nastavený API kľúč.';
+        S.screen='home';render();return;
+      }
     }
     // NOW show the animation — both players have the question ready
     S.questions=[sdQ];S.current=0;S.selected=null;
@@ -1104,10 +1116,75 @@ function attach(code){
       if(S.role==='p1'){S.bo3OppWins=r.bo3.p2wins||0;}
       else{S.bo3OppWins=r.bo3.p1wins||0;}
     }
+    // Bo3 ready check: when both players ready, start next game
+    if(S.bo3Active&&S.screen==='bo3_results'&&r.bo3ready){
+      const p1Ready=r.bo3ready.p1||false;
+      const p2Ready=r.bo3ready.p2||false;
+      if(p1Ready&&p2Ready&&!S._bo3NextStarted){
+        S._bo3NextStarted=true; // Prevent double trigger
+        startBo3NextRound();
+        return;
+      }
+    }
     if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
   });
 }
 function detach(){if(rRef&&rCb)rRef.off('value',rCb);rRef=null;rCb=null;clearTimer();}
+
+// ═══════════════════════════════════════════════════
+// BO3 NEXT ROUND STARTER (after both players ready)
+// ═══════════════════════════════════════════════════
+async function startBo3NextRound(){
+  S.bo3Game++;
+  // Reset game state, keep series state
+  S.questions=[];S.current=0;S.score=0;S.selected=null;
+  S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;
+  S.oppScore=0;S.oppDone=false;S.oppAnswers=[];
+  S.analysisStarted=false;S.eloChange=0;S.newElo=0;S.analysisReady=false;
+  S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
+  S.suddenDeath=false;S.suddenDone=false;
+  S.bo3NextReady=false; // Reset ready flag
+  S._bo3NextStarted=false; // Reset trigger flag
+  
+  // Show round intro animation then generate
+  showRoundIntro(S.bo3Game, async()=>{
+    S.loadingMsg='Generujem kolo '+S.bo3Game+'...';S.screen='loading';render();
+    try{
+      if(S.role==='p1'){
+        // P1 generates questions
+        S.srQuestions=await loadDueSRQuestions();
+        const qs=await genQ(calcDiff(S.myProfile),S.myProfile?.stats,S.srQuestions,S.format);
+        S.questions=qs;
+        await dbUp('rooms/'+S.roomCode,{
+          questions:qs,status:'next_round',
+          p1:{name:S.name,score:0,finished:false},
+          p2:{name:S.oppName,score:0,finished:false},
+          'bo3/game':S.bo3Game,
+          'bo3/p1wins':S.bo3MyWins,
+          'bo3/p2wins':S.bo3OppWins,
+          'bo3ready/p1':false, // Reset ready flags
+          'bo3ready/p2':false
+        });
+        S.screen='quiz';render();
+      }else{
+        // P2 waits for questions
+        S.loadingMsg='Čakám na otázky...';
+        let tries=0;
+        while(tries<60){
+          const r=await dbGet('rooms/'+S.roomCode);
+          if(r?.status==='next_round'&&r?.questions){
+            S.questions=r.questions;
+            S.screen='quiz';render();
+            return;
+          }
+          await new Promise(res=>setTimeout(res,400));
+          tries++;
+        }
+        S.error='Timeout: Otázky sa nepodarilo načítať';S.screen='home';render();
+      }
+    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+  });
+}
 
 // ═══════════════════════════════════════════════════
 // ANALYSIS
@@ -1228,6 +1305,8 @@ async function runAnalysis(){
       }
       // Save game to history
       S.bo3History.push({myScore:S.score,oppScore:S.oppScore,myAnswers:[...S.myAnswers],questions:[...S.questions],game:S.bo3Game});
+      S.bo3NextReady=false; // Reset ready flag for next game
+      S._bo3NextStarted=false; // Reset trigger flag
       S.screen='bo3_results';render();
     }else{
       render();
@@ -2179,7 +2258,9 @@ function hBo3Results(){
     <div class="insight-label">🤖 AI hodnotenie hry</div>
     ${S.aiInsight?`<div class="insight-text">${esc(S.aiInsight)}</div>`:`<div class="insight-loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>`}
   </div>
-  <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px">⚔️ ĎALŠIA HRA SÉRIE</button>
+  <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px">
+    ${S.bo3NextReady?'✓ PRIPRAVENÝ · Čakám na súpera...':'⚔️ SOM PRIPRAVENÝ NA ĎALŠIU HRU'}
+  </button>
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">Vzdať sériu</button>`;}
 
 function hAnalysis(){
@@ -2507,35 +2588,17 @@ function bindAll(){
   }
   g('newBtn')?.addEventListener('click',()=>{detach();resetGame();render();});
   g('bo3NextBtn')?.addEventListener('click',async()=>{
-    S.bo3Game++;
-    // Reset game state, keep series state
-    S.questions=[];S.current=0;S.score=0;S.selected=null;
-    S.myAnswers=[];S.myDone=false;S.answerTimes=[];S.questionStartTime=0;S.oppScore=0;S.oppDone=false;S.oppAnswers=[];
-    S.analysisStarted=false;S.eloChange=0;S.newElo=0;S.analysisReady=false;
-    S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
-    S.suddenDeath=false;S.suddenDone=false; // Reset sudden death for next game
-    // Show round intro animation then generate
-    showRoundIntro(S.bo3Game, async()=>{
-      S.loadingMsg='Generujem kolo '+S.bo3Game+'...';S.screen='loading';render();
-      try{
-        if(S.role==='p1'){
-          S.srQuestions=await loadDueSRQuestions();
-          const qs=await genQ(calcDiff(S.myProfile),S.myProfile?.stats,S.srQuestions,S.format);
-          S.questions=qs;
-          await dbUp('rooms/'+S.roomCode,{
-            questions:qs,status:'next_round',
-            p1:{name:S.name,score:0,finished:false},
-            p2:{name:S.oppName,score:0,finished:false},
-            'bo3/game':S.bo3Game,'bo3/p1wins':S.bo3MyWins,'bo3/p2wins':S.bo3OppWins
-          });
-          S.screen='quiz';render();
-        }else{
-          // P2: signal ready for next round, wait for questions
-          await dbUp('rooms/'+S.roomCode,{'bo3/game':S.bo3Game,status:'next_round_p2ready'});
-          S.loadingMsg='Čakám na otázky...';S.screen='loading';render();
-        }
-      }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
-    });
+    // Ready system: both players must click ready before next game starts
+    if(S.bo3NextReady){
+      // Already clicked ready, just wait
+      return;
+    }
+    
+    // Mark self as ready in Firebase
+    S.bo3NextReady=true;
+    const myReadyKey=S.role==='p1'?'bo3ready/p1':'bo3ready/p2';
+    await dbUp('rooms/'+S.roomCode,{[myReadyKey]:true});
+    render(); // Update button to show "waiting for opponent"
   });
   g('rematchBtn')?.addEventListener('click',async()=>{
     clearTimer();detach();
