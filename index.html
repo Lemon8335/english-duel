@@ -1541,26 +1541,51 @@ function hHome(){
 
   return`
   <div class="hero-card">
-    <div class="hero-top">
-      <div class="hero-rank-block">
-        <div class="hero-rank-label">Tvoj rank</div>
-        <div class="hero-rank-row">
-          <span class="hero-rank-name" style="color:${rank.color}">${rank.n.toUpperCase()}</span>
+    <!-- Circular ELO Badge with Rank -->
+    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:18px">
+      <div style="position:relative">
+        <!-- Circular progress ring -->
+        <svg width="140" height="140" style="transform:rotate(-90deg)">
+          <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+          <circle cx="70" cy="70" r="62" fill="none" stroke="${rank.color}" stroke-width="8" 
+            stroke-dasharray="${2*Math.PI*62}" stroke-dashoffset="${2*Math.PI*62*(1-prog/100)}"
+            stroke-linecap="round" style="transition:stroke-dashoffset .8s ease"/>
+        </svg>
+        <!-- Center content -->
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+          <div style="font-size:2rem;margin-bottom:2px">${rank.emoji}</div>
+          <div style="font-size:1.8rem;font-weight:900;font-family:'Orbitron',sans-serif;color:${rank.color};line-height:1">${elo}</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.4);letter-spacing:1px;margin-top:2px">ELO</div>
         </div>
       </div>
-      <div class="hero-elo-block">
-        <div class="hero-elo-num">${elo}</div>
-        <div class="hero-elo-label">ELO</div>
+    </div>
+    
+    <!-- Rank name and progress -->
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:1.1rem;font-weight:800;letter-spacing:2px;color:${rank.color};margin-bottom:8px">
+        ${rank.n.toUpperCase()}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:rgba(255,255,255,.4)">
+        <span>${rank.n}</span>
+        <div style="flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden">
+          <div style="height:100%;background:${rank.color};width:${prog}%;transition:width .8s ease"></div>
+        </div>
+        <span>${nxt}</span>
       </div>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.28);margin-bottom:4px"><span>${rank.n}</span><span>${nxt}</span></div>
-    <div class="rank-progress-bar" style="margin-bottom:10px"><div class="rank-progress-fill" style="width:${prog}%;background:${rank.color}"></div></div>
-    <div style="margin-top:10px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
-      <span class="xp-badge" style="font-size:.65rem;letter-spacing:1.5px">LEVEL ${xpLevel(prof?.xp||0)}</span>
-      <span style="font-size:10px;color:rgba(255,255,255,.28)">${prof?.xp||0} XP</span>
+    
+    <!-- Level & XP -->
+    <div style="background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.15);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;color:#ffb300;letter-spacing:2px">⚡ LEVEL ${xpLevel(prof?.xp||0)}</span>
+        <span style="font-size:.7rem;color:rgba(255,179,0,.6)">${prof?.xp||0} XP</span>
+      </div>
+      <div style="height:6px;background:rgba(255,179,0,.15);border-radius:3px;overflow:hidden">
+        <div style="height:100%;background:linear-gradient(90deg,#ffb300,#ffd54f);width:${xpProgress(prof?.xp||0)}%;transition:width .8s ease"></div>
+      </div>
     </div>
-    <div class="xp-bar" style="margin-bottom:12px"><div class="xp-bar-fill" style="width:${xpProgress(prof?.xp||0)}%"></div></div>
-    ${stats?`<div class="cat-bars" style="margin-bottom:12px">${catBars}</div>`:'<div style="font-size:12px;color:rgba(255,255,255,.22);text-align:center;padding:6px 0 12px">Zahraj prvý duel — uvidíš štatistiky</div>'}
+    
+    <!-- Difficulty selector -->
     <div class="diff-inline" style="background:${diff===1?'rgba(102,187,106,.07)':diff===3?'rgba(255,82,82,.06)':'rgba(255,179,0,.07)'};border-color:${diff===1?'rgba(102,187,106,.2)':diff===3?'rgba(255,82,82,.2)':'rgba(255,179,0,.18)'}">
       <div class="diff-inline-segs">
         <div class="diff-inline-seg" style="background:${diff===1?'#66bb6a':'rgba(255,255,255,.15)'}"></div>
