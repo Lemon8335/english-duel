@@ -489,7 +489,7 @@ const S={
   placementQs:[], placementCurrent:0, placementAnswers:[], placementResult:null,
   // Best of 3
   suddenDeath:false, suddenDone:false,
-  bo3Active:false, bo3MyWins:0, bo3OppWins:0, bo3Game:0, bo3MaxGames:3, bo3NextReady:false,
+  bo3Active:false, bo3MyWins:0, bo3OppWins:0, bo3Game:0, bo3MaxGames:3, bo3NextReady:false, bo3NextFormat:null,
   bo3OppName:'', bo3OppUid:'',
   bo3History:[],
   gameHistory:[], historyLoaded:false,
@@ -1120,14 +1120,18 @@ function attach(code){
     }
     // Bo3 ready check: when both players ready, start next game
     // Only trigger when on bo3_results screen and both ready
-    if(S.bo3Active&&S.screen==='bo3_results'&&r.bo3ready&&!S._bo3NextStarted){
-      const p1Ready=r.bo3ready.p1||false;
-      const p2Ready=r.bo3ready.p2||false;
+    if(S.bo3Active&&S.screen==='bo3_results'&&!S._bo3NextStarted){
+      // Sync format choice from Firebase (winner's choice)
+      if(r.bo3nextFormat)S.bo3NextFormat=r.bo3nextFormat;
+      
+      const p1Ready=(r.bo3ready?.p1)||false;
+      const p2Ready=(r.bo3ready?.p2)||false;
       if(p1Ready&&p2Ready){
         S._bo3NextStarted=true; // Prevent double trigger
         startBo3NextRound();
         return;
       }
+      render(); // Update UI when format syncs
     }
     if(S.screen==='quiz'||S.screen==='waiting')updateLiveBar();
   });
@@ -1147,6 +1151,11 @@ async function startBo3NextRound(){
   S.aiInsight=null;S.hintUsed=false;S._countdownStarted=false;
   S.suddenDeath=false;S.suddenDone=false;
   S.bo3NextReady=false; // Reset ready flag
+  
+  // Use selected format or fallback to current format
+  const nextFormat=S.bo3NextFormat||S.format;
+  S.format=nextFormat; // Apply format for this round
+  S.bo3NextFormat=null; // Reset for next round
   // NOTE: _bo3NextStarted will be reset in runAnalysis() when bo3_results screen shows again
   
   // Show round intro animation then generate
@@ -1154,19 +1163,20 @@ async function startBo3NextRound(){
     S.loadingMsg='Generujem kolo '+S.bo3Game+'...';S.screen='loading';render();
     try{
       if(S.role==='p1'){
-        // P1 generates questions
+        // P1 generates questions with selected format
         S.srQuestions=await loadDueSRQuestions();
-        const qs=await genQ(calcDiff(S.myProfile),S.myProfile?.stats,S.srQuestions,S.format);
+        const qs=await genQ(calcDiff(S.myProfile),S.myProfile?.stats,S.srQuestions,nextFormat);
         S.questions=qs;
         await dbUp('rooms/'+S.roomCode,{
-          questions:qs,status:'next_round',
+          questions:qs,status:'next_round',format:nextFormat,
           p1:{name:S.name,score:0,finished:false},
           p2:{name:S.oppName,score:0,finished:false},
           'bo3/game':S.bo3Game,
           'bo3/p1wins':S.bo3MyWins,
           'bo3/p2wins':S.bo3OppWins,
           'bo3ready/p1':false, // Reset ready flags
-          'bo3ready/p2':false
+          'bo3ready/p2':false,
+          'bo3nextFormat':null // Reset format for next round
         });
         S.screen='quiz';render();
       }else{
@@ -1310,6 +1320,9 @@ async function runAnalysis(){
       S.bo3History.push({myScore:S.score,oppScore:S.oppScore,myAnswers:[...S.myAnswers],questions:[...S.questions],game:S.bo3Game});
       S.bo3NextReady=false; // Reset ready flag for next game
       S._bo3NextStarted=false; // Reset trigger flag
+      S.bo3NextFormat=null; // Reset format choice for next game
+      S.aiInsight=null; // CRITICAL: Reset AI insight so it generates fresh for this game
+      S.aiInsightLoading=false;
       S.screen='bo3_results';render();
     }else{
       render();
@@ -2238,6 +2251,71 @@ function hBo3Results(){
     <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">NOVÝ DUEL</button>`;}
 
   // Series continues
+  const iWon=S.score>S.oppScore;
+  const isDraw=S.score===S.oppScore;
+  
+  // Format picker - winner chooses format for next game
+  let formatPickerHTML='';
+  let readyButtonHTML='';
+  
+  if(iWon){
+    // I won this game - I choose format for next game
+    formatPickerHTML=`
+    <div style="background:rgba(0,255,200,.06);border:1px solid rgba(0,255,200,.2);border-radius:14px;padding:14px;margin-bottom:16px">
+      <div style="text-align:center;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:rgba(0,255,200,.7);margin-bottom:12px">
+        🏆 Vyhral si! Vyber formát ďalšieho kola:
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${Object.entries(FORMATS).filter(([k])=>k!=='sr'&&k!=='mixed').map(([k,f])=>`
+          <button class="format-pick-btn ${S.bo3NextFormat===k?'selected':''}" data-format="${k}" style="
+            background:${S.bo3NextFormat===k?f.color+'22':'rgba(255,255,255,.03)'};
+            border:1.5px solid ${S.bo3NextFormat===k?f.color:'rgba(255,255,255,.1)'};
+            border-radius:10px;padding:10px 8px;cursor:pointer;transition:all .2s;
+            font-size:.75rem;font-weight:600;color:${S.bo3NextFormat===k?f.color:'rgba(255,255,255,.5)'};
+          ">
+            <div style="font-size:1.1rem;margin-bottom:3px">${f.icon}</div>
+            <div>${f.label}</div>
+          </button>
+        `).join('')}
+      </div>
+    </div>`;
+    readyButtonHTML=`
+    <button class="btn" id="bo3NextBtn" ${!S.bo3NextFormat?'disabled':''} style="
+      background:${S.bo3NextFormat?'linear-gradient(135deg,#00ffc8,#00d4a0)':'rgba(255,255,255,.1)'};
+      color:${S.bo3NextFormat?'#000':'rgba(255,255,255,.3)'};
+      font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px;
+      cursor:${S.bo3NextFormat?'pointer':'not-allowed'};
+    ">
+      ${S.bo3NextReady?'✓ PRIPRAVENÝ · Čakám na súpera...':S.bo3NextFormat?'✅ POTVRDIŤ A POKRAČOVAŤ':'🎯 Najprv vyber formát'}
+    </button>`;
+  }else if(isDraw){
+    // Draw - rematch with same format? Or sudden death already handled this
+    formatPickerHTML=`
+    <div style="background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:.82rem;color:rgba(255,179,0,.8)">⚖️ Remíza! Pokračujeme s rovnakým formátom.</div>
+    </div>`;
+    readyButtonHTML=`
+    <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px">
+      ${S.bo3NextReady?'✓ PRIPRAVENÝ · Čakám na súpera...':'⚔️ SOM PRIPRAVENÝ NA ĎALŠIU HRU'}
+    </button>`;
+  }else{
+    // I lost - opponent chooses format
+    const oppFormat=S.bo3NextFormat||'...';
+    formatPickerHTML=`
+    <div style="background:rgba(255,82,82,.06);border:1px solid rgba(255,82,82,.2);border-radius:14px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,82,82,.6);margin-bottom:8px">
+        Súper vybral formát:
+      </div>
+      <div style="font-size:1.1rem;font-weight:700;color:#fff">
+        ${S.bo3NextFormat?FORMATS[S.bo3NextFormat]?.icon+' '+FORMATS[S.bo3NextFormat]?.label:'⏳ Čakám na výber...'}
+      </div>
+    </div>`;
+    readyButtonHTML=`
+    <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px">
+      ${S.bo3NextReady?'✓ PRIPRAVENÝ · Čakám na súpera...':'⚔️ SOM PRIPRAVENÝ NA ĎALŠIU HRU'}
+    </button>`;
+  }
+  
   return`
   <div style="font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;text-align:center;color:${gameColor};letter-spacing:2px;margin-bottom:4px">${gameResult}</div>
   <div style="text-align:center;font-size:.82rem;color:rgba(255,255,255,.38);margin-bottom:16px">${S.score}–${S.oppScore} · Hra ${S.bo3Game} z ${S.bo3MaxGames}</div>
@@ -2257,13 +2335,8 @@ function hBo3Results(){
       </div>
     </div>
   </div>
-  <div class="insight-box" style="margin-bottom:16px">
-    <div class="insight-label">🤖 AI hodnotenie hry</div>
-    ${S.aiInsight?`<div class="insight-text">${esc(S.aiInsight)}</div>`:`<div class="insight-loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Hodnotím výkon...</span></div>`}
-  </div>
-  <button class="btn" id="bo3NextBtn" style="background:linear-gradient(135deg,#ff6b35,#e53935);color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1px">
-    ${S.bo3NextReady?'✓ PRIPRAVENÝ · Čakám na súpera...':'⚔️ SOM PRIPRAVENÝ NA ĎALŠIU HRU'}
-  </button>
+  ${formatPickerHTML}
+  ${readyButtonHTML}
   <button class="btn btn-ghost" id="newBtn" style="margin-top:9px">Vzdať sériu</button>`;}
 
 function hAnalysis(){
@@ -2576,9 +2649,16 @@ function bindAll(){
     });
   }
   // Generate AI insight when results screen appears (async, non-blocking)
+  // For bo3: only generate on final game (when series is over)
   // Animate ELO/XP counters on analysis screen
   if(S.screen==='analysis'&&S.analysisReady)initCounters();
-  if((S.screen==='results'||S.screen==='bo3_results')&&!S.aiInsight&&!S.aiInsightLoading&&S.myAnswers.length>1){
+  
+  // AI Insight generation - skip for intermediate bo3 rounds
+  const isSeriesOver=S.bo3Active&&(S.bo3MyWins>=BO3_WINS_NEEDED||S.bo3OppWins>=BO3_WINS_NEEDED);
+  const shouldGenerateInsight=(S.screen==='results'||S.screen==='bo3_results')&&!S.aiInsight&&!S.aiInsightLoading&&S.myAnswers.length>1;
+  const skipBo3Intermediate=S.bo3Active&&!isSeriesOver&&S.screen==='bo3_results';
+  
+  if(shouldGenerateInsight&&!skipBo3Intermediate){
     S.aiInsightLoading=true;
     generateInsight().then(text=>{
       S.aiInsight=text;S.aiInsightLoading=false;
@@ -2597,11 +2677,34 @@ function bindAll(){
       return;
     }
     
+    // Winner must select format first
+    const iWon=S.score>S.oppScore;
+    if(iWon&&!S.bo3NextFormat){
+      // Winner hasn't selected format yet
+      return;
+    }
+    
     // Mark self as ready in Firebase
     S.bo3NextReady=true;
     const myReadyKey=S.role==='p1'?'bo3ready/p1':'bo3ready/p2';
-    await dbUp('rooms/'+S.roomCode,{[myReadyKey]:true});
+    const updates={[myReadyKey]:true};
+    
+    // If I'm the winner, also upload my format choice
+    if(iWon){
+      updates['bo3nextFormat']=S.bo3NextFormat;
+    }
+    
+    await dbUp('rooms/'+S.roomCode,updates);
     render(); // Update button to show "waiting for opponent"
+  });
+  
+  // Format picker buttons
+  document.querySelectorAll('[data-format]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const fmt=btn.dataset.format;
+      S.bo3NextFormat=fmt;
+      render();
+    });
   });
   g('rematchBtn')?.addEventListener('click',async()=>{
     clearTimer();detach();
@@ -2893,7 +2996,7 @@ function resetGame(){
   S.aiInsight=null;S.aiInsightLoading=false;S.error=null;
   // Reset bo3 state
   S.bo3Active=false;S.bo3MyWins=0;S.bo3OppWins=0;S.bo3Game=0;
-  S.bo3NextReady=false;S._bo3NextStarted=false;S.bo3History=[];
+  S.bo3NextReady=false;S._bo3NextStarted=false;S.bo3History=[];S.bo3NextFormat=null;
   // Reset sudden death state
   S.suddenDeath=false;S.suddenDone=false;
 }
