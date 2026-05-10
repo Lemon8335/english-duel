@@ -1562,15 +1562,8 @@ function hHome(){
     
     <!-- Rank name and progress -->
     <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:1.1rem;font-weight:800;letter-spacing:2px;color:${rank.color};margin-bottom:8px">
+      <div style="font-size:1.1rem;font-weight:800;letter-spacing:2px;color:${rank.color}">
         ${rank.n.toUpperCase()}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:.7rem;color:rgba(255,255,255,.4)">
-        <span>${rank.n}</span>
-        <div style="flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden">
-          <div style="height:100%;background:${rank.color};width:${prog}%;transition:width .8s ease"></div>
-        </div>
-        <span>${nxt}</span>
       </div>
     </div>
     
