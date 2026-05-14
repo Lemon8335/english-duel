@@ -335,7 +335,7 @@
     .hero-pills{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     /* Action area */
     .action-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:8px;padding-left:2px}
-    .cta-primary-btn{background:linear-gradient(135deg,#00ffc8,#00b894);border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;border:none;width:100%;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .cta-primary-btn{background:linear-gradient(135deg,#00b894,#008f6f);border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;border:none;width:100%;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
     .cta-primary-btn.coop-style{background:linear-gradient(135deg,#7c4dff,#5e35b1)}
     .cta-primary-btn.bo3-style{background:linear-gradient(135deg,#ff6b35,#e53935)}
     .cta-primary-btn.solo-style{background:linear-gradient(135deg,#ffb300,#e65100)}
@@ -3100,12 +3100,16 @@ async function handleGo(){
     S.solo=true;S.roomCode='solo';S.role='p1';
     S.oppName='';S.oppScore=0;S.oppDone=false;
     S.loadingMsg='Generujem otázky...';S.screen='loading';render();
+    
+    // Small delay to ensure loading screen renders before heavy AI call
+    await new Promise(r=>setTimeout(r,50));
+    
     try{
       const diff=calcDiff(S.myProfile);
       S.srQuestions=await loadDueSRQuestions();
       const qs=S.format==='sr'?await genSROnlyQuestions(S.srQuestions):await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
       S.questions=qs;S.screen='quiz';render();
-    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+    }catch(e){S.error=getUserFriendlyError(e);S.screen='home';render();}
     return;
   }
   if(S.mode==='create'){
