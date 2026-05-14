@@ -578,6 +578,7 @@ async function genSuddenDeathQuestion(){
         S.error='Sudden Death potrebuje Anthropic API kľúč! Otvor Nastavenia a zadaj API kľúč.';
         S.screen='home';render();return;
       }
+      S.loadingMsg='⚡ Generujem sudden death otázku...';
       S.screen='loading';render(); // Show loading while generating
       const diff=calcDiff(S.myProfile);
       const qs=await genQ(diff,S.myProfile?.stats,[],S.format);
@@ -589,6 +590,7 @@ async function genSuddenDeathQuestion(){
     }else{
       // P2 fetches the question (starts polling immediately)
       // Show loading screen while waiting for P1 to generate question
+      S.loadingMsg='⏳ Čakám na sudden death otázku...';
       S.screen='loading';render();
       let tries=0;
       const maxTries=60; // 60 × 400ms = 24 seconds (enough for AI generation)
@@ -644,6 +646,60 @@ Format played: ${FORMATS[S.format]?.label||'Mixed'}
 ${isCoop?'Mode: Cooperative':'Mode: Competitive'}
 
 Write ONLY the insight text in Slovak, no labels, no intro. Max 2-3 sentences. Be specific about what to improve.`
+      }]})
+    });
+    if(!res.ok)return null;
+    const data=await res.json();
+    return data.content?.find(b=>b.type==='text')?.text?.trim()||null;
+  }catch(e){return null;}
+}
+
+// Generate AI insight for Best of 3 series (uses all games)
+async function generateBo3SeriesInsight(){
+  if(!S.bo3History||S.bo3History.length===0)return null;
+  
+  // Aggregate data from all games
+  const allAnswers=S.bo3History.flatMap(g=>g.myAnswers||[]);
+  const allQuestions=S.bo3History.flatMap(g=>g.questions||[]);
+  const totalCorrect=allAnswers.filter(a=>a.correct).length;
+  const totalQuestions=allAnswers.length;
+  
+  // Build game-by-game breakdown
+  const gameBreakdown=S.bo3History.map((g,idx)=>{
+    const correct=g.myAnswers.filter(a=>a.correct).length;
+    const total=g.myAnswers.length;
+    const result=g.myScore>g.oppScore?'výhra':g.myScore===g.oppScore?'remíza':'prehra';
+    return`Kolo ${idx+1}: ${g.myScore}-${g.oppScore} (${result}) - ${correct}/${total} správne`;
+  }).join('\n');
+  
+  // Category breakdown across all games
+  const catBreakdown=Object.entries(CATS).map(([k,c])=>{
+    const qs=allAnswers.filter((_,i)=>catKey(allQuestions[i]?.type)===k);
+    const ok=qs.filter(a=>a.correct).length;
+    if(qs.length===0)return null;
+    return`${c.label}: ${ok}/${qs.length} (${Math.round(ok/qs.length*100)}%)`;
+  }).filter(Boolean).join(', ');
+  
+  // Series result
+  const seriesResult=S.bo3MyWins>S.bo3OppWins?'Vyhral si sériu':'Prehral si sériu';
+  
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':S.ak,'anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:250,messages:[{role:'user',content:
+        `You are a concise English coach. A student just finished a Best of 3 series. Write a SHORT (3-4 sentences max) personal insight in Slovak about their overall series performance. Be specific, encouraging but honest.
+
+Series result: ${seriesResult} (${S.bo3MyWins}-${S.bo3OppWins})
+Overall accuracy: ${totalCorrect}/${totalQuestions} correct (${Math.round(totalCorrect/totalQuestions*100)}%)
+
+Game breakdown:
+${gameBreakdown}
+
+Category performance:
+${catBreakdown}
+
+Write ONLY the insight text in Slovak, no labels, no intro. Focus on overall performance across all 3 games and what to improve. Max 3-4 sentences.`
       }]})
     });
     if(!res.ok)return null;
@@ -1112,9 +1168,13 @@ function attach(code){
     }
     if(S.screen==='waiting'&&S.oppDone){runAnalysis();return;}
     // Sync Bo3 state from Firebase
-    if(S.bo3Active&&r.bo3){
-      if(S.role==='p1'){S.bo3OppWins=r.bo3.p2wins||0;}
-      else{S.bo3OppWins=r.bo3.p1wins||0;}
+    // CRITICAL: Don't sync wins when on bo3_results screen - local state is already final
+    if(S.bo3Active&&r.bo3&&S.screen!=='bo3_results'){
+      const newOppWins=S.role==='p1'?(r.bo3.p2wins||0):(r.bo3.p1wins||0);
+      // Safety: wins can only increase by 0 or 1, never decrease or jump by 2+
+      if(newOppWins>=S.bo3OppWins&&newOppWins<=S.bo3OppWins+1){
+        S.bo3OppWins=newOppWins;
+      }
       // Sync game number to prevent desync
       if(r.bo3.game!==undefined)S.bo3Game=r.bo3.game;
     }
@@ -2147,11 +2207,15 @@ function hStats(){
 function hBo3Summary(){
   const hist=S.bo3History;
   if(!hist.length)return`<div class="loading-wrap"><div class="spinner"></div></div>`;
-  const totalMy=hist.reduce((s,g)=>s+g.myScore,0);
-  const totalOpp=hist.reduce((s,g)=>s+g.oppScore,0);
-  const totalQ=hist.reduce((s,g)=>s+g.questions.length,0);
-  const myPct=Math.round(totalMy/totalQ*100);
-  const oppPct=Math.round(totalOpp/totalQ*100);
+  // Calculate total correct answers (not score points!)
+  const totalCorrect=hist.reduce((s,g)=>s+(g.myAnswers?.filter(a=>a.correct).length||0),0);
+  const totalQ=hist.reduce((s,g)=>s+(g.questions?.length||0),0);
+  const myPct=totalQ>0?Math.round(totalCorrect/totalQ*100):0;
+  
+  // Keep score totals for display (but don't use for percentage)
+  const totalMyScore=hist.reduce((s,g)=>s+g.myScore,0);
+  const totalOppScore=hist.reduce((s,g)=>s+g.oppScore,0);
+  
   // Per-category across all games
   const allMyAnswers=hist.flatMap(g=>g.myAnswers);
   const allQs=hist.flatMap(g=>g.questions);
@@ -2166,11 +2230,11 @@ function hBo3Summary(){
       <span class="cat-pct" style="color:${c.color}">${pct}%</span>
     </div>`;
   }).join('');
-  const gameRows=hist.map(g=>{
+  const gameRows=hist.map((g,idx)=>{
     const v=g.myScore>g.oppScore?'win':g.myScore<g.oppScore?'loss':'draw';
     const c=v==='win'?'#00ffc8':v==='draw'?'#ffb300':'#ff5252';
     return`<div class="stat-row">
-      <span class="stat-lbl">Kolo ${g.game}</span>
+      <span class="stat-lbl">Kolo ${idx+1}</span>
       <span class="stat-val" style="color:${c}">${g.myScore}–${g.oppScore} (${v==='win'?'výhra':v==='draw'?'remíza':'prehra'})</span>
     </div>`;
   }).join('');
@@ -2196,14 +2260,14 @@ function hBo3Summary(){
     ${gameRows}
     <div class="stat-row" style="border-top:1px solid rgba(255,255,255,.07);margin-top:4px;border-bottom:none">
       <span class="stat-lbl">Celkovo správne</span>
-      <span class="stat-val" style="color:#00ffc8">${totalMy}/${totalQ} (${myPct}%)</span>
+      <span class="stat-val" style="color:#00ffc8">${totalCorrect}/${totalQ} (${myPct}%)</span>
     </div>
   </div>
   <div class="sec-title">Výkon podľa kategórií</div>
   <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:13px;margin-bottom:16px">
     <div class="cat-bars">${catRows}</div>
   </div>
-  <button class="btn btn-primary" id="newBtn">NOVÝ DUEL</button>
+  <button class="btn btn-primary" id="backToDashboardBtn">⬅️ SPÄŤ NA DASHBOARD</button>
 `;}
 
 function hSuddenDeath(){
@@ -2678,7 +2742,9 @@ function bindAll(){
   
   if(shouldGenerateInsight&&!skipBo3Intermediate){
     S.aiInsightLoading=true;
-    generateInsight().then(text=>{
+    // Use series insight for bo3 final screen, regular insight otherwise
+    const insightPromise=isSeriesOver?generateBo3SeriesInsight():generateInsight();
+    insightPromise.then(text=>{
       S.aiInsight=text;S.aiInsightLoading=false;
       // Update insight box if still on results screen
       const box=document.getElementById('ai-insight-content');
@@ -2688,6 +2754,7 @@ function bindAll(){
     });
   }
   g('newBtn')?.addEventListener('click',()=>{detach();resetGame();render();});
+  g('backToDashboardBtn')?.addEventListener('click',()=>{detach();resetGame();render();});
   g('bo3NextBtn')?.addEventListener('click',async()=>{
     // Ready system: both players must click ready before next game starts
     if(S.bo3NextReady){
