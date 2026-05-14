@@ -1140,7 +1140,8 @@ function attach(code){
             let oppElo=START_ELO;
             if(p2uid){const op=await dbGet('users/'+p2uid);if(op?.elo)oppElo=op.elo;}
             const diff=calcSharedDiff(S.myProfile,oppElo);
-            S.srQuestions=await loadDueSRQuestions();
+            // SR only in solo mode - in multiplayer it's unfair (one player has seen questions, other hasn't)
+            S.srQuestions=S.solo?await loadDueSRQuestions():[];
             const qs=S.format==='sr'?await genSROnlyQuestions(S.srQuestions):await genQ(diff,S.myProfile?.stats,S.srQuestions,S.format);
             if(!Array.isArray(qs)||!qs.length)throw new Error('AI nevrátila žiadne otázky.');
             await dbUp('rooms/'+S.roomCode,{questions:qs,status:'ready',error:null});
@@ -1224,7 +1225,8 @@ async function startBo3NextRound(){
     try{
       if(S.role==='p1'){
         // P1 generates questions with selected format
-        S.srQuestions=await loadDueSRQuestions();
+        // SR only in solo mode - disabled in multiplayer for fairness
+        S.srQuestions=S.solo?await loadDueSRQuestions():[];
         const qs=await genQ(calcDiff(S.myProfile),S.myProfile?.stats,S.srQuestions,nextFormat);
         S.questions=qs;
         await dbUp('rooms/'+S.roomCode,{
