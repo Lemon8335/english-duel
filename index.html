@@ -3134,6 +3134,31 @@ Rules:
   try{p=JSON.parse(m[0]);}
   catch(err){throw new Error('Neplatný JSON z AI. Skús znova alebo zvýš max_tokens. Detail: '+err.message);}
   if(!Array.isArray(p.questions)||!p.questions.length)throw new Error('Prázdne otázky');
+  
+  // CRITICAL: Shuffle options to remove AI bias (AI tends to put correct answer in A or B)
+  // This ensures correct answer is truly random across all positions
+  p.questions.forEach(q => {
+    if(!Array.isArray(q.options) || q.options.length < 2) return;
+    
+    // Create array of indices [0,1,2,3]
+    const indices = q.options.map((_, i) => i);
+    
+    // Fisher-Yates shuffle
+    for(let i = indices.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    
+    // Reorder options according to shuffled indices
+    const oldOptions = [...q.options];
+    const oldCorrect = q.correct;
+    
+    q.options = indices.map(i => oldOptions[i]);
+    
+    // Update correct index to match new position
+    q.correct = indices.indexOf(oldCorrect);
+  });
+  
   return p.questions;
 }
 
