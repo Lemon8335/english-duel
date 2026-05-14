@@ -1677,7 +1677,11 @@ function hHome(){
   const isSolo=S.mode==='solo';
   const isJoin=S.mode==='join';
   const ctaLabel=isSolo?'ZAČAŤ TRÉNING':isJoin?'PRIPOJIŤ SA':'VYTVORIŤ DUEL';
-  const ctaSub=isSolo?'Sólo tréning · +XP':isJoin?'Zadaj kód od súpera':S.submode==='bo3'?'Best of 3 · Séria':S.submode==='coop'?'Kooperatívny duel':'Súťažný · ELO zápas';
+  
+  // Show selected format in button subtitle
+  const formatLabel = S.format && S.format !== 'mixed' ? ` · ${FORMATS[S.format]?.icon} ${FORMATS[S.format]?.label}` : '';
+  const ctaSub=isSolo?`Sólo tréning${formatLabel}`:isJoin?'Zadaj kód od súpera':S.submode==='bo3'?`Best of 3 · Séria${formatLabel}`:S.submode==='coop'?`Kooperatívny duel${formatLabel}`:`Súťažný · ELO zápas${formatLabel}`;
+  
   const ctaStyle=isSolo?'solo-style':S.submode==='coop'&&!isSolo&&!isJoin?'coop-style':S.submode==='bo3'&&!isSolo&&!isJoin?'bo3-style':'';
   const canGo=S.name.trim()&&S.mode&&(S.mode==='solo'||S.mode==='create'||(S.mode==='join'&&S.roomCode.length===4));
 
@@ -2648,7 +2652,13 @@ function bindAll(){
   Object.keys(FORMATS).forEach(k=>{
     g('fmt_'+k)?.addEventListener('click',()=>{
       if(k==='sr'&&(S.myProfile?.gamesPlayed||0)<5)return;
-      S.format=k;render();
+      S.format=k;
+      render();
+      // Auto-scroll to selected format so user sees it
+      setTimeout(()=>{
+        const el=g('fmt_'+k);
+        if(el)el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      },50);
     });
   });
   g('codeInp')?.addEventListener('input',e=>{
