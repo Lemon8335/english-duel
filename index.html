@@ -402,6 +402,16 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .loading-wrap{text-align:center;padding:28px 0}
     .loading-text{color:rgba(255,255,255,.36);font-size:.84rem}
+    
+    /* ═══════════════════════════════════════════════════
+       SKELETON LOADERS - Better perceived performance
+       ═══════════════════════════════════════════════════ */
+    .skeleton-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;margin-bottom:12px}
+    .skeleton-line{height:16px;background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;border-radius:4px;margin-bottom:10px;animation:skeleton-pulse 1.5s ease-in-out infinite}
+    .skeleton-line.short{width:60%}
+    .skeleton-line.medium{width:80%}
+    .skeleton-circle{width:48px;height:48px;border-radius:50%;background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:skeleton-pulse 1.5s ease-in-out infinite;margin:0 auto 12px}
+    @keyframes skeleton-pulse{0%{background-position:200% 0}100%{background-position:-200% 0}}
   </style>
 </head>
 <body>
@@ -588,19 +598,18 @@ async function genSuddenDeathQuestion(){
         sdP1done:false,sdP2done:false,sdP1time:null,sdP2time:null
       });
     }else{
-      // P2 fetches the question (starts polling immediately)
-      // Show loading screen while waiting for P1 to generate question
+      // P2 waits for question using real-time Firebase listener (INSTANT response!)
       S.loadingMsg='⏳ Čakám na sudden death otázku...';
       S.screen='loading';render();
-      let tries=0;
-      const maxTries=60; // 60 × 400ms = 24 seconds (enough for AI generation)
-      while(tries<maxTries){
-        const r=await dbGet('rooms/'+S.roomCode);
-        if(r?.sdQuestion){sdQ=r.sdQuestion;break;}
-        await new Promise(res=>setTimeout(res,400));
-        tries++;
-      }
-      if(!sdQ){
+      
+      try {
+        const room = await waitForFirebaseValue(
+          'rooms/'+S.roomCode,
+          r => r?.sdQuestion != null,
+          30000 // 30s timeout
+        );
+        sdQ = room.sdQuestion;
+      } catch(e) {
         S.error='Sudden Death otázka sa nepodarilo načítať. Skontroluj či má zakladateľ hry nastavený API kľúč.';
         S.screen='home';render();return;
       }
@@ -610,7 +619,7 @@ async function genSuddenDeathQuestion(){
     showSuddenDeathIntro(()=>{
       S.screen='sudden_death';render();
     });
-  }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+  }catch(e){S.error=getUserFriendlyError(e);S.screen='home';render();}
 }
 
 // ═══════════════════════════════════════════════════
@@ -1008,6 +1017,73 @@ function dbSet(p,d){return S.db.ref(p).set(d);}
 function dbUp(p,d){return S.db.ref(p).update(d);}
 function dbGet(p){return S.db.ref(p).get().then(s=>s.val());}
 
+/**
+ * Convert technical error to user-friendly message
+ * @param {Error|string} error - Error object or message
+ * @returns {string} User-friendly error message
+ */
+function getUserFriendlyError(error) {
+  const msg = error?.message || error || '';
+  const msgLower = msg.toLowerCase();
+  
+  // Network errors
+  if (msgLower.includes('network') || msgLower.includes('failed to fetch') || msgLower.includes('connection')) {
+    return '📡 Problém s pripojením. Skontroluj internet a skús znova.';
+  }
+  
+  // API errors
+  if (msgLower.includes('api') || msgLower.includes('401') || msgLower.includes('unauthorized')) {
+    return '🔑 Problém s API kľúčom. Skontroluj ho v Nastaveniach.';
+  }
+  
+  // Firebase auth errors
+  if (msgLower.includes('auth') || msgLower.includes('permission')) {
+    return '🔒 Problém s prihlásením. Skús sa odhlásiť a prihlásiť znova.';
+  }
+  
+  // Timeout errors
+  if (msgLower.includes('timeout')) {
+    return '⏱️ Operácia trvala príliš dlho. Skús to znova.';
+  }
+  
+  // AI generation errors
+  if (msgLower.includes('json') || msgLower.includes('parse') || msgLower.includes('neplatný')) {
+    return '🤖 AI vygenerovalo neplatnú odpoveď. Skús znova (môže sa to stať náhodne).';
+  }
+  
+  // Generic fallback
+  return '⚠️ Nastala chyba. Skús to znova alebo reštartuj aplikáciu.';
+}
+
+/**
+ * Wait for Firebase value to match condition (real-time listener)
+ * Replaces polling with instant Firebase listener
+ * @param {string} path - Firebase path
+ * @param {function} condition - Function that returns true when data is ready
+ * @param {number} timeout - Timeout in ms (default 30s)
+ * @returns {Promise} Resolves with data when condition met
+ */
+function waitForFirebaseValue(path, condition, timeout = 30000) {
+  return new Promise((resolve, reject) => {
+    const ref = S.db.ref(path);
+    const timer = setTimeout(() => {
+      ref.off('value', handler);
+      reject(new Error('Timeout čakania na Firebase data'));
+    }, timeout);
+    
+    const handler = snap => {
+      const data = snap.val();
+      if (condition(data)) {
+        clearTimeout(timer);
+        ref.off('value', handler);
+        resolve(data);
+      }
+    };
+    
+    ref.on('value', handler);
+  });
+}
+
 // ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
@@ -1242,22 +1318,24 @@ async function startBo3NextRound(){
         });
         S.screen='quiz';render();
       }else{
-        // P2 waits for questions
+        // P2 waits for questions using real-time Firebase listener (INSTANT response!)
         S.loadingMsg='Čakám na otázky...';
-        let tries=0;
-        while(tries<60){
-          const r=await dbGet('rooms/'+S.roomCode);
-          if(r?.status==='next_round'&&r?.questions){
-            S.questions=r.questions;
-            S.screen='quiz';render();
-            return;
-          }
-          await new Promise(res=>setTimeout(res,400));
-          tries++;
+        try {
+          const room = await waitForFirebaseValue(
+            'rooms/'+S.roomCode,
+            r => r?.status === 'next_round' && r?.questions != null,
+            30000 // 30s timeout
+          );
+          S.questions = room.questions;
+          S.screen = 'quiz';
+          render();
+        } catch(e) {
+          S.error = 'Timeout: Otázky sa nepodarilo načítať';
+          S.screen = 'home';
+          render();
         }
-        S.error='Timeout: Otázky sa nepodarilo načítať';S.screen='home';render();
       }
-    }catch(e){S.error='Chyba: '+e.message;S.screen='home';render();}
+    }catch(e){S.error=getUserFriendlyError(e);S.screen='home';render();}
   });
 }
 
@@ -1450,7 +1528,26 @@ function updateLiveBar(){
 // ═══════════════════════════════════════════════════
 // SCREEN HTML
 // ═══════════════════════════════════════════════════
-function hLoad(){return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${S.loadingMsg||'Načítavam...'}</div></div>`;}
+function hLoad(){
+  // Use skeleton for AI generation (better perceived performance)
+  // Use spinner for quick operations
+  const useSkeleton = S.loadingMsg?.includes('Generujem') || S.loadingMsg?.includes('Čakám na otázky');
+  
+  if(useSkeleton){
+    return`
+    <div class="loading-wrap">
+      <div class="skeleton-card">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+      <div class="loading-text">${S.loadingMsg||'Načítavam...'}</div>
+    </div>`;
+  }
+  
+  return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">${S.loadingMsg||'Načítavam...'}</div></div>`;
+}
 
 function hPlacementLoading(){return`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Pripravujem placement test...</div></div>`;}
 
